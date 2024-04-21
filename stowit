@@ -1,0 +1,22 @@
+#!/bin/env sh
+
+args=""
+
+while getopts 'sh' opt; do
+    case "$opt" in
+        s)
+            args="$args -nv"
+            ;;
+        h|?)
+            echo "Usage: $(basename "$0") [-a] [-b] [-c arg]"
+            exit 1
+            ;;
+    esac
+done
+
+packages="zsh tmux"
+
+for pkg in $packages; do
+    stow $args "$pkg"
+done
+
