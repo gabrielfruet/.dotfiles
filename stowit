@@ -2,23 +2,55 @@
 
 args="--ignore=pkg --verbose=2"
 
-while getopts 'sh' opt; do
+runstow() {
+    current_dir="$1"
+    pkg_path="$1/pkg"
+    target_arg="--target=$HOME"
+
+    while IFS='=' read -r key value; do
+        case $key in 
+            target) target_arg="--target=$value"
+                ;;
+        esac
+    done < "$pkg_path"
+
+    stow $args --dir="$current_dir" "$target_arg" .
+}
+
+stow_packages() {
+    current_dir="$1"
+    pkg_path="$current_dir/pkg"
+
+    if [ -f "$pkg_path" ]; then
+        runstow "$current_dir"
+    else
+        echo "Entering $current_dir"
+        for dir in "$current_dir"/*/; do
+            if [ -d "$dir" ]; then  
+                clean_dir="$(basename "$dir")"
+                stow_packages "$clean_dir"  
+            fi
+        done;
+    fi
+}
+
+while getopts 'suh' opt; do
     case "$opt" in
         s)
             args="$args -n"
             ;;
+        u)
+            args="$args -D"
+            exit 0
+            ;;
         h|?)
-            echo "Usage: $(basename "$0") [-a] [-b] [-c arg]"
+            echo "Usage: $(basename "$0") [-s] [-t] [-u]"
+            echo "-s -> Simulate symlinks, like stow -n ..."
+            echo "-t -> Delete symlinks, like stow -D ..."
             exit 1
             ;;
     esac
 done
 
-miscpkg="zsh tmux i3"
 
-all_pkgs="$miscpkg"
-
-for pkg in $all_pkgs; do
-    stow $args "$pkg"
-done
-
+stow_packages .
