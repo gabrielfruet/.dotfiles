@@ -14,9 +14,11 @@ while getopts 'sh' opt; do
     esac
 done
 
-packages="zsh tmux"
+miscpkg="zsh tmux i3"
 
-for pkg in $packages; do
+all_pkgs="$miscpkg"
+
+for pkg in $all_pkgs; do
     stow $args "$pkg"
 done
 
