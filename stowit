@@ -1,11 +1,11 @@
 #!/bin/env sh
 
-args=""
+args="--ignore=pkg --verbose=2"
 
 while getopts 'sh' opt; do
     case "$opt" in
         s)
-            args="$args -nv"
+            args="$args -n"
             ;;
         h|?)
             echo "Usage: $(basename "$0") [-a] [-b] [-c arg]"
