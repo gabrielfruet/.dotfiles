@@ -27,7 +27,7 @@ stow_packages() {
         echo "Entering $current_dir"
         for dir in "$current_dir"/*/; do
             if [ -d "$dir" ]; then  
-                clean_dir="$(basename "$dir")"
+                clean_dir="$(realpath "$dir")"
                 stow_packages "$clean_dir"  
             fi
         done;
