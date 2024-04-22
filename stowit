@@ -1,6 +1,11 @@
-#!/bin/env sh
+#!/bin/env bash
 
-args="--ignore=pkg --verbose=2"
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+LBLUE='\033[1;34m'
+NC='\033[0m'
+
+args="--ignore=pkg --verbose=3"
 
 runstow() {
     current_dir="$1"
@@ -14,7 +19,11 @@ runstow() {
         esac
     done < "$pkg_path"
 
+    echo -e "${LBLUE}Running stow at: $current_dir ${NC}"
+
+    echo -e "${YELLOW}"
     stow $args --dir="$current_dir" "$target_arg" .
+    echo -e "${NC}"
 }
 
 stow_packages() {
@@ -24,7 +33,7 @@ stow_packages() {
     if [ -f "$pkg_path" ]; then
         runstow "$current_dir"
     else
-        echo "Entering $current_dir"
+        echo -e "${BLUE}Entering $(realpath "$current_dir") ${NC}"
         for dir in "$current_dir"/*/; do
             if [ -d "$dir" ]; then  
                 clean_dir="$(realpath "$dir")"
