@@ -10,6 +10,7 @@ This repository contains dotfiles managed by a script using GNU Stow to symlink 
 ## Script Features 🛠️
 - The script traverses each package directory and uses GNU Stow to create symlinks in the home directory or a specified target directory.
 - It supports ignoring specific paths and provides verbose output by default.
+- Substitutes dot-NAME for .NAME, this make the dotfiles more readable, as they are not hidden in this way. 
 
 ## Basic Usage 🚀
 1. **Clone the repository:**
