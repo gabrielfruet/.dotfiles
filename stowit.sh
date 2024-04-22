@@ -59,6 +59,7 @@ stow_packages() {
     fi
 }
 
+
 while getopts 'suh' opt; do
     case "$opt" in
         s)
