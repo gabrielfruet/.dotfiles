@@ -3,6 +3,7 @@
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 LBLUE='\033[1;34m'
+CYAN='\033[96m'
 NC='\033[0m'
 
 args="--ignore=pkg --verbose=3"
@@ -10,19 +11,22 @@ args="--ignore=pkg --verbose=3"
 runstow() {
     current_dir="$1"
     pkg_path="$1/pkg"
-    target_arg="--target=$HOME"
+    target="$HOME"
+
+    echo -e "${LBLUE}Running stow at: $current_dir ${NC}"
 
     while IFS='=' read -r key value; do
         case $key in 
-            target) target_arg="--target=$value"
+            target) 
+                target="$(echo "$value" | envsubst)"
                 ;;
         esac
     done < "$pkg_path"
 
-    echo -e "${LBLUE}Running stow at: $current_dir ${NC}"
+    echo -e "${CYAN}Target: $target${NC}"
 
     echo -e "${YELLOW}"
-    stow $args --dir="$current_dir" "$target_arg" .
+    stow $args --dir="$current_dir" --target="$target" .
     echo -e "${NC}"
 }
 
