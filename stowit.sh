@@ -1,4 +1,6 @@
 #!/bin/env bash
+#
+set -e
 
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
@@ -69,13 +71,19 @@ while getopts 'suh' opt; do
             args="-D $args"
             ;;
         h|?)
-            echo "Usage: $(basename "$0") [-s] [-t] [-u]"
-            echo "-s -> Simulate symlinks, like stow -n ..."
-            echo "-t -> Delete symlinks, like stow -D ..."
-            exit 1
+            echo "Usage: $(basename "$0") [-s|-u] pkg"
+            echo "    -s      Simulate symlinks, like stow -n ..."
+            echo "    -u      Delete symlinks, like stow -D ..."
+            exit 0
             ;;
     esac
 done
 
+# Shift arguments until the last, as the last is the package
+shift $((OPTIND-1))
+dir="."
+if [[ -n "$1" ]]; then
+    dir="$1"
+fi
 
-stow_packages .
+stow_packages "$dir"
