@@ -6,7 +6,7 @@ LBLUE='\033[1;34m'
 CYAN='\033[96m'
 NC='\033[0m'
 
-args="--ignore=pkg --verbose=3"
+args="--ignore=pkg --verbose=3 --dotfiles"
 
 runstow() {
     current_dir="$1"
