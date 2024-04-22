@@ -15,19 +15,22 @@ export PATH="$PATH:/home/gabrielfruet/.local/bin"
 export PATH="$PATH:/home/gabrielfruet/bin/flatpak"
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
-export ALIAS="$HOME/.aliases"
+export ALIAS="$HOME/aliases"
 export SCRIPTS="$HOME/bin/scripts"
 export PATH="$PATH:/$SCRIPTS"
 
+
+# ** WARNING **
+# NECESSARY FOR tmuxss.sh working
 if [[ $TMUX ]]; then
     if [[ $VIRTUAL_ENV ]]; then
         source "$VIRTUAL_ENV/bin/activate"
     fi
 fi
 
+source $ALIAS/aliases.zsh
 
 # Spacership prompt
-source $ALIAS/aliases.zsh
 
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
