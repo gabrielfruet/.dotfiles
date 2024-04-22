@@ -12,6 +12,7 @@ runstow() {
     current_dir="$1"
     pkg_path="$1/pkg"
     target="$HOME"
+    ignore=""
 
     echo -e "${LBLUE}Running stow at: $current_dir ${NC}"
 
@@ -20,13 +21,24 @@ runstow() {
             target) 
                 target="$(echo "$value" | envsubst)"
                 ;;
+            ignore)
+                ignore="$value"
+                ;;
         esac
     done < "$pkg_path"
 
     echo -e "${CYAN}Target: $target${NC}"
 
+    specargs="$args"
+    specargs="$specargs --target=$target --dir=$current_dir"
+    if [[ -n "$ignore" ]]; then
+        specargs="$specargs --ignore=${ignore}" 
+    fi
+
+    echo -e "${BLUE}Running:${NC}\n${LBLUE} stow $specargs . ${NC}"
+
     echo -e "${YELLOW}"
-    stow $args --dir="$current_dir" --target="$target" .
+    stow $specargs .
     echo -e "${NC}"
 }
 
@@ -50,11 +62,10 @@ stow_packages() {
 while getopts 'suh' opt; do
     case "$opt" in
         s)
-            args="$args -n"
+            args="-n $args"
             ;;
         u)
-            args="$args -D"
-            exit 0
+            args="-D $args"
             ;;
         h|?)
             echo "Usage: $(basename "$0") [-s] [-t] [-u]"
