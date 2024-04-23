@@ -65,6 +65,7 @@ bindsym $mod+Shift+q kill
 
 # start dmenu (a program launcher)
 bindsym $mod+d exec --no-startup-id ~/.config/rofi/launchers/type-4/launcher.sh
+#bindsym $mod+d exec --no-startup-id rofi -show drun
 # A more modern dmenu replacement is rofi:
 # bindcode $mod+40 exec "rofi -modi drun,run -show drun"
 # There also is i3-dmenu-desktop which only displays applications shipping a
@@ -241,7 +242,7 @@ for_window [class="^.*"] client.focused          #77dd77 #285577 #ffffff #2e9ef4
 #exec_always pulseaudio --start
 #exec_always --no-startup-id "feh --bg-fill ~/Documents/wallpapers/f0mpjw4ddzv41.png" 
 #exec_always --no-startup-id "$HOME/.config/i3/polybar.sh"
-exec_always --no-startup-id "picom --experimental-backends"
+#exec_always --no-startup-id "picom"
 #exec_always --no-startup-id "$HOME/.config/i3/volumeicon.sh"
 exec_always --no-startup-id "setxkbmap us"
 exec --no-startup-id "zsh -c 'sleep 1; /home/gabrielfruet/bin/startup/screen_layout.sh' &"
