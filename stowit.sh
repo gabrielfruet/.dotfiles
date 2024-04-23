@@ -22,6 +22,7 @@ runstow() {
         case $key in 
             target) 
                 target="$(echo "$value" | envsubst)"
+		mkdir -p "$target"
                 ;;
             ignore)
                 ignore="$value"
