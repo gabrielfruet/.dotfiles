@@ -34,7 +34,7 @@ osname="$(hostnamectl | sed -n 's/^ *Operating System: \(.*\)$/\1/p' | sed 's/ /
 
 case $osname in
     archlinux) archlinux;;
-    fedora) fedora;;
+    fedora*) fedora;;
 esac
 
 
