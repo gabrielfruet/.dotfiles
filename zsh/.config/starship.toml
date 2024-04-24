@@ -2,6 +2,7 @@
 #"$schema" = "$HOME/.config/schema.json" 
 # Inserts a blank line between shell prompts
 add_newline = false 
+command_timeout=20000
 format = "${custom.start}$all$time$character"
 
 # Replace the "❯" symbol in the prompt with "➜"
