@@ -246,3 +246,4 @@ for_window [class="^.*"] client.focused          #77dd77 #285577 #ffffff #2e9ef4
 #exec_always --no-startup-id "$HOME/.config/i3/volumeicon.sh"
 exec_always --no-startup-id "setxkbmap us"
 exec --no-startup-id "zsh -c 'sleep 1; /home/gabrielfruet/bin/startup/screen_layout.sh' &"
+exec --no-startup-id "nitrogen --restore"
