@@ -197,7 +197,29 @@ bindsym $mod+r mode "resize"
 # Start i3bar to display a workspace bar (plus the system information i3status
 # finds out, if available)
 #set $bg-color #13162050
-set $bg-color #15161e99
+#pywal start
+set $fg #ffffff
+#set_from_resource $fg #ffffff
+set_from_resource $bg i3wm.color0
+
+
+set_from_resource $c0 i3wm.color0
+set_from_resource $c1 i3wm.color1
+set_from_resource $c2 i3wm.color2
+set_from_resource $c3 i3wm.color3
+set_from_resource $c4 i3wm.color4
+set_from_resource $c5 i3wm.color5
+set_from_resource $c6 i3wm.color6
+set_from_resource $c7 i3wm.color7
+set_from_resource $c8 i3wm.color8
+set_from_resource $c9 i3wm.color9
+set_from_resource $c10 i3wm.color10
+set_from_resource $c11 i3wm.color11
+set_from_resource $c12 i3wm.color12
+set_from_resource $c13 i3wm.color13
+set_from_resource $c14 i3wm.color14
+set_from_resource $c15 i3wm.color15
+#pywal end
 
 set $focusedws-border-color #FF7C7C
 set $focusedws-bg-color #FF7C7C
@@ -217,16 +239,25 @@ bar {
         font pango:JetBrainsMono Nerd Font, Bold 11
         i3bar_command i3bar --transparency
         mode dock
-        #padding -2px -2px -2px -2px
         height 20
 
         colors {
-                background $bg-color
-                separator #BEC8F3
+                #pywal start
+                background $bg
+                statusline #FF0000
                 #                   border            background            text
-                focused_workspace   $focusedws-border-color $focusedws-bg-color   $focusedws-text-color
-                active_workspace   $active-border-color $active-bg-color   $active-text-color
-                inactive_workspace  $inactive-border-color $inactive-bg-color    $inactive-text-color
+                focused_workspace   $c2               $c2                   $fg
+                active_workspace    $bg               $bg                   $fg
+                inactive_workspace  $bg               $bg                   $fg
+               #urgent_workspace    $bg-color         #000000               $text-color
+                #pywal end
+
+
+                #background $bg
+                #                   border            background            text
+                #focused_workspace   $focusedws-border-color $focusedws-bg-color   $focusedws-text-color
+                #active_workspace   $active-border-color $active-bg-color   $active-text-color
+                #inactive_workspace  $inactive-border-color $inactive-bg-color    $inactive-text-color
                #urgent_workspace    $bg-color         #000000               $text-color
         }
 }
@@ -246,4 +277,4 @@ for_window [class="^.*"] client.focused          #77dd77 #285577 #ffffff #2e9ef4
 #exec_always --no-startup-id "$HOME/.config/i3/volumeicon.sh"
 exec_always --no-startup-id "setxkbmap us"
 exec --no-startup-id "zsh -c 'sleep 1; /home/gabrielfruet/bin/startup/screen_layout.sh' &"
-exec --no-startup-id "nitrogen --restore"
+exec --no-startup-id "wal -R"
