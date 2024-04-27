@@ -1,5 +1,8 @@
 import=["~/.cache/wal/colors-alacritty.toml"]
 
+[colors]
+transparent_background_colors=true
+
 #[[colors.indexed_colors]]
 #color = "0xff9e64"
 #index = 16
@@ -75,7 +78,6 @@ style = 'Extrabold Italic'
 [window]
 decorations = "Full"
 opacity = 0.8
-
 [window.dimensions]
 columns = 144
 lines = 40
