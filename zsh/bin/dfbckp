@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+current_dir="$(pwd)"
+fmt_date="$(date +'%H-%M-%S--%d-%m-%Y')"
+under_dir="dfbckp-${fmt_date}.tar.gz"
+tar_flags="-czf"
+dotconfig="$HOME/.config"
+dotconfig_backup=("nvim" "i3" "tmux" "picom.conf" "rofi" "rofi.gabrielfruet" "starship.toml")  # List of directories to backup
+home_backup=(".zshrc" ".bashrc" ".tmux.conf" ".aliases" "bin" ".ssh" ".zsh")
+
+echo "Creating archive named ${current_dir}/${under_dir}, do you want to proceed? y/n"
+while true; do
+  read -r ans
+  if [ "$ans" = "y" ]; then
+    # Create a temporary directory for the symlinks
+    tmp_dir=$(mktemp -d)
+
+    # Link DOTCONFIG_BACKUP files/directories
+    for item in "${dotconfig_backup[@]}"; do
+      echo "copying ${item}"
+      cp -r "${dotconfig}/${item}" "${tmp_dir}/${item}"
+    done
+    
+    # Link HOME_BACKUP files/directories
+    for item in "${home_backup[@]}"; do
+      echo "copying ${item}"
+      cp -r "${HOME}/${item}" "${tmp_dir}/${item}"
+    done
+
+    # Create tar.gz including everything in tmp_dir
+    tar "${tar_flags}" "${current_dir}/${under_dir}" -C "${tmp_dir}" .
+    
+    # Cleanup: Remove the temporary directory
+    rm -rf "${tmp_dir}"
+    echo "Backup created successfully."
+    exit 0
+  elif [ "$ans" = "n" ]; then
+    echo "Exiting..."
+    exit 1
+  else
+    echo "Invalid answer, answer again"
+  fi
+done
