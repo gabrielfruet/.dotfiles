@@ -18,11 +18,11 @@ get_nitrogen_wallpaper_name() {
 }
 
 set_with_feh() {
-    feh --image-bg black --recursive --auto-zoom --geometry 1200x600 --thumbnails --thumb-width 200 --thumb-height 200 --index-info '' --action "w= feh --bg-scale %f" "$WALLPAPERS"
+    feh --image-bg black --recursive --auto-zoom --geometry 1200x600 --thumbnails --thumb-width 200 --thumb-height 200 --index-info '' --action "w= feh --bg-scale %f" "$WALLPAPERS" > /dev/null
     fehbgpath=$(awk 'FNR==2{print $4}' < ~/.fehbg | sed "s/'//g" ) 
     echo fehbgpath
-    wal -i "$fehbgpath" --backend haishoku
-    echo 'awesome.restart()' | awesome-client
+    wal -i "$fehbgpath" --backend colorz
+    awesome-client "awesome.restart()"
 }
 
 while getopts 'spfh' opt; do

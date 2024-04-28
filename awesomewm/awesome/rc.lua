@@ -44,13 +44,26 @@ do
 end
 -- }}}
 
+do
+    local function update_theme()
+        beautiful.init(gears.filesystem.get_themes_dir() .. "xresources/theme.lua")
+        awesome.emit_signal("theme::update")
+    end
+
+    awesome.connect_signal("theme_change", update_theme)
+end
+
 -- {{{ Variable definitions
 -- Themes define colours, icons, font and wallpapers.
 beautiful.init(gears.filesystem.get_themes_dir() .. "xresources/theme.lua")
 THEME = beautiful.xresources
 
 beautiful.useless_gap = 5
-beautiful.border_width = 0
+beautiful.border_width = 1
+beautiful.tasklist_bg_normal = THEME.get_current_theme().background .. '00'
+beautiful.taglist_bg_focus = THEME.get_current_theme().color10
+beautiful.tasklist_bg_focus = THEME.get_current_theme().color10
+
 
 -- This is used later as the default terminal and editor to run.
 terminal = "alacritty"
@@ -97,7 +110,7 @@ myawesomemenu = {
 }
 
 mymainmenu = awful.menu({ items = { { "awesome", myawesomemenu, beautiful.awesome_icon },
-                                    { "open terminal", terminal }
+                                    { "open terminal", terminal },
                                   }
                         })
 
@@ -188,14 +201,13 @@ screen.connect_signal("property::geometry", set_wallpaper)
 
 awful.screen.connect_for_each_screen(function(s)
     -- Wallpaper
-    local ICON_OPACITY=0.7
     set_wallpaper(s)
 
 
     -- Each screen has its own tag table.
     --awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, awful.layout.layouts[1])
     --
-    local names = {'5', '6', '7', '8', '9'}
+    local names = {'5'}
     local l = awful.layout.suit  -- Just to save some typing: use an alias.
     local layouts = { l.tile, l.tile, l.floating, l.fair, l.max,
         l.floating, l.tile.left, l.floating, l.floating }
@@ -206,7 +218,7 @@ awful.screen.connect_for_each_screen(function(s)
         layout = awful.layout.suit.tile,
         screen = s,
         icon_only=true,
-        index=1
+        index=1,
     })
 
     awful.tag.add("Browser", {
@@ -246,13 +258,6 @@ awful.screen.connect_for_each_screen(function(s)
                            awful.button({ }, 4, function () awful.layout.inc( 1) end),
                            awful.button({ }, 5, function () awful.layout.inc(-1) end)))
     -- Create a taglist widget
-    s.mytaglist = awful.widget.taglist {
-        screen  = s,
-        filter  = awful.widget.taglist.filter.all,
-        buttons = taglist_buttons,
-    }
-    local colorA = "#ffffff" -- Default color
-    local colorB = "#ff0000" -- Color when selected
     s.mytaglist = awful.widget.taglist {
         screen  = s,
         filter  = awful.widget.taglist.filter.all,
@@ -309,27 +314,61 @@ awful.screen.connect_for_each_screen(function(s)
     s.mytasklist = awful.widget.tasklist {
         screen  = s,
         filter  = awful.widget.tasklist.filter.currenttags,
-        buttons = tasklist_buttons
+        buttons = tasklist_buttons,
+        style = {
+            shape = gears.shape.powerline,
+        },
+        layout = {
+            spacing = -13,
+            layout  = wibox.layout.fixed.horizontal
+        },
+        widget_template = {
+            {
+                {
+                    {
+                        id     = 'text_role',
+                        widget = wibox.widget.textbox,
+                    },
+                    left  = 20,
+                    right = 20,
+                    widget = wibox.container.margin,
+                },
+                widget = wibox.container.constraint,
+                width = 100,
+                strategy ='exact'
+            },
+            id     = 'background_role',
+            widget = wibox.container.background,
+        },
     }
 
     -- RAM WIDGET
-    local memwidget = wibox.widget.textbox()
+    local ramwidget = wibox.widget.textbox()
     vicious.cache(vicious.widgets.mem)
-    vicious.register(memwidget, vicious.widgets.mem, "$1%", 13)
-    local ramwidget = wibox.widget{
-        {
-            {
-                image=awesomepath .. '/icons/ram_white.png',
-                widget=wibox.widget.imagebox,
-            },
-            layout = wibox.container.margin,
-            right = 5,
-        },
-        memwidget,
-        layout = wibox.layout.fixed.horizontal,
-    }
+    vicious.register(ramwidget, vicious.widgets.mem, "RAM $1%", 10)
+
+    --CPU WIDGET
+    local cpuwidget = wibox.widget.textbox()
+    vicious.cache(vicious.widgets.cpu)
+    vicious.register(cpuwidget, vicious.widgets.cpu, "CPU $1%", 10)
+
+    local wrap_on_sep = function(widgets, separator_opts, layout)
+        local wraped_widgets = {layout=layout}
+        for i,widget_i in ipairs(widgets) do
+            wraped_widgets[i] = {layout=layout}
+            local separator_widget = {
+                widget=wibox.widget.separator
+            }
+            table.insert(wraped_widgets[i], widget_i)
+            table.insert(wraped_widgets[i], separator_widget)
+            for k,sepop in pairs(separator_opts) do
+                separator_widget[k] = sepop
+            end
+        end
+        return wraped_widgets
+    end
     -- Create the wibox
-    s.mywibox = awful.wibar({ position = "top", screen = s , bg = beautiful.bg_normal .. "cc"})
+    s.mywibox = awful.wibar({ position = "top", screen = s , bg = beautiful.bg_normal .. "cc", height=25})
     -- Add widgets to the wibox
     s.mywibox:setup {
         layout = wibox.layout.align.horizontal,
@@ -339,15 +378,34 @@ awful.screen.connect_for_each_screen(function(s)
             --mylauncher,
             s.mytaglist,
             s.mypromptbox,
-            s.mytasklist,
+            {
+                s.mytasklist,
+                widget=wibox.container.margin,
+                left = 20,
+            }
         },
         mytextclock,
         { -- Right widgets
             layout = wibox.layout.fixed.horizontal,
-            ramwidget,
-            mykeyboardlayout,
-            wibox.widget.systray(),
-            s.mylayoutbox,
+            --wrap_on_sep({cpuwidget, ramwidget}, {orientation="vertical", forced_width=20, thickness=2, span_ratio=0.5}, wibox.layout.fixed.horizontal),
+            {
+                ramwidget,
+                cpuwidget,
+                mykeyboardlayout,
+                layout=wibox.layout.fixed.horizontal,
+                spacing=20,
+                spacing_widget={
+                    widget=wibox.widget.separator,
+                    orientation="vertical",
+                    thickness=2,
+                    span_ratio=0.5
+                }
+            },
+            {
+                s.mylayoutbox,
+                wibox.widget.systray(),
+                layout = wibox.layout.fixed.horizontal
+            }
         },
     }
 end)
