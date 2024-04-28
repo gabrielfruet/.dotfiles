@@ -170,4 +170,110 @@ M.mytasklist = function(s)
 
 end
 
+local function set_wallpaper(s)
+    -- Wallpaper
+    if beautiful.wallpaper then
+        local wallpaper = beautiful.wallpaper
+        -- If wallpaper is a function, call it with the screen
+        if type(wallpaper) == "function" then
+            wallpaper = wallpaper(s)
+        end
+        gears.wallpaper.maximized(wallpaper, s, true)
+    end
+end
+
+-- Re-set wallpaper when a screen's geometry changes (e.g. different resolution)
+screen.connect_signal("property::geometry", set_wallpaper)
+
+M.wibox_init = function() awful.screen.connect_for_each_screen(function(s)
+    -- Wallpaper
+    set_wallpaper(s)
+
+
+    -- Each screen has its own tag table.
+    --awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, awful.layout.layouts[1])
+    --
+    -- Create a promptbox for each screen
+    s.mypromptbox = awful.widget.prompt()
+    -- Create an imagebox widget which will contain an icon indicating which layout we're using.
+    -- We need one layoutbox per screen.
+    s.mylayoutbox = awful.widget.layoutbox(s)
+    s.mylayoutbox:buttons(gears.table.join(
+        awful.button({ }, 1, function () awful.layout.inc( 1) end),
+        awful.button({ }, 3, function () awful.layout.inc(-1) end),
+        awful.button({ }, 4, function () awful.layout.inc( 1) end),
+        awful.button({ }, 5, function () awful.layout.inc(-1) end)))
+    -- Create a taglist widget
+    s.mytaglist = M.mytaglist(s)
+    s.mytasklist = M.mytasklist(s)
+
+    -- RAM WIDGET
+    local ramwidget = wibox.widget.textbox()
+    vicious.cache(vicious.widgets.mem)
+    vicious.register(ramwidget, vicious.widgets.mem, "RAM $1%", 10)
+
+    --CPU WIDGET
+    local cpuwidget = wibox.widget.textbox()
+    vicious.cache(vicious.widgets.cpu)
+    vicious.register(cpuwidget, vicious.widgets.cpu, "CPU $1%", 10)
+
+    local wrap_on_sep = function(widgets, separator_opts, layout)
+        local wraped_widgets = {layout=layout}
+        for i,widget_i in ipairs(widgets) do
+            wraped_widgets[i] = {layout=layout}
+            local separator_widget = {
+                widget=wibox.widget.separator
+            }
+            table.insert(wraped_widgets[i], widget_i)
+            table.insert(wraped_widgets[i], separator_widget)
+            for k,sepop in pairs(separator_opts) do
+                separator_widget[k] = sepop
+            end
+        end
+        return wraped_widgets
+    end
+    -- Create the wibox
+    s.mywibox = awful.wibar({ position = "top", screen = s , bg = beautiful.bg_normal .. "cc", height=25})
+    -- Add widgets to the wibox
+    s.mywibox:setup {
+        layout = wibox.layout.align.horizontal,
+        expand = "none",
+        { -- Left widgets
+            layout = wibox.layout.fixed.horizontal,
+            --mylauncher,
+            s.mytaglist,
+            s.mypromptbox,
+            {
+                s.mytasklist,
+                widget=wibox.container.margin,
+                left = 20,
+            }
+        },
+        mytextclock,
+        { -- Right widgets
+            layout = wibox.layout.fixed.horizontal,
+            --wrap_on_sep({cpuwidget, ramwidget}, {orientation="vertical", forced_width=20, thickness=2, span_ratio=0.5}, wibox.layout.fixed.horizontal),
+            {
+                ramwidget,
+                cpuwidget,
+                mykeyboardlayout,
+                layout=wibox.layout.fixed.horizontal,
+                spacing=20,
+                spacing_widget={
+                    widget=wibox.widget.separator,
+                    orientation="vertical",
+                    thickness=2,
+                    span_ratio=0.5
+                }
+            },
+            {
+                s.mylayoutbox,
+                wibox.widget.systray(),
+                layout = wibox.layout.fixed.horizontal
+            }
+        },
+    }
+end)
+end
+
 return M
