@@ -20,8 +20,9 @@ configuration {
 }
 
 /*****----- Global Properties -----*****/
-@import                          "shared/colors.rasi"
 @import                          "shared/fonts.rasi"
+
+@import "~/.cache/wal/colors-rofi-dark"
 
 * {
     border-colour:               var(selected);

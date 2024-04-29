@@ -35,6 +35,7 @@ transparent_background_colors=true
 #background = "0x1a1b26"
 #foreground = "0xc0caf5"
 
+
 [font.normal]
 family = 'JetBrainsMono Nerd Font'
 style = 'Bold'
@@ -51,33 +52,10 @@ style = 'Bold Italic'
 family = 'JetBrainsMono Nerd Font'
 style = 'Extrabold Italic'
 
-#[font.normal]
-#family = 'FiraCode Nerd Font'
-#style = 'Regular'
-
-#[font.bold]
-#family = 'FiraCode Nerd Font'
-#style = 'Bold'
-
-#[font.italic]
-#family = 'FiraCode Nerd Font'
-#style = 'Italic'
-
-#[font.normal]
-#family = 'Iosevka Nerd Font'
-#style = 'Normal'
-
-#[font.bold]
-#family = 'Iosevka Nerd Font'
-#style = 'Bold'
-
-#[font.italic]
-#family = 'Iosevka Nerd Font'
-#style = 'Italic'
-
 [window]
 decorations = "Full"
 opacity = 0.8
+
 [window.dimensions]
 columns = 144
 lines = 40

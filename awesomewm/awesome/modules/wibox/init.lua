@@ -2,7 +2,7 @@ local awful = require('awful')
 local wibox = require('wibox')
 local gears = require('gears')
 local beautiful = require('beautiful')
-local vicious = require("vicious")
+local modules_wibox_widgets = require('modules.wibox.widgets')
 
 local M = {}
 
@@ -44,45 +44,62 @@ local tasklist_buttons = gears.table.join(
                      awful.button({ }, 5, function ()
                                               awful.client.focus.byidx(-1)
                                           end))
+local function add_icon_tags(icon_tags, screen)
+    for i,v in ipairs(icon_tags) do
+        local icon
+        if type(v.icon) == 'string' then
+            icon = gears.surface.load_uncached(v.icon)
+        else
+            icon = v.icon
+        end
+
+        local tag_tbl = {
+            icon=icon,
+            layout=v.layout,
+            screen = screen,
+            index=i,
+            icon_only=true,
+        }
+        awful.tag.add(v[1], tag_tbl)
+    end
+end
 
 M.mytaglist =  function(s)
-    local names = {'5'}
-    local l = awful.layout.suit  -- Just to save some typing: use an alias.
-    local layouts = { l.tile, l.tile, l.floating, l.fair, l.max,
-        l.floating, l.tile.left, l.floating, l.floating }
-    awful.tag(names, s, layouts)
     local awesomepath = os.getenv("HOME") .. '/.config/awesome'
-    awful.tag.add("Terminal", {
-        icon = gears.surface.load_uncached(awesomepath .. "/icons/terminal_icon.png"),
-        layout = awful.layout.suit.tile,
-        screen = s,
-        icon_only=true,
-        index=1,
-    })
-
-    awful.tag.add("Browser", {
-        icon = gears.surface.load_uncached(awesomepath .. "/icons/browser_icon.png"),
-        layout = awful.layout.suit.tile,
-        screen = s,
-        icon_only=true,
-        index=2
-    })
-
-    awful.tag.add("Spotify", {
-        icon = gears.surface.load_uncached(awesomepath .. "/icons/song_icon.png"),
-        layout = awful.layout.suit.floating,
-        screen = s,
-        icon_only=true,
-        index=3
-    })
-
-    awful.tag.add("Discord", {
-        icon = gears.surface.load_uncached(awesomepath .. "/icons/discord-white-icon.webp"),
-        layout = awful.layout.suit.floating,
-        screen = s,
-        icon_only=true,
-        index=4
-    })
+    local l = awful.layout.suit
+    add_icon_tags({
+        {
+            "Terminal",
+            icon=awesomepath .. "/icons/terminal_icon.png",
+            layout=l.tile
+        },
+        {
+            "Browser",
+            icon=awesomepath .. "/icons/browser2.png",
+            layout=l.tile
+        },
+        {
+            "Home",
+            icon=awesomepath .. "/icons/home_white.png",
+            layout=l.float
+        },
+        {
+            "Folder",
+            icon=awesomepath .. "/icons/folder2.png",
+            layout=l.magnifier
+        },
+        {
+            "Spotify",
+            icon=awesomepath .. "/icons/song_icon.png",
+            layout=l.float
+        },
+        {
+            "Discord",
+            icon=awesomepath .. "/icons/chat.png",
+            layout=l.magnifier
+        },
+    }, s)
+    awful.tag({}, s, {})
     return awful.widget.taglist {
         screen  = s,
         filter  = awful.widget.taglist.filter.all,
@@ -116,21 +133,30 @@ M.mytaglist =  function(s)
             id = 'background_role',
             widget = wibox.container.background,
             create_callback = function(self, tag, index, tags)
+                SELECTED_COLOR = THEME.get_current_theme().background
+                UNSELECTED_COLOR = THEME.get_current_theme().foreground
                 local img_widget = self:get_children_by_id('icon_role')[1]
-                local img = gears.surface.load_uncached(tag.icon)
-                img_widget.image = img
+                local img = tag.icon
                 tag:connect_signal('property::selected', function()
-                    img_widget.image = gears.color.recolor_image(img, THEME.get_current_theme().foreground)
+                    img_widget.image = gears.color.recolor_image(img, SELECTED_COLOR)
                 end)
+
+                if tag.selected then
+                    img_widget.image = gears.color.recolor_image(img, SELECTED_COLOR)
+                else
+                    img_widget.image = gears.color.recolor_image(img, UNSELECTED_COLOR)
+                end
             end,
             update_callback = function(self, tag, index, tags)
+                SELECTED_COLOR = THEME.get_current_theme().background
+                UNSELECTED_COLOR = THEME.get_current_theme().foreground
                 local img_widget = self:get_children_by_id('icon_role')[1]
                 local img = gears.surface.load_uncached(tag.icon)
                 img_widget.image = img
                 if tag.selected then
-                    img_widget.image = gears.color.recolor_image(img, THEME.get_current_theme().background)
+                    img_widget.image = gears.color.recolor_image(img, SELECTED_COLOR)
                 else
-                    img_widget.image = gears.color.recolor_image(img, THEME.get_current_theme().foreground)
+                    img_widget.image = gears.color.recolor_image(img, UNSELECTED_COLOR)
                 end
             end,
         },
@@ -190,15 +216,16 @@ M.wibox_init = function() awful.screen.connect_for_each_screen(function(s)
     set_wallpaper(s)
 
 
-    -- Each screen has its own tag table.
-    --awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, awful.layout.layouts[1])
-    --
     -- Create a promptbox for each screen
     s.mypromptbox = awful.widget.prompt()
+    s.mytextclock = wibox.widget.textclock()
+    -- Create a promptbox for each screen
     -- Create an imagebox widget which will contain an icon indicating which layout we're using.
     -- We need one layoutbox per screen.
     s.mylayoutbox = awful.widget.layoutbox(s)
     s.mylayoutbox:buttons(gears.table.join(
+    -- Create an imagebox widget which will contain an icon indicating which layout we're using.
+    -- We need one layoutbox per screen. s.mylayoutbox = awful.widget.layoutbox(s) s.mylayoutbox:buttons(gears.table.join(
         awful.button({ }, 1, function () awful.layout.inc( 1) end),
         awful.button({ }, 3, function () awful.layout.inc(-1) end),
         awful.button({ }, 4, function () awful.layout.inc( 1) end),
@@ -207,15 +234,10 @@ M.wibox_init = function() awful.screen.connect_for_each_screen(function(s)
     s.mytaglist = M.mytaglist(s)
     s.mytasklist = M.mytasklist(s)
 
-    -- RAM WIDGET
-    local ramwidget = wibox.widget.textbox()
-    vicious.cache(vicious.widgets.mem)
-    vicious.register(ramwidget, vicious.widgets.mem, "RAM $1%", 10)
-
-    --CPU WIDGET
-    local cpuwidget = wibox.widget.textbox()
-    vicious.cache(vicious.widgets.cpu)
-    vicious.register(cpuwidget, vicious.widgets.cpu, "CPU $1%", 10)
+    local ramwidget = modules_wibox_widgets.ram()
+    local cpuwidget = modules_wibox_widgets.cpu()
+    local batwidget = modules_wibox_widgets.bat()
+    local volwidget = modules_wibox_widgets.vol()
 
     local wrap_on_sep = function(widgets, separator_opts, layout)
         local wraped_widgets = {layout=layout}
@@ -249,17 +271,20 @@ M.wibox_init = function() awful.screen.connect_for_each_screen(function(s)
                 left = 20,
             }
         },
-        mytextclock,
+        s.mytextclock,
         { -- Right widgets
             layout = wibox.layout.fixed.horizontal,
-            --wrap_on_sep({cpuwidget, ramwidget}, {orientation="vertical", forced_width=20, thickness=2, span_ratio=0.5}, wibox.layout.fixed.horizontal),
             {
-                ramwidget,
                 cpuwidget,
+                ramwidget,
+                volwidget,
+                batwidget,
                 mykeyboardlayout,
+                s.mylayoutbox,
                 layout=wibox.layout.fixed.horizontal,
                 spacing=20,
                 spacing_widget={
+                    color=beautiful.taglist_bg_focus,
                     widget=wibox.widget.separator,
                     orientation="vertical",
                     thickness=2,
@@ -267,12 +292,12 @@ M.wibox_init = function() awful.screen.connect_for_each_screen(function(s)
                 }
             },
             {
-                s.mylayoutbox,
                 wibox.widget.systray(),
                 layout = wibox.layout.fixed.horizontal
             }
         },
     }
+
 end)
 end
 

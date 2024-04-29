@@ -5,7 +5,6 @@ pcall(require, "luarocks.loader")
 -- Standard awesome library
 local gears = require("gears")
 local awful = require("awful")
-local vicious = require("vicious")
 require("awful.autofocus")
 -- Widget and layout library
 local wibox = require("wibox")
@@ -19,6 +18,7 @@ local modules_wibox = require('modules.wibox')
 -- Enable hotkeys help widget for VIM and other apps
 -- when client with a matching name is opened:
 require("awful.hotkeys_popup.keys")
+require('modules.preservetag')
 
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
@@ -45,25 +45,32 @@ do
 end
 -- }}}
 
-do
-    local function update_theme()
-        beautiful.init(gears.filesystem.get_themes_dir() .. "xresources/theme.lua")
-        awesome.emit_signal("theme::update")
-    end
-
-    awesome.connect_signal("theme_change", update_theme)
-end
-
 -- {{{ Variable definitions
 -- Themes define colours, icons, font and wallpapers.
 beautiful.init(gears.filesystem.get_themes_dir() .. "xresources/theme.lua")
 THEME = beautiful.xresources
 
-beautiful.useless_gap = 5
-beautiful.border_width = 1
+local main_color = THEME.get_current_theme().color1  -- Adjust the color as needed
+local shine_color = THEME.get_current_theme().foreground
+
+-- Create a linear gradient pattern
+-- Adjust the coordinates to control the direction of the gradient
+local gradient = gears.color.create_linear_pattern{
+    type = "linear",
+    from = { 0, -20 }, -- Gradient starts from the top
+    to = { 0, 15 },   -- Gradient ends 30 pixels down
+    stops = {
+        { 0, shine_color },  -- Start with a shine at the top
+        { 1, main_color }, -- Transition to the main color in the middle
+    }
+}
+
+beautiful.useless_gap = 10
+beautiful.border_width = 2
 beautiful.tasklist_bg_normal = THEME.get_current_theme().background .. '00'
-beautiful.taglist_bg_focus = THEME.get_current_theme().color10
-beautiful.tasklist_bg_focus = THEME.get_current_theme().color10
+--beautiful.taglist_bg_focus = THEME.get_current_theme().color10
+beautiful.taglist_bg_focus = gradient
+beautiful.tasklist_bg_focus = gradient
 
 
 -- This is used later as the default terminal and editor to run.
@@ -143,7 +150,6 @@ kbdcfg.switch('us')
 
 -- {{{ Wibar
 -- Create a textclock widget
-mytextclock = wibox.widget.textclock()
 
 -- Create a wibox for each screen and add it
 local taglist_buttons = gears.table.join(
@@ -409,6 +415,10 @@ clientbuttons = gears.table.join(
     end)
 )
 
+local custom_keymaps = require('modules.mappings')
+
+globalkeys = gears.table.join(globalkeys, custom_keymaps)
+
 -- Set keys
 root.keys(globalkeys)
 -- }}}
@@ -538,6 +548,4 @@ client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_n
 --
 -- Autostart applications
 --
-awful.spawn.with_shell(os.getenv('HOME') .. '/.screenlayout/default_dualmonitor.sh')
-awful.spawn.with_shell('picom')
-awful.spawn.with_shell(os.getenv('HOME') .. '/.fehbg')
+require('modules.autostart').run()
