@@ -21,7 +21,7 @@ set_with_feh() {
     feh --image-bg black --recursive --geometry 1200x600 --thumbnails --thumb-width 200 --thumb-height 200 --index-info '' --action "w= feh --bg-scale %f" "$WALLPAPERS" > /dev/null
     fehbgpath=$(awk 'FNR==2{print $4}' < ~/.fehbg | sed "s/'//g" ) 
     echo fehbgpath
-    wal -i "$fehbgpath" --backend colorz
+    wal -st -i "$fehbgpath" --backend colorz
     awesome-client "awesome.restart()"
 }
 
