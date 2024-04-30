@@ -14,8 +14,7 @@ M.is_chargeable = function ()
     return result:match("BAT%d+") ~= nil
 end
 
-M.is_charging = function ()
-    local battery_path = "/sys/class/power_supply/BAT0/"
+M.is_charging = function () local battery_path = "/sys/class/power_supply/BAT0/"
     local status_file_path = battery_path .. "status"
 
     local status_file = io.open(status_file_path, "r")
