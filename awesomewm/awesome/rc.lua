@@ -51,13 +51,13 @@ beautiful.init(gears.filesystem.get_themes_dir() .. "xresources/theme.lua")
 THEME = beautiful.xresources
 
 local main_color = THEME.get_current_theme().color1  -- Adjust the color as needed
-local shine_color = THEME.get_current_theme().foreground
+local shine_color = '#ffffff'
 
 -- Create a linear gradient pattern
 -- Adjust the coordinates to control the direction of the gradient
 local gradient = gears.color.create_linear_pattern{
     type = "linear",
-    from = { 0, -20 }, -- Gradient starts from the top
+    from = { 0, -30 }, -- Gradient starts from the top
     to = { 0, 15 },   -- Gradient ends 30 pixels down
     stops = {
         { 0, shine_color },  -- Start with a shine at the top
@@ -65,8 +65,8 @@ local gradient = gears.color.create_linear_pattern{
     }
 }
 
-beautiful.useless_gap = 10
-beautiful.border_width = 2
+beautiful.useless_gap = 8
+beautiful.border_width = 1
 beautiful.tasklist_bg_normal = THEME.get_current_theme().background .. '00'
 --beautiful.taglist_bg_focus = THEME.get_current_theme().color10
 beautiful.taglist_bg_focus = gradient
