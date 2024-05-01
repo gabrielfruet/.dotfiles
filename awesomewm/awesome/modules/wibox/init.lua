@@ -2,6 +2,7 @@ local awful = require('awful')
 local wibox = require('wibox')
 local gears = require('gears')
 local beautiful = require('beautiful')
+local defs = require('modules.definitions')
 local modules_wibox_widgets = require('modules.wibox.widgets')
 
 local M = {}
@@ -238,24 +239,10 @@ M.wibox_init = function() awful.screen.connect_for_each_screen(function(s)
     local cpuwidget = modules_wibox_widgets.cpu()
     local batwidget = modules_wibox_widgets.bat()
     local volwidget = modules_wibox_widgets.vol()
+    local powwidget = modules_wibox_widgets.power()
 
-    local wrap_on_sep = function(widgets, separator_opts, layout)
-        local wraped_widgets = {layout=layout}
-        for i,widget_i in ipairs(widgets) do
-            wraped_widgets[i] = {layout=layout}
-            local separator_widget = {
-                widget=wibox.widget.separator
-            }
-            table.insert(wraped_widgets[i], widget_i)
-            table.insert(wraped_widgets[i], separator_widget)
-            for k,sepop in pairs(separator_opts) do
-                separator_widget[k] = sepop
-            end
-        end
-        return wraped_widgets
-    end
     -- Create the wibox
-    s.mywibox = awful.wibar({ position = "top", screen = s , bg = beautiful.bg_normal .. "cc", height=25})
+    s.mywibox = awful.wibar({ position = "top", screen = s , bg = beautiful.bg_normal .. defs.opacity_hex, height=25})
     -- Add widgets to the wibox
     s.mywibox:setup {
         layout = wibox.layout.align.horizontal,
@@ -273,14 +260,12 @@ M.wibox_init = function() awful.screen.connect_for_each_screen(function(s)
         },
         s.mytextclock,
         { -- Right widgets
-            layout = wibox.layout.fixed.horizontal,
             {
                 cpuwidget,
                 ramwidget,
                 volwidget,
                 batwidget,
                 mykeyboardlayout,
-                s.mylayoutbox,
                 layout=wibox.layout.fixed.horizontal,
                 spacing=20,
                 spacing_widget={
@@ -293,8 +278,11 @@ M.wibox_init = function() awful.screen.connect_for_each_screen(function(s)
             },
             {
                 wibox.widget.systray(),
-                layout = wibox.layout.fixed.horizontal
-            }
+                powwidget,
+                s.mylayoutbox,
+                layout = wibox.layout.fixed.horizontal,
+            },
+            layout = wibox.layout.fixed.horizontal,
         },
     }
 

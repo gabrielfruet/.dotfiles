@@ -1,9 +1,11 @@
 local vicious = require('vicious')
 local wibox = require('wibox')
 local gears = require('gears')
+local awful = require('awful')
 local beautiful = require('beautiful')
 local volhandler = require('modules.handlers.volume')
 local bathandler = require('modules.handlers.battery')
+local naughty = require('naughty')
 ICONSPATH = os.getenv('HOME') .. '/.config/awesome/icons'
 
 local M = {}
@@ -41,7 +43,7 @@ M.bat = function(opts)
 
     opts = opts ~= nil and opts or {}
 
-    local markup = [[<span color='%s'>%s</span>]]
+    local markup = [[<span color='%s'><b>%s</b></span>]]
     local mybatwidget = wibox.widget{
         {
             {
@@ -156,6 +158,35 @@ M.vol = function (opts)
 
     awesome.connect_signal("volume_update", update_volume)
     update_volume()
+
+    return widget
+end
+
+M.power = function()
+    local powericon = ICONSPATH .. '/power.png'
+    powericon = gears.color.recolor_image(powericon, beautiful.fg_normal)
+    local widget = wibox.widget {
+        {
+            image = powericon,
+            resize = true,
+            widget = wibox.widget.imagebox
+        },
+        margins = 4,
+        widget = wibox.container.margin
+    }
+
+    local popup = require('modules.popup.power')
+
+    widget:buttons(
+        awful.util.table.join(
+            awful.button({}, 1, function()
+                if popup.visible then
+                    popup.hide()
+                else
+                    popup:move_next_to(mouse.current_widget_geometry)
+                end
+            end))
+    )
 
     return widget
 end

@@ -10,6 +10,7 @@ require("awful.autofocus")
 local wibox = require("wibox")
 -- Theme handling library
 local beautiful = require("beautiful")
+local defs = require('modules.definitions')
 -- Notification library
 local naughty = require("naughty")
 local menubar = require("menubar")
@@ -47,31 +48,6 @@ end
 
 -- {{{ Variable definitions
 -- Themes define colours, icons, font and wallpapers.
-beautiful.init(gears.filesystem.get_themes_dir() .. "xresources/theme.lua")
-THEME = beautiful.xresources
-
-local main_color = THEME.get_current_theme().color1  -- Adjust the color as needed
-local shine_color = '#ffffff'
-
--- Create a linear gradient pattern
--- Adjust the coordinates to control the direction of the gradient
-local gradient = gears.color.create_linear_pattern{
-    type = "linear",
-    from = { 0, -30 }, -- Gradient starts from the top
-    to = { 0, 15 },   -- Gradient ends 30 pixels down
-    stops = {
-        { 0, shine_color },  -- Start with a shine at the top
-        { 1, main_color }, -- Transition to the main color in the middle
-    }
-}
-
-beautiful.useless_gap = 8
-beautiful.border_width = 1
-beautiful.tasklist_bg_normal = THEME.get_current_theme().background .. '00'
---beautiful.taglist_bg_focus = THEME.get_current_theme().color10
-beautiful.taglist_bg_focus = gradient
-beautiful.tasklist_bg_focus = gradient
-
 
 -- This is used later as the default terminal and editor to run.
 terminal = "alacritty"
