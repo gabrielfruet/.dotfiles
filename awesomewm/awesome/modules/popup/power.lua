@@ -4,6 +4,7 @@ local beautiful = require('beautiful')
 local wibox = require('wibox')
 local confirmpp = require('modules.popup.confirm')
 local defs = require('modules.definitions')
+local utils = require('modules.utils')
 local naughty = require('naughty')
 --local defs = require('modules.definitions')
 ICONSPATH = os.getenv('HOME') .. '/.config/awesome/icons'
@@ -15,6 +16,10 @@ local menu_items = {
     {name='Lock', icon=ICONSPATH .. '/lock.png', cmd='awesome-client "require(\'awful\').spawn(\'i3lock\')"', message='Are you sure you want to lock?'},
     {name='Shutdown', icon=ICONSPATH .. '/power.png', cmd='systemctl poweroff', message='Are you sure you want to shutdown?'},
 }
+
+local function text_markup(text)
+    return text
+end
 
 local popup = awful.popup {
     ontop = true,
@@ -35,14 +40,14 @@ local SELECTED_COLOR_FG = defs.colors.selected_fg
 local UNSELECTED_COLOR_FG = defs.colors.unselected_fg
 local SPECIAL_COLOR_FG = defs.colors.red
 
-local confirmation_popup = nil
+
+local active_confirmation_popup = nil
 
 local function base_after_choice()
-    if confirmation_popup ~= nil then
-        confirmation_popup.visible = false
-        confirmation_popup = nil
+    if active_confirmation_popup ~= nil then
+        active_confirmation_popup.hide()
+        active_confirmation_popup = nil
     end
-    popup.visible = false
 end
 
 local function on_confirmation(opts)
@@ -60,6 +65,48 @@ end
 local function on_decline()
     base_after_choice()
 end
+
+local confirmation_popup_cache = {}
+
+local hover_timer = gears.timer({
+    timeout = 0.5,
+    autostart = false,
+    single_shot=true,
+    callback = function ()
+        if not popup.is_mouse_ontop and (active_confirmation_popup == nil or not active_confirmation_popup.is_mouse_ontop) then
+            popup.hide()
+        end
+    end
+})
+
+local function get_confirmation_popup(item)
+    if confirmation_popup_cache[item.name] ~= nil then return confirmation_popup_cache[item.name] end
+
+    confirmation_popup_cache[item.name] = confirmpp.create{
+        message = item.message,
+        on_confirm = on_confirmation({cmd=item.cmd}),
+        on_decline = on_decline,
+        on_leave = function ()
+           hover_timer:start()
+        end,
+        on_enter = function ()
+            if hover_timer.started then
+                hover_timer:stop()
+            end
+        end
+    }
+    return confirmation_popup_cache[item.name]
+end
+
+local function confirmation_focus_on(item)
+    if active_confirmation_popup ~= nil then
+        active_confirmation_popup.hide()
+    end
+    active_confirmation_popup = get_confirmation_popup(item)
+    active_confirmation_popup:move_next_to(mouse.current_widget_geometry)
+    active_confirmation_popup.visible = true
+end
+
 
 for _, item in ipairs(menu_items) do
     local icon = {
@@ -81,7 +128,7 @@ for _, item in ipairs(menu_items) do
                     widget = wibox.widget.imagebox
                 },
                 {
-                    text = item.name,
+                    markup = text_markup(item.name),
                     widget = wibox.widget.textbox,
                 },
                 spacing=12,
@@ -97,11 +144,13 @@ for _, item in ipairs(menu_items) do
 
 
     row:connect_signal("mouse::enter", function(c)
+        if not popup.visible then return end
         c:set_bg(defs.colors.selected_bg)
         c:set_fg(defs.colors.selected_fg)
         iconwidget.image = icon.selected
     end)
     row:connect_signal("mouse::leave", function(c)
+        if not popup.visible then return end
         c:set_bg(defs.colors.unselected_bg)
         c:set_fg(defs.colors.unselected_fg)
         iconwidget.image = icon.unselected
@@ -109,11 +158,13 @@ for _, item in ipairs(menu_items) do
 
     local old_cursor, old_wibox
     row:connect_signal("mouse::enter", function()
+        if not popup.visible then return end
         local wb = mouse.current_wibox
         old_cursor, old_wibox = wb.cursor, wb
         wb.cursor = "hand1"
     end)
     row:connect_signal("mouse::leave", function()
+        if not popup.visible then return end
         if old_wibox then
             old_wibox.cursor = old_cursor
             old_wibox = nil
@@ -123,29 +174,38 @@ for _, item in ipairs(menu_items) do
     row:buttons(
         awful.util.table.join(
             awful.button({}, 1, function()
-                if confirmation_popup == nil then
-                    confirmation_popup = confirmpp.create{
-                        message = item.message,
-                        on_confirm = on_confirmation({cmd=item.cmd}),
-                        on_decline = on_decline,
-                    }
-                    confirmation_popup:move_next_to(mouse.current_widget_geometry)
-
-                    confirmation_popup.visible = true
-                end
+                confirmation_focus_on(item)
             end))
     )
-
-
 
     table.insert(rows, row)
 end
 
 popup:setup(rows)
 
+popup.is_mouse_ontop = false
+
+popup:connect_signal('mouse::enter', function ()
+    if not popup.visible then return end
+    if hover_timer.started then
+        hover_timer:stop()
+    end
+    popup.is_mouse_ontop = true
+end)
+
+popup:connect_signal('mouse::leave', function ()
+    if not popup.visible then return end
+    hover_timer:start()
+    popup.is_mouse_ontop = false
+end)
+
 popup.hide = function ()
     popup.visible = false
     on_decline()
 end
+
+popup:connect_signal('property::visible', function ()
+    hover_timer:start()
+end)
 
 return popup

@@ -2,6 +2,7 @@ local awful = require('awful')
 local gears = require('gears')
 local beautiful = require('beautiful')
 local wibox = require('wibox')
+local naughty  = require('naughty')
 
 local defs = require('modules.definitions')
 local utils = require('modules.utils')
@@ -13,10 +14,14 @@ local confirm_options = {
     {text='No'},
 }
 
+local noop = function () end
+
 local defaults = {
     message = 'Do you really want to do this?',
-    on_confirm = function() end,
-    on_decline = function() end
+    on_confirm = noop,
+    on_decline = noop,
+    on_leave = noop,
+    on_enter = noop
 }
 
 M.create = function (opts)
@@ -102,7 +107,7 @@ M.create = function (opts)
                 margins = 8,
             },
             widget = wibox.container.constraint,
-            width = 100,
+            width = 150,
         },
         options_widget,
         layout = wibox.layout.fixed.vertical
@@ -110,7 +115,24 @@ M.create = function (opts)
 
     popup:setup(message_widget)
 
+    popup.hide = function ()
+        popup.visible = false
+    end
+
+    popup.widget:connect_signal('mouse::enter', function ()
+        if not popup.visible then return end
+        popup.is_mouse_ontop = true
+        opts.on_enter()
+    end)
+
+    popup.widget:connect_signal('mouse::leave', function ()
+        if not popup.visible then return end
+        popup.is_mouse_ontop = false
+        opts.on_leave()
+    end)
+
     return popup
 end
+
 
 return M

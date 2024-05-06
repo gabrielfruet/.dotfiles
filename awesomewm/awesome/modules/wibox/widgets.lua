@@ -13,14 +13,14 @@ local M = {}
 M.ram = function()
     local ramwidget = wibox.widget.textbox()
     vicious.cache(vicious.widgets.mem)
-    vicious.register(ramwidget, vicious.widgets.mem, "RAM $1%", 10)
+    vicious.register(ramwidget, vicious.widgets.mem, "<b>RAM $1%</b>", 10)
     return ramwidget
 end
 
 M.cpu = function()
     local cpuwidget = wibox.widget.textbox()
     vicious.cache(vicious.widgets.cpu)
-    vicious.register(cpuwidget, vicious.widgets.cpu, "CPU $1%", 10)
+    vicious.register(cpuwidget, vicious.widgets.cpu, "<b>CPU $1%</b>", 10)
     return cpuwidget
 end
 
@@ -129,7 +129,7 @@ M.vol = function (opts)
             right=6,
         },
         {
-            text='',
+            markup='',
             widget=wibox.widget.textbox,
         },
         layout=wibox.layout.fixed.horizontal
@@ -143,9 +143,9 @@ M.vol = function (opts)
 
         if volpercent == MUTED then
             img_widget.image = icons.muted
-            text_widget.text = 'Muted'
+            text_widget.markup = '<b>Muted</b>'
         else
-            text_widget.text = tostring(volpercent) .. '%'
+            text_widget.markup = '<b>' .. tostring(volpercent) .. '%' .. '</b>'
             if volpercent == 0 then
                 img_widget.image = icons.novol
             elseif volpercent < 50 then
@@ -158,6 +158,19 @@ M.vol = function (opts)
 
     awesome.connect_signal("volume_update", update_volume)
     update_volume()
+
+    widget:buttons(
+        awful.util.table.join(
+            awful.button({}, 1, function()
+                volhandler.toggle_mute()
+            end),
+            awful.button({}, 4, function()
+                volhandler.increase_volume(5)
+            end),
+            awful.button({}, 5, function()
+                volhandler.decrease_volume(5)
+            end))
+    )
 
     return widget
 end
