@@ -26,6 +26,10 @@ end
 
 
 M.bat = function(opts)
+    if not bathandler.is_chargeable() then
+        return nil
+    end
+
     local icons = {
         charg = ICONSPATH .. "/batcharg.png",
         low = ICONSPATH .. "/batlow.png",
