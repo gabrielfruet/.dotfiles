@@ -2,6 +2,7 @@ local gears = require('gears')
 local beautiful = require('beautiful')
 
 beautiful.init(gears.filesystem.get_themes_dir() .. "xresources/theme.lua")
+beautiful.font = 'JetBrainsMonoNerdFontMono-ExtraBold 9'
 THEME = beautiful.xresources
 
 local M = {}
