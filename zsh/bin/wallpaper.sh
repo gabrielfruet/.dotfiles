@@ -20,15 +20,23 @@ get_nitrogen_wallpaper_name() {
 set_with_feh() {
     feh --image-bg black --recursive --geometry 1200x600 --thumbnails --thumb-width 200 --thumb-height 200 --index-info '' --action "w= feh --bg-scale %f" "$WALLPAPERS" > /dev/null
     fehbgpath=$(awk 'FNR==2{print $4}' < ~/.fehbg | sed "s/'//g" ) 
-    echo fehbgpath
     wal -st -i "$fehbgpath" --backend colorz
     awesome-client "awesome.restart()"
 }
 
-while getopts 'fh' opt; do
+reload() {
+    fehbgpath=$(awk 'FNR==2{print $4}' < ~/.fehbg | sed "s/'//g" ) 
+    wal -st -i "$fehbgpath" --backend colorz
+}
+
+while getopts 'frh' opt; do
     case "$opt" in
         f)
             set_with_feh
+            exit 0
+            ;;
+        r)
+            reload
             exit 0
             ;;
         h|?)
