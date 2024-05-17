@@ -16,7 +16,6 @@ local popup = awful.popup {
     shape   = gears.shape.rounded_rect,
     placement = awful.placement.centered,
     border_width = 2,
-    opacity = defs.opacity,
     border_color = beautiful.border_color
 }
 
@@ -42,6 +41,7 @@ local function create_wallpaper_grid()
             widget  = wibox.container.margin
         },
         bg     = beautiful.bg_normal,
+        opacity = defs.opacity,
         widget = wibox.container.background
     }
 
