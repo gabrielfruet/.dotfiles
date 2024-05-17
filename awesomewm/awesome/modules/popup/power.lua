@@ -30,7 +30,7 @@ local popup = awful.popup {
     preferred_positions = 'bottom',
     maximum_width = 400,
     offset = { y = 5 },
-    opacity=0.8,
+    opacity=defs.opacity,
     widget = {}
 }
 

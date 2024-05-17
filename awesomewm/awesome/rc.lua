@@ -19,7 +19,6 @@ local modules_wibox = require('modules.wibox')
 -- Enable hotkeys help widget for VIM and other apps
 -- when client with a matching name is opened:
 require("awful.hotkeys_popup.keys")
-require('modules.preservetag')
 
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
@@ -525,3 +524,5 @@ client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_n
 -- Autostart applications
 --
 require('modules.autostart').run()
+require('modules.popup.wallpaper')
+require('modules.preserves')

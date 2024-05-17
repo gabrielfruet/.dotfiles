@@ -34,7 +34,7 @@ M.create = function (opts)
             gears.shape.rounded_rect(cr, width, height, 4)
         end,
         maximum_width = 400,
-        opacity=0.8,
+        opacity=defs.opacity,
         offset = { y = 5 , x = -5},
         widget = {}
     }
