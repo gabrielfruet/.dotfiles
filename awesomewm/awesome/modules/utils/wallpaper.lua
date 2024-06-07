@@ -13,11 +13,11 @@ end
 function M.set_wallpaper(wallpaper, reload)
     current_wallpaper_path = wallpaper
     M.preview_wallpaper(wallpaper)
-    if reload == true then
-        awful.spawn.easy_async_with_shell('wal -stn -i "' .. wallpaper .. '" --backend colorz', function ()
+    awful.spawn.easy_async_with_shell('wal -stn -i "' .. wallpaper .. '" --backend colorz', function ()
+        if reload == true then
             awesome.restart()
-        end)
-    end
+        end
+    end)
 end
 
 return M

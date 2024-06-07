@@ -10,10 +10,12 @@ require("awful.autofocus")
 local wibox = require("wibox")
 -- Theme handling library
 local beautiful = require("beautiful")
-local defs = require('modules.definitions')
 -- Notification library
 local naughty = require("naughty")
 local menubar = require("menubar")
+
+beautiful.init(gears.filesystem.get_themes_dir() .. "xresources/theme.lua")
+require('modules.definitions')
 local hotkeys_popup = require("awful.hotkeys_popup")
 local modules_wibox = require('modules.wibox')
 -- Enable hotkeys help widget for VIM and other apps
@@ -47,6 +49,7 @@ end
 
 -- {{{ Variable definitions
 -- Themes define colours, icons, font and wallpapers.
+
 
 -- This is used later as the default terminal and editor to run.
 terminal = "alacritty"

@@ -5,7 +5,10 @@ import=[
 ]
 
 [colors]
-transparent_background_colors=true
+transparent_background_colors=false
+
+[font]
+size=14
 
 [font.normal]
 family = 'JetBrainsMono Nerd Font'

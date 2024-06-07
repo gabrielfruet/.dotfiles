@@ -92,7 +92,7 @@ M.mytaglist =  function(s)
         {
             "Spotify",
             icon=awesomepath .. "/icons/song_icon.png",
-            layout=l.float
+            layout=l.tile
         },
         {
             "Discord",

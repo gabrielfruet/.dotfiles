@@ -27,7 +27,7 @@ local gradient = gears.color.create_linear_pattern{
 }
 
 beautiful.useless_gap = 8
-beautiful.border_width = 1
+beautiful.border_width = 2
 beautiful.tasklist_bg_normal = THEME.get_current_theme().background .. '00'
 
 --beautiful.taglist_bg_focus = THEME.get_current_theme().color10

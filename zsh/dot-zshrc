@@ -19,12 +19,13 @@ source $ZSH_PROFILE/sourcerer.zsh
 
 # Plugins
 plugins=(
-  git 
-  gnu-utils
-  zsh-autosuggestions
-  colored-man-pages
-  colorize
-  common-aliases
+    git 
+    gnu-utils
+    docker
+    zsh-autosuggestions
+    colored-man-pages
+    colorize
+    common-aliases
 )
 
 #ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
@@ -49,3 +50,4 @@ bindkey '^ ' autosuggest-accept
 eval "$(starship init zsh)"
 source $ZSH/oh-my-zsh.sh
 source $ZSH_CUSTOM/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source <(fzf --zsh)

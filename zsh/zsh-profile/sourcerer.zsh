@@ -8,4 +8,4 @@ source $CURRDIR/tmux.zsh
 source $CURRDIR/zoxide.zsh
 source $CURRDIR/aliases.zsh
 source $CURRDIR/pyenv.zsh
-#source $CURRDIR/pywal.zsh
+source $CURRDIR/docker.zsh

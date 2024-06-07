@@ -130,7 +130,7 @@ globalkeys = gears.table.join(
     awful.key({ modkey }, "t", function()
         popup.visible = not popup.visible
         if not popup.visible then
-            set_wallpaper(initial_wallpaper)
+            set_wallpaper(current_wallpaper_path)
         end
     end,
     {description = "show wallpaper selector", group = "custom"})
