@@ -169,26 +169,16 @@ M.mytasklist = function(s)
         filter  = awful.widget.tasklist.filter.currenttags,
         buttons = tasklist_buttons,
         style = {
-            shape = gears.shape.powerline,
-        },
-        layout = {
-            spacing = -13,
-            layout  = wibox.layout.fixed.horizontal
+            shape = gears.shape.circle
         },
         widget_template = {
             {
-                {
                     {
-                        id     = 'text_role',
-                        widget = wibox.widget.textbox,
+                        id     = 'icon_role',
+                        widget = wibox.widget.imagebox,
                     },
-                    left  = 20,
-                    right = 20,
+                    margins=5,
                     widget = wibox.container.margin,
-                },
-                widget = wibox.container.constraint,
-                width = 100,
-                strategy ='exact'
             },
             id     = 'background_role',
             widget = wibox.container.background,
@@ -255,7 +245,7 @@ M.wibox_init = function() awful.screen.connect_for_each_screen(function(s)
             {
                 s.mytasklist,
                 widget=wibox.container.margin,
-                left = 20,
+                left = 10,
             }
         },
         s.mytextclock,
