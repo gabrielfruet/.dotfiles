@@ -51,3 +51,4 @@ eval "$(starship init zsh)"
 source $ZSH/oh-my-zsh.sh
 source $ZSH_CUSTOM/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 source <(fzf --zsh)
+if [ -f "/home/fruet/.config/fabric/fabric-bootstrap.inc" ]; then . "/home/fruet/.config/fabric/fabric-bootstrap.inc"; fi

@@ -13,6 +13,7 @@ local menu_items = {
     {name='Log-out', icon=ICONSPATH .. '/log-out.png', cmd='awesome-client "awesome.quit()"', message='Are you sure you want to log-out?'},
     {name='Reboot', icon=ICONSPATH .. '/loop.png', cmd='systemctl reboot', message='Are you sure you want to reboot?'},
     {name='Suspend', icon=ICONSPATH .. '/moon.png', cmd='systemctl suspend', message='Are you sure you want to suspend?'},
+    {name='Hibernate', icon=ICONSPATH .. '/hibernation.png', cmd='systemctl hibernate', message='Are you sure you want to hibernate?'},
     {name='Lock', icon=ICONSPATH .. '/lock.png', cmd='awesome-client "require(\'awful\').spawn(\'i3lock\')"', message='Are you sure you want to lock?'},
     {name='Shutdown', icon=ICONSPATH .. '/power.png', cmd='systemctl poweroff', message='Are you sure you want to shutdown?'},
 }

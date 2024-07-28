@@ -87,7 +87,7 @@ M.mytaglist =  function(s)
         {
             "Folder",
             icon=awesomepath .. "/icons/folder2.png",
-            layout=l.magnifier
+            layout=l.tile
         },
         {
             "Spotify",
@@ -97,7 +97,7 @@ M.mytaglist =  function(s)
         {
             "Discord",
             icon=awesomepath .. "/icons/chat.png",
-            layout=l.magnifier
+            layout=l.tile
         },
     }, s)
     awful.tag({}, s, {})
