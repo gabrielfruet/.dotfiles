@@ -1,0 +1,542 @@
+% omz, git
+
+# git
+g
+
+# git add
+ga
+
+# git add --all
+gaa
+
+# git add --patch
+gapa
+
+# git add --update
+gau
+
+# git add --verbose
+gav
+
+# git apply
+gap
+
+# git apply --3way
+gapt
+
+# git branch
+gb
+
+# git branch -a
+gba
+
+# git branch -d
+gbd
+
+# git branch --no-color --merged | grep -vE "^([+]|\s($(git_main_branch)|$(git_develop_branch))\s*$)" | xargs git branch -d 2>/dev/null
+gbda
+
+# git branch -D
+gbD
+
+# git blame -b -w
+gbl
+
+# git branch --no-merged
+gbnm
+
+# git branch --remote
+gbr
+
+# git bisect
+gbs
+
+# git bisect bad
+gbsb
+
+# git bisect good
+gbsg
+
+# git bisect reset
+gbsr
+
+# git bisect start
+gbss
+
+# git commit -v
+gc
+
+# git commit -v --amend
+gc!
+
+# git commit -v --no-edit --amend
+gcn!
+
+# git commit -v -a
+gca
+
+# git commit -v -a --amend
+gca!
+
+# git commit -v -a --no-edit --amend
+gcan!
+
+# git commit -v -a -s --no-edit --amend
+gcans!
+
+# git commit -a -m
+gcam
+
+# git commit -a -s
+gcas
+
+# git commit -a -s -m
+gcasm
+
+# git commit -s -m
+gcsm
+
+# git checkout -b
+gcb
+
+# git config --list
+gcf
+
+# git clone --recurse-submodules
+gcl
+
+# git clone --recurse-submodules "$@" && cd "$(basename $_ .git)"
+gccd
+
+# git clean -id
+gclean
+
+# git reset --hard && git clean -dffx
+gpristine
+
+# git checkout $(git_main_branch)
+gcm
+
+# git checkout $(git_develop_branch)
+gcd
+
+# git commit -m
+gcmsg
+
+# git checkout
+gco
+
+# git checkout --recurse-submodules
+gcor
+
+# git shortlog -sn
+gcount
+
+# git cherry-pick
+gcp
+
+# git cherry-pick --abort
+gcpa
+
+# git cherry-pick --continue
+gcpc
+
+# git commit -S
+gcs
+
+# git diff
+gd
+
+# git diff --cached
+gdca
+
+# git diff --cached --word-diff
+gdcw
+
+# git describe --tags $(git rev-list --tags --max-count=1)
+gdct
+
+# git diff --staged
+gds
+
+# git diff-tree --no-commit-id --name-only -r
+gdt
+
+# git diff $@ ":(exclude)package-lock.json" ":(exclude)*.lock"
+gdnolock
+
+# git diff @{upstream}
+gdup
+
+# git diff -w $@ | view -
+gdv
+
+# git diff --word-diff
+gdw
+
+# git fetch
+gf
+
+# git fetch --all --prune
+gfa
+
+# git ls-files | grep
+gfg
+
+# git fetch origin
+gfo
+
+# git gui citool
+gg
+
+# git gui citool --amend
+gga
+
+# git push --force origin $(current_branch)
+ggf
+
+# git push --force-with-lease origin $(current_branch)
+ggfl
+
+# git pull origin $(current_branch)
+ggl
+
+# git push origin $(current_branch)
+ggp
+
+# ggl && ggp
+ggpnp
+
+# git pull origin "$(git_current_branch)"
+ggpull
+
+# ggu
+ggpur
+
+# git push origin "$(git_current_branch)"
+ggpush
+
+# git branch --set-upstream-to=origin/$(git_current_branch)
+ggsup
+
+# git pull --rebase origin $(current_branch)
+ggu
+
+# git push --set-upstream origin $(git_current_branch)
+gpsup
+
+# git help
+ghh
+
+# git update-index --assume-unchanged
+gignore
+
+# git ls-files -v | grep "^[[:lower:]]"
+gignored
+
+# git svn dcommit && git push github $(git_main_branch):svntrunk
+git-svn-dcommit-push
+
+# gitk --all --branches &!
+gk
+
+# gitk --all $(git log -g --pretty=%h) &!
+gke
+
+# git pull
+gl
+
+# git log --stat
+glg
+
+# git log --stat -p
+glgp
+
+# git log --graph
+glgg
+
+# git log --graph --decorate --all
+glgga
+
+# git log --graph --max-count=10
+glgm
+
+# git log --oneline --decorate
+glo
+
+# git log --graph --pretty='%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset'
+glol
+
+# git log --graph --pretty='%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset' --stat
+glols
+
+# git log --graph --pretty='%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ad) %C(bold blue)<%an>%Creset'
+glod
+
+# git log --graph --pretty='%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ad) %C(bold blue)<%an>%Creset' --date=short
+glods
+
+# git log --graph --pretty='%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset' --all
+glola
+
+# git log --oneline --decorate --graph
+glog
+
+# git log --oneline --decorate --graph --all
+gloga
+
+# git log --pretty=<format>
+glp
+
+# git merge
+gm
+
+# git merge origin/$(git_main_branch)
+gmom
+
+# git mergetool --no-prompt
+gmtl
+
+# git mergetool --no-prompt --tool=vimdiff
+gmtlvim
+
+# git merge upstream/$(git_main_branch)
+gmum
+
+# git merge --abort
+gma
+
+# git push
+gp
+
+# git push --dry-run
+gpd
+
+# git push --force-with-lease
+gpf
+
+# git push --force
+gpf!
+
+# git push origin --all && git push origin --tags
+gpoat
+
+# git pull --rebase
+gpr
+
+# git push upstream
+gpu
+
+# git push -v
+gpv
+
+# git remote
+gr
+
+# git remote add
+gra
+
+# git rebase
+grb
+
+# git rebase --abort
+grba
+
+# git rebase --continue
+grbc
+
+# git rebase $(git_develop_branch)
+grbd
+
+# git rebase -i
+grbi
+
+# git rebase $(git_main_branch)
+grbm
+
+# git rebase origin/$(git_main_branch)
+grbom
+
+# git rebase --onto
+grbo
+
+# git rebase --skip
+grbs
+
+# git revert
+grev
+
+# git reset
+grh
+
+# git reset --hard
+grhh
+
+# git reset origin/$(git_current_branch) --hard
+groh
+
+# git rm
+grm
+
+# git rm --cached
+grmc
+
+# git remote rename
+grmv
+
+# git remote remove
+grrm
+
+# git restore
+grs
+
+# git remote set-url
+grset
+
+# git restore --source
+grss
+
+# git restore --staged
+grst
+
+# cd "$(git rev-parse --show-toplevel || echo .)"
+grt
+
+# git reset --
+gru
+
+# git remote update
+grup
+
+# git remote -v
+grv
+
+# git status -sb
+gsb
+
+# git svn dcommit
+gsd
+
+# git show
+gsh
+
+# git submodule init
+gsi
+
+# git show --pretty=short --show-signature
+gsps
+
+# git svn rebase
+gsr
+
+# git status -s
+gss
+
+# git status
+gst
+
+# git stash push
+gsta
+
+# git stash save
+gsta
+
+# git stash apply
+gstaa
+
+# git stash clear
+gstc
+
+# git stash drop
+gstd
+
+# git stash list
+gstl
+
+# git stash pop
+gstp
+
+# git stash show --text
+gsts
+
+# git stash --include-untracked
+gstu
+
+# git stash --all
+gstall
+
+# git submodule update
+gsu
+
+# git switch
+gsw
+
+# git switch -c
+gswc
+
+# git switch $(git_main_branch)
+gswm
+
+# git switch $(git_develop_branch)
+gswd
+
+# git tag -s
+gts
+
+# git tag | sort -V
+gtv
+
+# gtl(){ git tag --sort=-v:refname -n -l ${1}* }; noglob gtl
+gtl
+
+# git update-index --no-assume-unchanged
+gunignore
+
+# git log -n 1 | grep -q -c "--wip--" && git reset HEAD~1
+gunwip
+
+# git pull --rebase
+gup
+
+# git pull --rebase -v
+gupv
+
+# git pull --rebase --autostash
+gupa
+
+# git pull --rebase --autostash -v
+gupav
+
+# git pull --rebase origin $(git_main_branch)
+gupom
+
+# git pull --rebase=interactive origin $(git_main_branch)
+gupomi
+
+# git pull upstream $(git_main_branch)
+glum
+
+# git pull upstream $(git_current_branch)
+gluc
+
+# git whatchanged -p --abbrev-commit --pretty=medium
+gwch
+
+# git add -A; git rm $(git ls-files --deleted) 2> /dev/null; git commit --no-verify --no-gpg-sign -m "--wip-- [skip ci]"
+gwip
+
+# git am
+gam
+
+# git am --continue
+gamc
+
+# git am --skip
+gams
+
+# git am --abort
+gama
+
+# git am --show-current-patch
+gamscp
+
