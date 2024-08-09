@@ -6,7 +6,7 @@ local defs = require('modules.definitions')
 local set_wallpaper = require('modules.utils.wallpaper').set_wallpaper
 local preview_wallpaper = require('modules.utils.wallpaper').preview_wallpaper
 
-local wallpaper_dir = os.getenv("HOME") .. "/wallpapers"
+local wallpaper_dir = os.getenv('HOME') .. '/wallpapers'
 local initial_wallpaper = current_wallpaper_path
 
 local popup = awful.popup {
