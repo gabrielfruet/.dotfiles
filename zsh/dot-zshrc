@@ -26,10 +26,16 @@ plugins=(
     colored-man-pages
     colorize
     common-aliases
+    alias-finder
 )
 
-#ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
-#ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=3'
+# ~/.zshrc
+
+zstyle ':omz:plugins:alias-finder' autoload yes # disabled by default
+zstyle ':omz:plugins:alias-finder' longer yes # disabled by default
+zstyle ':omz:plugins:alias-finder' exact yes # disabled by default
+zstyle ':omz:plugins:alias-finder' cheaper yes # disabled by default
+
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=11'
 
 # Auto suggestions
@@ -48,6 +54,7 @@ bindkey '^ ' autosuggest-accept
 # -----------WARNING-----------------
 # HAS TO BE SOURCED AT THE END OF THE FILE
 eval "$(starship init zsh)"
+eval "$(navi widget zsh)"
 source $ZSH/oh-my-zsh.sh
 source $ZSH_CUSTOM/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 source <(fzf --zsh)
