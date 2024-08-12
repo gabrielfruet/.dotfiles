@@ -235,6 +235,7 @@ M.wibox_init = function() awful.screen.connect_for_each_screen(function(s)
     s.mywibox = awful.wibar({ position = "top", screen = s , bg = beautiful.bg_normal .. defs.opacity_hex, height=25})
     -- Add widgets to the wibox
     s.mywibox:setup {
+        bg=defs.colors.unselected_bg,
         layout = wibox.layout.align.horizontal,
         expand = "none",
         { -- Left widgets
@@ -246,7 +247,7 @@ M.wibox_init = function() awful.screen.connect_for_each_screen(function(s)
                 s.mytasklist,
                 widget=wibox.container.margin,
                 left = 10,
-            }
+            },
         },
         s.mytextclock,
         { -- Right widgets
