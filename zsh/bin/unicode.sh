@@ -1,4 +1,4 @@
 #!/usr/bin/env sh
 
-echo -ne "\u$1" | xclip -selection clipboard
+echo -e "\u$1" | xclip -selection clipboard
 

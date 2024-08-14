@@ -11,7 +11,7 @@ M.opacity_hex = 'cc'
 M.opacity = 0.8
 M.colors = {}
 
-local main_color = THEME.get_current_theme().color1  -- Adjust the color as needed
+local main_color = THEME.get_current_theme().color3  -- Adjust the color as needed
 local shine_color = '#ffffff'
 
 -- Create a linear gradient pattern
