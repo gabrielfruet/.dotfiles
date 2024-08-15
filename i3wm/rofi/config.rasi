@@ -10,6 +10,7 @@
 /*****----- Configuration -----*****/
 configuration {
 	modi:                       "drun";
+    modes: "window,run,ssh,drun";
     show-icons:                 true;
     display-drun:               "";
     display-run:                "";
