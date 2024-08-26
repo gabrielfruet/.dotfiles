@@ -6,6 +6,7 @@ local beautiful = require('beautiful')
 local volhandler = require('modules.handlers.volume')
 local bathandler = require('modules.handlers.battery')
 local naughty = require('naughty')
+local defs = require('modules.definitions')
 ICONSPATH = os.getenv('HOME') .. '/.config/awesome/icons'
 
 local M = {}
@@ -13,14 +14,14 @@ local M = {}
 M.ram = function()
     local ramwidget = wibox.widget.textbox()
     vicious.cache(vicious.widgets.mem)
-    vicious.register(ramwidget, vicious.widgets.mem, "<b>RAM $1%</b>", 10)
+    vicious.register(ramwidget, vicious.widgets.mem, defs.text_pango_wrapper("RAM $1%"), 10)
     return ramwidget
 end
 
 M.cpu = function()
     local cpuwidget = wibox.widget.textbox()
     vicious.cache(vicious.widgets.cpu)
-    vicious.register(cpuwidget, vicious.widgets.cpu, "<b>CPU $1%</b>", 10)
+    vicious.register(cpuwidget, vicious.widgets.cpu, defs.text_pango_wrapper("CPU $1%"), 10)
     return cpuwidget
 end
 
@@ -41,7 +42,7 @@ M.bat = function(opts)
     for k,v in pairs(icons) do
         icons[k] = gears.color.recolor_image(
             v,
-            beautiful.fg_normal
+            defs.colors.unselected_fg
         )
     end
 
@@ -115,7 +116,7 @@ M.vol = function (opts)
     for k,v in pairs(icons) do
         icons[k] = gears.color.recolor_image(
             v,
-            beautiful.fg_normal
+            defs.colors.unselected_fg
         )
     end
 
@@ -128,9 +129,10 @@ M.vol = function (opts)
                 widget=wibox.widget.imagebox
             },
             widget=wibox.container.margin,
-            bottom=6,
-            top=6,
-            right=6,
+            left = 0,
+            right = 5,
+            bottom = 7,
+            top = 5,
         },
         {
             markup='',
@@ -147,9 +149,9 @@ M.vol = function (opts)
 
         if volpercent == MUTED then
             img_widget.image = icons.muted
-            text_widget.markup = '<b>Muted</b>'
+            text_widget.markup = defs.text_pango_wrapper('Muted')
         else
-            text_widget.markup = '<b>' .. tostring(volpercent) .. '%' .. '</b>'
+            text_widget.markup = defs.text_pango_wrapper(tostring(volpercent) .. '%')
             if volpercent == 0 then
                 img_widget.image = icons.novol
             elseif volpercent < 50 then
@@ -181,14 +183,14 @@ end
 
 M.power = function()
     local powericon = ICONSPATH .. '/power.png'
-    powericon = gears.color.recolor_image(powericon, beautiful.fg_normal)
+    powericon = gears.color.recolor_image(powericon, defs.colors.unselected_fg)
     local widget = wibox.widget {
         {
             image = powericon,
             resize = true,
             widget = wibox.widget.imagebox
         },
-        margins = 4,
+        margins = 2,
         widget = wibox.container.margin
     }
 

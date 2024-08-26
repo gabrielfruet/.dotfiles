@@ -19,7 +19,7 @@ local menu_items = {
 }
 
 local function text_markup(text)
-    return text
+    return string.format('<big><b>%s</b></big>',text)
 end
 
 local popup = awful.popup {

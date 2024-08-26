@@ -2,16 +2,19 @@ local gears = require('gears')
 local beautiful = require('beautiful')
 
 beautiful.init(gears.filesystem.get_themes_dir() .. "xresources/theme.lua")
-beautiful.font = 'JetBrainsMonoNerdFontMono-ExtraBold 9'
+-- beautiful.font = 'JetBrainsMonoNerdFontMono-ExtraBold 9'
+beautiful.font = 'Roboto 9'
 THEME = beautiful.xresources
 
 local M = {}
 
-M.opacity_hex = 'cc'
-M.opacity = 0.8
+-- M.opacity_hex = 'cc'
+M.opacity_hex = 'b4'
+M.opacity = 0.7
+-- M.opacity = 0.8
 M.colors = {}
 
-local main_color = THEME.get_current_theme().color3  -- Adjust the color as needed
+local main_color = THEME.get_current_theme().color13 -- Adjust the color as needed
 local shine_color = '#ffffff'
 
 -- Create a linear gradient pattern
@@ -26,8 +29,12 @@ local gradient = gears.color.create_linear_pattern{
     }
 }
 
+M.text_pango_wrapper = function (text)
+    return string.format('<span foreground=\'%s\'><big><b>%s</b></big></span>', M.colors.unselected_fg, text)
+end
+
 beautiful.useless_gap = 8
-beautiful.border_width = 2
+beautiful.border_width = 1
 beautiful.tasklist_bg_normal = THEME.get_current_theme().background .. '00'
 
 --beautiful.taglist_bg_focus = THEME.get_current_theme().color10
@@ -36,7 +43,7 @@ beautiful.tasklist_bg_focus = gradient
 
 M.colors.selected_bg = gradient
 M.colors.selected_fg = THEME.get_current_theme().background
-M.colors.unselected_fg = THEME.get_current_theme().foreground
+M.colors.unselected_fg = '#eeeec0'
 M.colors.unselected_bg = THEME.get_current_theme().background
 M.colors.red = '#cc3333'
 

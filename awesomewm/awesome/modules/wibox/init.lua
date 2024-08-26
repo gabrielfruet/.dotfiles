@@ -134,8 +134,8 @@ M.mytaglist =  function(s)
             id = 'background_role',
             widget = wibox.container.background,
             create_callback = function(self, tag, index, tags)
-                SELECTED_COLOR = THEME.get_current_theme().background
-                UNSELECTED_COLOR = THEME.get_current_theme().foreground
+                SELECTED_COLOR = defs.colors.selected_fg
+                UNSELECTED_COLOR = defs.colors.unselected_fg
                 local img_widget = self:get_children_by_id('icon_role')[1]
                 local img = tag.icon
                 tag:connect_signal('property::selected', function()
@@ -149,8 +149,8 @@ M.mytaglist =  function(s)
                 end
             end,
             update_callback = function(self, tag, index, tags)
-                SELECTED_COLOR = THEME.get_current_theme().background
-                UNSELECTED_COLOR = THEME.get_current_theme().foreground
+                SELECTED_COLOR = defs.colors.selected_fg
+                UNSELECTED_COLOR = defs.colors.unselected_fg
                 local img_widget = self:get_children_by_id('icon_role')[1]
                 local img = gears.surface.load_uncached(tag.icon)
                 img_widget.image = img
@@ -168,17 +168,20 @@ M.mytasklist = function(s)
         screen  = s,
         filter  = awful.widget.tasklist.filter.currenttags,
         buttons = tasklist_buttons,
-        style = {
-            shape = gears.shape.circle
-        },
+        -- style = {
+        --     shape = gears.shape.circle
+        -- },
         widget_template = {
             {
+                {
                     {
                         id     = 'icon_role',
                         widget = wibox.widget.imagebox,
                     },
-                    margins=5,
-                    widget = wibox.container.margin,
+                    widget = wibox.layout.fixed.horizontal,
+                },
+                margins=5,
+                widget = wibox.container.margin,
             },
             id     = 'background_role',
             widget = wibox.container.background,
@@ -209,7 +212,7 @@ M.wibox_init = function() awful.screen.connect_for_each_screen(function(s)
 
     -- Create a promptbox for each screen
     s.mypromptbox = awful.widget.prompt()
-    s.mytextclock = wibox.widget.textclock()
+    s.mytextclock = wibox.widget.textclock(defs.text_pango_wrapper('%A %b %d, %H:%M'))
     -- Create a promptbox for each screen
     -- Create an imagebox widget which will contain an icon indicating which layout we're using.
     -- We need one layoutbox per screen.
@@ -264,7 +267,7 @@ M.wibox_init = function() awful.screen.connect_for_each_screen(function(s)
                     widget=wibox.widget.separator,
                     orientation="vertical",
                     thickness=2,
-                    span_ratio=0.5
+                    span_ratio=0.6
                 }
             },
             {

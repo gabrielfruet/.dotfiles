@@ -39,7 +39,7 @@ M.create = function (opts)
         widget = {}
     }
 
-    local options_widget = { 
+    local options_widget = {
         layout = wibox.layout.flex.horizontal,
     }
 
@@ -50,7 +50,7 @@ M.create = function (opts)
                     {
                         id = 'text',
                         align = 'center',
-                        text = v.text,
+                        markup = defs.text_pango_wrapper(v.text),
                         widget = wibox.widget.textbox
                     },
                     margins=8,

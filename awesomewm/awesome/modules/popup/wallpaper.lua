@@ -40,7 +40,7 @@ local function create_wallpaper_grid()
             margins = 10,
             widget  = wibox.container.margin
         },
-        bg     = beautiful.bg_normal,
+        bg = defs.colors.unselected_bg .. defs.opacity_hex,
         opacity = defs.opacity,
         widget = wibox.container.background
     }

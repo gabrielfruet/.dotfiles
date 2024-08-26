@@ -15,7 +15,7 @@ local naughty = require("naughty")
 local menubar = require("menubar")
 
 beautiful.init(gears.filesystem.get_themes_dir() .. "xresources/theme.lua")
-require('modules.definitions')
+local defs = require('modules.definitions')
 local hotkeys_popup = require("awful.hotkeys_popup")
 local modules_wibox = require('modules.wibox')
 -- Enable hotkeys help widget for VIM and other apps
@@ -109,6 +109,12 @@ menubar.utils.terminal = terminal -- Set the terminal for applications that requ
 
 -- Keyboard map indicator and switcher
 mykeyboardlayout = awful.widget.keyboardlayout()
+mykeyboardlayout.widget:connect_signal("widget::redraw_needed", function()
+    local current_layout = mykeyboardlayout.widget:get_text()
+    mykeyboardlayout.widget:set_markup(defs.text_pango_wrapper(current_layout))
+end)
+
+mykeyboardlayout.widget:emit_signal("widget::redraw_needed")
 
 kbdcfg = {}
 kbdcfg.cmd = "setxkbmap"
@@ -415,7 +421,7 @@ awful.rules.rules = {
                      keys = clientkeys,
                      buttons = clientbuttons,
                      screen = awful.screen.preferred,
-                     placement = awful.placement.no_overlap+awful.placement.no_offscreen
+                     placement = awful.placement.centered+awful.placement.no_overlap+awful.placement.no_offscreen
      }
     },
 

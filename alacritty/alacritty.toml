@@ -13,22 +13,30 @@ size=14
 [font.normal]
 family = 'JetBrainsMono Nerd Font'
 style = 'Bold'
+# family = 'FiraCode Nerd Font'
+# style = 'Medium'
 
 [font.bold]
 family = 'JetBrainsMono Nerd Font'
 style = 'Extrabold'
+# family = 'FiraCode Nerd Font'
+# style = 'Bold'
 
 [font.italic]
+# family = 'FiraCode Nerd Font'
+# style = 'Normal'
 family = 'JetBrainsMono Nerd Font'
 style = 'Bold Italic'
 
 [font.bold_italic]
 family = 'JetBrainsMono Nerd Font'
 style = 'Extrabold Italic'
+# family = 'FiraCode Nerd Font'
+# style = 'Bold'
 
 [window]
 decorations = "Full"
-opacity = 0.8
+opacity = 0.7
 
 [window.dimensions]
 columns = 72
