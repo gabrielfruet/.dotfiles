@@ -33,6 +33,7 @@ M.create = function (opts)
         shape = function(cr, width, height)
             gears.shape.rounded_rect(cr, width, height, 4)
         end,
+        bg = defs.colors.unselected_bg,
         maximum_width = 400,
         opacity=defs.opacity,
         offset = { y = 5 , x = -5},

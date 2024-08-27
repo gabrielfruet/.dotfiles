@@ -185,6 +185,10 @@ root.buttons(gears.table.join(
 ))
 -- }}}
 
+-- local my_help = hotkeys_popup.widget {
+--     font = 'Roboto 11'
+-- }
+
 -- {{{ Key bindings
 globalkeys = gears.table.join(
     awful.key({ modkey,           }, "d", function () awful.spawn.with_shell('rofi -show drun') end,

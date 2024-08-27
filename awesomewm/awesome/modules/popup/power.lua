@@ -31,7 +31,8 @@ local popup = awful.popup {
     preferred_positions = 'bottom',
     maximum_width = 400,
     offset = { y = 5 },
-    opacity=defs.opacity,
+    bg = defs.colors.unselected_bg,
+    --opacity=defs.opacity,
     widget = {}
 }
 
@@ -138,7 +139,9 @@ for _, item in ipairs(menu_items) do
             widget = wibox.container.margin,
             margins=8,
         },
-        widget = wibox.container.background
+        widget = wibox.container.background,
+        bg=defs.colors.unselected_bg,
+        fg=defs.colors.unselected_fg,
     }
 
     local iconwidget = row:get_children_by_id('icon')[1]

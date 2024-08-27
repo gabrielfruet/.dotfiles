@@ -6,9 +6,15 @@ command_timeout=20000
 format = "${custom.start}$all$character"
 
 # Replace the "❯" symbol in the prompt with "➜"
-[character] # The name of the module we are configuring is "character"
-success_symbol = "[➜](bold green)" # The "success_symbol" segment is being set to "➜" with the color "bold green"
-error_symbol = "[✘](bold red)"
+# [character] # The name of the module we are configuring is "character"
+# success_symbol = "[➜](bold green)" # The "success_symbol" segment is being set to "➜" with the color "bold green"
+# error_symbol = "[✘](bold red)"
+
+[character]
+success_symbol = "[❯](green)"
+error_symbol = "[❯](red)"
+vimcmd_symbol = "[❮](green)"
+
 
 # Disable the package module, hiding it from the prompt completely
 #[package]

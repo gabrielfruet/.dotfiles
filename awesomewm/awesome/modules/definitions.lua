@@ -4,13 +4,16 @@ local beautiful = require('beautiful')
 beautiful.init(gears.filesystem.get_themes_dir() .. "xresources/theme.lua")
 -- beautiful.font = 'JetBrainsMonoNerdFontMono-ExtraBold 9'
 beautiful.font = 'Roboto 9'
+beautiful.hotkeys_font = 'Roboto 12'
+beautiful.hotkeys_description_font = 'Roboto 12'
 THEME = beautiful.xresources
 
 local M = {}
 
 -- M.opacity_hex = 'cc'
-M.opacity_hex = 'b4'
-M.opacity = 0.7
+-- M.opacity_hex = '7F'
+M.opacity_hex = '7F'
+M.opacity = 1.0
 -- M.opacity = 0.8
 M.colors = {}
 
@@ -44,7 +47,7 @@ beautiful.tasklist_bg_focus = gradient
 M.colors.selected_bg = gradient
 M.colors.selected_fg = THEME.get_current_theme().background
 M.colors.unselected_fg = '#eeeec0'
-M.colors.unselected_bg = THEME.get_current_theme().background
+M.colors.unselected_bg = THEME.get_current_theme().background .. M.opacity_hex
 M.colors.red = '#cc3333'
 
 return M

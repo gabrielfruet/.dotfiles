@@ -131,7 +131,7 @@ M.vol = function (opts)
             widget=wibox.container.margin,
             left = 0,
             right = 5,
-            bottom = 7,
+            bottom = 5,
             top = 5,
         },
         {
