@@ -37,9 +37,18 @@ local function create_wallpaper_grid()
 
     local grid_widget = wibox.widget{
         {
-            grid,
-            margins = 10,
-            widget  = wibox.container.margin
+            {
+                markup=defs.text_pango_wrapper('Wallpaper selector'),
+                widget = wibox.widget.textbox,
+                align='center',
+                font='Roboto 12'
+            },
+            {
+                grid,
+                margins = 10,
+                widget  = wibox.container.margin
+            },
+            widget = wibox.layout.fixed.vertical
         },
         bg = defs.colors.unselected_bg,
         opacity = defs.opacity,
