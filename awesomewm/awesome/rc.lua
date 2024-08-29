@@ -191,7 +191,7 @@ root.buttons(gears.table.join(
 
 -- {{{ Key bindings
 globalkeys = gears.table.join(
-    awful.key({ modkey,           }, "d", function () awful.spawn.with_shell('rofi -show drun') end,
+    awful.key({ modkey,           }, "d", function () awful.spawn.with_shell('rofi -show drun -theme ~/.config/rofi/dmenu/style-1.rasi') end,
         {description = "Rofi launch", group = "client"}),
     awful.key({ modkey,           }, "Shift_R", function () kbdcfg.switch() end,
         {description = "Switch keyboard layout", group = "client"}),
@@ -279,7 +279,7 @@ globalkeys = gears.table.join(
     -- Prompt
     --awful.key({ modkey },            "r",     function () awful.screen.focused().mypromptbox:run() end,
               --{description = "run prompt", group = "launcher"}),
-    awful.key({ modkey,           }, "r", function () awful.spawn.with_shell('rofi -show run') end,
+    awful.key({ modkey,           }, "r", function () awful.spawn.with_shell('rofi -show run ') end,
         {description = "Run arbitrary command", group = "launcher"}),
 
     awful.key({ modkey }, "x",
