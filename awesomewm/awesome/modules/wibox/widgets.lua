@@ -48,7 +48,7 @@ M.bat = function(opts)
 
     opts = opts ~= nil and opts or {}
 
-    local markup = [[<span color='%s'><b>%s</b></span>]]
+    local markup = [[<span color='%s'><big><b>%s</b></big></span>]]
     local mybatwidget = wibox.widget{
         {
             {
@@ -75,10 +75,10 @@ M.bat = function(opts)
             color="#00ff00"
             icon = icons.charg
         elseif percent > 95 then
-            color = THEME.get_current_theme().foreground
+            color = defs.colors.unselected_fg
             icon = icons.full
         elseif percent > 60 then
-            color = THEME.get_current_theme().foreground
+            color = defs.colors.unselected_fg
             icon = icons.ok
         elseif percent > 40 then
             color = '#ffff00'
@@ -99,6 +99,7 @@ M.bat = function(opts)
         call_now=true,
         callback=bat_update
     }
+    bat_update()
     return mybatwidget
 end
 
