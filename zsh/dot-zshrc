@@ -1,5 +1,8 @@
 #!/bin/env zsh
 
+set -o vi
+KEYTIMEOUT=1
+
 # Path configuration
 export PATH="~/bin:/usr/local/bin:$PATH"
 export PATH="$PATH:/usr/local/go/bin"
