@@ -16,6 +16,10 @@ local confirm_options = {
 
 local noop = function () end
 
+local function text_markup(text)
+    return string.format('<big><b>%s</b></big>',text)
+end
+
 local defaults = {
     message = 'Do you really want to do this?',
     on_confirm = noop,
@@ -35,7 +39,7 @@ M.create = function (opts)
         end,
         bg = defs.colors.unselected_bg,
         maximum_width = 400,
-        opacity=defs.opacity,
+        -- opacity=defs.opacity,
         offset = { y = 5 , x = -5},
         widget = {}
     }
@@ -51,13 +55,13 @@ M.create = function (opts)
                     {
                         id = 'text',
                         align = 'center',
-                        markup = defs.text_pango_wrapper(v.text),
+                        markup = text_markup(v.text),
                         widget = wibox.widget.textbox
                     },
                     margins=8,
                     widget=wibox.container.margin
                 },
-                bg = defs.colors.unselected_bg,
+                bg = nil,
                 fg = defs.colors.unselected_fg,
                 id = 'bg_role',
                 shape = gears.shape.rounded_rect,
@@ -75,7 +79,7 @@ M.create = function (opts)
         end)
 
         wi:connect_signal("mouse::leave", function(c)
-            wibg:set_bg(defs.colors.unselected_bg)
+            wibg:set_bg(nil)
             wibg:set_fg(defs.colors.unselected_fg)
         end)
 
@@ -101,7 +105,7 @@ M.create = function (opts)
         {
             {
                 {
-                    text=opts.message,
+                    markup=defs.text_pango_wrapper(opts.message),
                     widget=wibox.widget.textbox
                 },
                 widget = wibox.container.margin,

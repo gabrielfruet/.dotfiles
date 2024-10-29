@@ -140,7 +140,7 @@ for _, item in ipairs(menu_items) do
             margins=8,
         },
         widget = wibox.container.background,
-        bg=defs.colors.unselected_bg,
+        bg=nil,
         fg=defs.colors.unselected_fg,
     }
 
@@ -155,7 +155,7 @@ for _, item in ipairs(menu_items) do
     end)
     row:connect_signal("mouse::leave", function(c)
         if not popup.visible then return end
-        c:set_bg(defs.colors.unselected_bg)
+        c:set_bg(nil)
         c:set_fg(defs.colors.unselected_fg)
         iconwidget.image = icon.unselected
     end)
