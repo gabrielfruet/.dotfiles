@@ -44,6 +44,7 @@ ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=11'
 # Auto suggestions
 bindkey '^ ' autosuggest-accept
 
+
 # User configuration (Commented configurations are not active but kept for reference)
 # export MANPATH="/usr/local/man:$MANPATH"
 # export LANG=en_US.UTF-8
@@ -62,4 +63,10 @@ eval "$(opam env)"
 source $ZSH/oh-my-zsh.sh
 source $ZSH_CUSTOM/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 source <(fzf --zsh)
+
+if [ -n "$VIRTUAL_ENV" ]; then
+    echo "Sourcing venv"
+    . "$VIRTUAL_ENV/bin/activate"
+fi
+
 if [ -f "/home/fruet/.config/fabric/fabric-bootstrap.inc" ]; then . "/home/fruet/.config/fabric/fabric-bootstrap.inc"; fi
