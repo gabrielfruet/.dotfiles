@@ -1,4 +1,4 @@
-import=[
+general.import=[
     #"~/.config/alacritty/themes/themes/tender.toml",
     "~/.config/alacritty/summer.toml",
     #"~/.cache/wal/colors-alacritty.toml"
