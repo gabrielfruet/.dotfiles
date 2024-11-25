@@ -8,6 +8,8 @@ GREEN='\033[92m'
 PURPLE='\e[0;35m'
 RESET='\033[0m'
 
+GIT_BRANCH_UNICODE="$(echo -e "$PURPLE $RESET")"
+
 PATH_POSITION=3
 
 UNCOMITTED_LABEL=$(echo -e "${RED}[Uncommitted]${RESET}")
@@ -28,7 +30,7 @@ get_branch() {
 rank_and_label_repos() {
     while read -r repo; do
         cd "$repo" || continue
-        git_output=$(git status --porcelain --branch 2>/dev/null)
+        git_output=$(git status --porcelain --branch 2>/dev/null || echo "")
 
         if [[ -z $git_output ]]; then
             # Skip non-Git directories or inaccessible repos
@@ -73,7 +75,7 @@ main() {
 
   # Use fzf to select a repository
   export FZF_GIT_COLOR=auto
-  selected_repo=$(echo "$repos" | rank_and_label_repos | fzf --preview "cd {$PATH_POSITION} && git status | bat" --preview-window=up:30% --layout=reverse --ansi)
+  selected_repo=$(echo "$repos" | rank_and_label_repos | fzf --preview "cd {$PATH_POSITION} && git status | bat" --preview-window=up:40% --layout=reverse --ansi)
   if [[ -n $selected_repo ]]; then
       repo_path=$(echo "$selected_repo" | awk "{print \$$PATH_POSITION}")
       if [[ -z $repo_path ]]; then
