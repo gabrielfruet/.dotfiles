@@ -23,7 +23,7 @@ find_git_repos() {
 }
 
 get_branch() {
-    git branch | sed 's/\**\s*//' | head -n 1
+    git branch | head -n 1 | sed 's/\**\s*//' 
 }
 
 # Function to rank and label repositories
@@ -75,7 +75,16 @@ main() {
 
   # Use fzf to select a repository
   export FZF_GIT_COLOR=auto
-  selected_repo=$(echo "$repos" | rank_and_label_repos | fzf --preview "cd {$PATH_POSITION} && git status | bat" --preview-window=up:40% --layout=reverse --ansi)
+  selected_repo=$(echo "$repos" \
+      | rank_and_label_repos \
+      | fzf \
+        --preview "cd {$PATH_POSITION} && git -c color.status=always status" \
+        --preview-window=up:40% \
+        --bind=ctrl-u:preview-half-page-up \
+        --bind=ctrl-d:preview-half-page-down \
+        --layout=reverse \
+        --ansi\
+    )
   if [[ -n $selected_repo ]]; then
       repo_path=$(echo "$selected_repo" | awk "{print \$$PATH_POSITION}")
       if [[ -z $repo_path ]]; then

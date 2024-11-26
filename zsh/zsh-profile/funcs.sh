@@ -27,7 +27,7 @@ git_global_run() {
     
     # Check if the command is not empty
     if [[ -z "$cmd" ]]; then
-        echo "Error: globalgit.sh show returned an empty output."
+        echo "Did not select any command"
         return 1
     fi
     
