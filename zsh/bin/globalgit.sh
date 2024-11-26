@@ -83,31 +83,38 @@ main() {
           exit 1
       fi
 
-      action=$(gum filter "push" "pull" "change directory" "lazygit" --placeholder="action...")
+      action=$(gum filter "push" "pull" "go to directory" "lazygit" --placeholder="action...")
 
       if [[ -z $action ]]; then
           echo "No action selected."
           exit 1
       fi
 
+      cmd=""
+
       case "$action" in
         "push")
-            cd "$repo_path" || exit 1 && echo "pushing..." ; git push
+            cmd="cd \"$repo_path\" || exit 1 && echo \"pushing...\" ; git push"
             ;;
         "pull")
-            cd "$repo_path" || exit 1 && echo "pulling..." ; git pull
+            cmd="cd \"$repo_path\" || exit 1 && echo \"pulling...\" ; git pull"
             ;;
         "go to directory")
-            cd "$repo_path" || exit 1
+            cmd="cd \"$repo_path\" || exit 1"
             ;;
         "lazygit")
-            cd "$repo_path" || exit 1 && lazygit
+            cmd="cd \"$repo_path\" || exit 1 && lazygit"
             ;;
       esac
+      if [[ "$1" = "echo" ]]; then
+          echo "$cmd"
+      else
+          eval "$cmd"
+      fi
 
       cd "$repo_path" || exit
   fi
 }
 
-main
+main "$1"
 
