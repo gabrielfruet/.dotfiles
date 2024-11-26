@@ -73,8 +73,6 @@ main() {
         exit 1
     fi
 
-  # Use fzf to select a repository
-  export FZF_GIT_COLOR=auto
   selected_repo=$(echo "$repos" \
       | rank_and_label_repos \
       | fzf \
