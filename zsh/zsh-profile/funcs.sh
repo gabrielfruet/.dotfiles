@@ -19,19 +19,3 @@ vnv() {
         fi
     fi
 }
-
-git_global_run() {
-    # Capture the output of `globalgit.sh show`
-    local cmd
-    cmd=$(globalgit.sh echo)
-    
-    # Check if the command is not empty
-    if [[ -z "$cmd" ]]; then
-        echo "Did not select any command"
-        return 1
-    fi
-    
-    # Execute the command in the current shell
-    eval "$cmd"
-}
-

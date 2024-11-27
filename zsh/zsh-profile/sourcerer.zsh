@@ -11,3 +11,4 @@ source $CURRDIR/pyenv.zsh
 source $CURRDIR/docker.zsh
 source $HOME/.env
 source $CURRDIR/gum_colors.sh
+source $CURRDIR/globalgit.sh

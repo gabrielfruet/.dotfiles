@@ -1,5 +1,6 @@
 #!/bin/env bash
 
+TIME_DIFF_SECONDS_THRESH=$((60*60*6))
 
 BLUE='\033[94m'
 RED='\033[91m'
@@ -17,6 +18,44 @@ UNPUSHED_LABEL=$(echo -e "${BLUE}[Behind]${RESET}")
 UNPULLED_LABEL=$(echo -e "${YELLOW}[Ahead]${RESET}")
 CLEAN_LABEL=$(echo -e "${GREEN}[Clean]${RESET}")
 
+fetch_repos() {
+    pids=()
+    repos="$1"
+
+    for repo in $repos; do
+        fetch_head_file="$repo/.git/FETCH_HEAD"
+
+        if [ ! -f "$fetch_head_file" ]; then
+            echo "Error: FETCH_HEAD not found. Is this a valid Git repository?"
+            continue
+        fi
+
+        fetch_head_time=$(stat -c %Y "$fetch_head_file")
+        current_time=$(date +%s)
+
+        time_diff_seconds=$((current_time - fetch_head_time))
+
+        if [ $time_diff_seconds -gt $TIME_DIFF_SECONDS_THRESH ]; then
+            days=$((time_diff_seconds/(24*60*60)))
+            daystr=""
+            if [ $days -gt 0 ]; then
+                daystr="$days days"
+            fi
+            echo "The last 'git fetch' was more than the threshold: $daystr $(date -d @$time_diff_seconds -u +"%H:%M:%S") ago."
+            echo "Fetching $repo"
+            cd "$repo" || exit && git fetch &
+            pids+=($!)
+        fi
+    done
+
+    echo "${pids[@]}"
+
+    # wait for all pids
+    for pid in "${pids[@]}"; do
+        wait "$pid" || echo "Some when fetching $repo"
+    done
+}
+
 # Find all Git repositories under the home directory
 find_git_repos() {
     find ~/dev ~/docs ~/.dotfiles -type d -name ".git" -exec dirname {} \;
@@ -30,6 +69,7 @@ get_branch() {
 rank_and_label_repos() {
     while read -r repo; do
         cd "$repo" || continue
+
         git_output=$(git status --porcelain --branch 2>/dev/null || echo "")
 
         if [[ -z $git_output ]]; then
@@ -66,16 +106,18 @@ rank_and_label_repos() {
 }
 
 # Main function
-main() {
+_git_global() {
     repos=$(find_git_repos)
     if [[ -z $repos ]]; then
         echo "No Git repositories found under the home directory."
         exit 1
     fi
 
-  selected_repo=$(echo "$repos" \
-      | rank_and_label_repos \
-      | fzf \
+    fetch_repos "$repos"
+
+    selected_repo=$(echo "$repos" \
+        | rank_and_label_repos \
+        | fzf \
         --preview "cd {$PATH_POSITION} && git -c color.status=always status" \
         --preview-window=up:40% \
         --bind=ctrl-u:preview-half-page-up \
@@ -97,31 +139,20 @@ main() {
           exit 1
       fi
 
-      cmd=""
-
       case "$action" in
         "push")
-            cmd="cd \"$repo_path\" || exit 1 && echo \"pushing...\" ; git push"
+            cd "$repo_path" || exit 1 && echo "pushing..." ; git push
             ;;
         "pull")
-            cmd="cd \"$repo_path\" || exit 1 && echo \"pulling...\" ; git pull"
+            cd "$repo_path" || exit 1 && echo "pulling..." ; git pull
             ;;
         "go to directory")
-            cmd="cd \"$repo_path\" || exit 1"
+            cd "$repo_path" || exit 1
             ;;
         "lazygit")
-            cmd="cd \"$repo_path\" || exit 1 && lazygit"
+            cd "$repo_path" || exit 1 && lazygit
             ;;
       esac
-      if [[ "$1" = "echo" ]]; then
-          echo "$cmd"
-      else
-          eval "$cmd"
-      fi
-
-      cd "$repo_path" || exit
   fi
 }
-
-main "$1"
 
