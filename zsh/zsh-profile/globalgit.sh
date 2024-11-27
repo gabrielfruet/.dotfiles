@@ -1,5 +1,8 @@
 #!/bin/env bash
 
+# doesnt print the [1]+done of a bg process
+set +m
+
 TIME_DIFF_SECONDS_THRESH=$((60*60*6))
 
 BLUE='\033[94m'
@@ -18,17 +21,16 @@ UNPUSHED_LABEL=$(echo -e "${BLUE}[Behind]${RESET}")
 UNPULLED_LABEL=$(echo -e "${YELLOW}[Ahead]${RESET}")
 CLEAN_LABEL=$(echo -e "${GREEN}[Clean]${RESET}")
 
-fetch_repos() {
+_fetch_one_repo() {
+    cd "$1" || exit && git fetch && echo "${GREEN}Done fetching$RESET $1"
+}
+
+_fetch_multiple_repos() {
     pids=()
     repos="$1"
 
-    for repo in $repos; do
+    while IFS= read -r repo; do
         fetch_head_file="$repo/.git/FETCH_HEAD"
-
-        if [ ! -f "$fetch_head_file" ]; then
-            echo "Error: FETCH_HEAD not found. Is this a valid Git repository?"
-            continue
-        fi
 
         fetch_head_time=$(stat -c %Y "$fetch_head_file")
         current_time=$(date +%s)
@@ -37,18 +39,18 @@ fetch_repos() {
 
         if [ $time_diff_seconds -gt $TIME_DIFF_SECONDS_THRESH ]; then
             days=$((time_diff_seconds/(24*60*60)))
-            daystr=""
-            if [ $days -gt 0 ]; then
-                daystr="$days days"
-            fi
-            echo "The last 'git fetch' was more than the threshold: $daystr $(date -d @$time_diff_seconds -u +"%H:%M:%S") ago."
-            echo "Fetching $repo"
-            cd "$repo" || exit && git fetch &
+            daystr=$(test $days -gt 0  && echo "$days days" || echo "")
+            
+            echo "Repository $BLUE$repo$RESET"
+            echo "${YELLOW}The last 'git fetch' was more than the threshold:$RESET $daystr $(date -d @$time_diff_seconds -u +"%H:%M:%S") ago."
+
+            _fetch_one_repo "$repo" &
+
             pids+=($!)
         fi
-    done
+    done <<< "$repos"
 
-    echo "${pids[@]}"
+    #echo "${pids[@]}"
 
     # wait for all pids
     for pid in "${pids[@]}"; do
@@ -57,16 +59,16 @@ fetch_repos() {
 }
 
 # Find all Git repositories under the home directory
-find_git_repos() {
+_find_git_repos() {
     find ~/dev ~/docs ~/.dotfiles -type d -name ".git" -exec dirname {} \;
 }
 
-get_branch() {
+_git_get_branch() {
     git branch | head -n 1 | sed 's/\**\s*//' 
 }
 
 # Function to rank and label repositories
-rank_and_label_repos() {
+_label_repos() {
     while read -r repo; do
         cd "$repo" || continue
 
@@ -99,7 +101,7 @@ rank_and_label_repos() {
             label="$CLEAN_LABEL"
         fi
 
-        branch=$(echo -e "$PURPLE$(get_branch)$RESET")
+        branch=$(echo -e "$PURPLE$(_git_get_branch)$RESET")
         # Output rank, label, and repository path
         echo "$label $branch $repo"
     done
@@ -107,19 +109,20 @@ rank_and_label_repos() {
 
 # Main function
 _git_global() {
-    repos=$(find_git_repos)
+    repos=$(_find_git_repos)
     if [[ -z $repos ]]; then
         echo "No Git repositories found under the home directory."
         exit 1
     fi
 
-    fetch_repos "$repos"
+    _fetch_multiple_repos "$repos"
 
     selected_repo=$(echo "$repos" \
-        | rank_and_label_repos \
+        | _label_repos \
         | fzf \
         --preview "cd {$PATH_POSITION} && git -c color.status=always status" \
-        --preview-window=up:40% \
+        --tmux center,70%\
+        --preview-window=right:40% \
         --bind=ctrl-u:preview-half-page-up \
         --bind=ctrl-d:preview-half-page-down \
         --layout=reverse \
@@ -127,6 +130,7 @@ _git_global() {
     )
   if [[ -n $selected_repo ]]; then
       repo_path=$(echo "$selected_repo" | awk "{print \$$PATH_POSITION}")
+
       if [[ -z $repo_path ]]; then
           echo "No repository selected."
           exit 1
