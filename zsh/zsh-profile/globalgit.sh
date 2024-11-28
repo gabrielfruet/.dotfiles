@@ -64,7 +64,8 @@ _find_git_repos() {
 }
 
 _git_get_branch() {
-    git branch | head -n 1 | sed 's/\**\s*//' 
+    branch_name="$(git branch | head -n 1 | sed 's/\**\s*//')"
+    [ "$branch_name" = "(no branch)" ] && echo "no-branch" || echo "$branch_name"
 }
 
 # Function to rank and label repositories
@@ -121,8 +122,8 @@ _git_global() {
         | _label_repos \
         | fzf \
         --preview "cd {$PATH_POSITION} && git -c color.status=always status" \
-        --tmux center,70%\
-        --preview-window=right:40% \
+        --tmux center,80%\
+        --preview-window=right:60% \
         --bind=ctrl-u:preview-half-page-up \
         --bind=ctrl-d:preview-half-page-down \
         --layout=reverse \
