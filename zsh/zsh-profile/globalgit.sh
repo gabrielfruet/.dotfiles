@@ -76,7 +76,12 @@ _find_git_repos() {
 
 _git_get_branch() {
     branch_name="$(git branch | head -n 1 | sed 's/\**\s*//')"
-    [ "$branch_name" = "(no branch)" ] && echo "no-branch" || echo "$branch_name"
+
+    if [ "$branch_name" = "(no branch)" ]; then 
+        echo "no-branch" 
+    else 
+        echo "$branch_name"
+    fi
 }
 
 # Function to rank and label repositories
