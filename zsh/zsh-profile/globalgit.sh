@@ -90,8 +90,9 @@ _label_repos() {
         cd "$repo" || continue
 
         git_output=$(git status --porcelain --branch 2>/dev/null || echo "")
+        git_status_success=$?
 
-        if [[ -z $git_output ]]; then
+        if [[ -z $git_output ]] || [ ! $git_status_success ]; then
             # Skip non-Git directories or inaccessible repos
             continue
         fi
