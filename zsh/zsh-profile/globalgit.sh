@@ -14,6 +14,7 @@ RESET='\033[0m'
 
 GIT_BRANCH_UNICODE="$(echo -e "$PURPLE $RESET")"
 
+FETCH_TIMEOUT=10
 PATH_POSITION=3
 
 UNCOMITTED_LABEL=$(echo -e "${RED}[Uncommitted]${RESET}")
@@ -22,7 +23,15 @@ UNPULLED_LABEL=$(echo -e "${YELLOW}[Ahead]${RESET}")
 CLEAN_LABEL=$(echo -e "${GREEN}[Clean]${RESET}")
 
 _fetch_one_repo() {
-    cd "$1" || exit && git fetch && echo "${GREEN}Done fetching$RESET $1"
+    cd "$1" || exit 
+
+    timeout $FETCH_TIMEOUT git fetch < /dev/null
+
+    if [[ ! $? ]]; then
+        echo "${RED}Timeout fetching$RESET $1"
+    else
+        echo "${GREEN}Done fetching$RESET $1"
+    fi
 }
 
 _fetch_multiple_repos() {
