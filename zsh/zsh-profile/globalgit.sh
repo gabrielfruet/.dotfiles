@@ -42,11 +42,13 @@ _fetch_multiple_repos() {
         fetch_head_file="$repo/.git/FETCH_HEAD"
 
         fetch_head_time=$(stat -c %Y "$fetch_head_file")
+        fetch_head_exits="$?"
         current_time=$(date +%s)
 
         time_diff_seconds=$((current_time - fetch_head_time))
 
-        if [ $time_diff_seconds -gt $TIME_DIFF_SECONDS_THRESH ]; then
+        if [ $time_diff_seconds -gt $TIME_DIFF_SECONDS_THRESH ] || [ ! $fetch_head_exits ]; then
+
             days=$((time_diff_seconds/(24*60*60)))
             daystr=$(test $days -gt 0  && echo "$days days" || echo "")
             
