@@ -195,7 +195,7 @@ globalkeys = gears.table.join(
         {description = "take a screenshot", group = "screenshot"}),
     awful.key({ modkey,           }, "d", function () awful.spawn.with_shell('rofi -show drun -theme ~/.config/rofi/dmenu/style-1.rasi') end,
         {description = "Rofi launch", group = "client"}),
-    awful.key({ modkey,           }, "Shift_L", function () kbdcfg.switch() end,
+    awful.key({ modkey,           }, "F1", function () kbdcfg.switch() end,
         {description = "Switch keyboard layout", group = "client"}),
     awful.key({ modkey,           }, "s",      hotkeys_popup.show_help,
               {description="show help", group="awesome"}),
