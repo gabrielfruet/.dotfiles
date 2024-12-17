@@ -143,24 +143,27 @@ M.vol = function (opts)
     }
 
     local function update_volume()
-        local volpercent = volhandler.get_current_volume()
-        local children = widget.children
-        local img_widget = children[1].children[1]
-        local text_widget = children[2]
+        -- local volpercent = 
+        volhandler.get_current_volume(function (volpercent)
+            local children = widget.children
+            local img_widget = children[1].children[1]
+            local text_widget = children[2]
 
-        if volpercent == MUTED then
-            img_widget.image = icons.muted
-            text_widget.markup = defs.text_pango_wrapper('Muted')
-        else
-            text_widget.markup = defs.text_pango_wrapper(tostring(volpercent) .. '%')
-            if volpercent == 0 then
-                img_widget.image = icons.novol
-            elseif volpercent < 50 then
-                img_widget.image = icons.halfvol
+            if volpercent == MUTED then
+                img_widget.image = icons.muted
+                text_widget.markup = defs.text_pango_wrapper('Muted')
             else
-                img_widget.image = icons.fullvol
+                text_widget.markup = defs.text_pango_wrapper(tostring(volpercent) .. '%')
+                if volpercent == 0 then
+                    img_widget.image = icons.novol
+                elseif volpercent < 50 then
+                    img_widget.image = icons.halfvol
+                else
+                    img_widget.image = icons.fullvol
+                end
             end
-        end
+
+        end)
     end
 
     awesome.connect_signal("volume_update", update_volume)
