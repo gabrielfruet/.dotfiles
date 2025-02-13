@@ -1,0 +1,27 @@
+[lint]
+# ✅ Essential categories that improve code quality without being overly strict
+select = [
+    "E",  # pycodestyle (formatting, whitespace)
+    "W",  # Warnings (common issues)
+    "B",  # Bugbear (best practices, security)
+    "S",  # Bandit (basic security checks)
+    "C90",
+]
+
+# ❌ Ignore checks that are too strict for general use
+ignore = [
+    "E501",  # Line too long (handled by formatter like Black)
+    "B905",  # `zip()` without strict=True (not always necessary)
+    "S101",  # `assert` usage (fine in non-production code)
+]
+
+# 🔄 Auto-fixable rules (Enable all safe auto-fixes)
+fixable = ["ALL"]
+
+[mccabe]
+max-complexity = 4
+
+# 🛠️ Per-file ignores (avoid unnecessary warnings in specific cases)
+[lint.per-file-ignores]
+"tests/*" = ["S"]  # Ignore security warnings in test files
+
