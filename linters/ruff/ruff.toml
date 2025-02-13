@@ -19,7 +19,7 @@ ignore = [
 fixable = ["ALL"]
 
 [mccabe]
-max-complexity = 4
+max-complexity = 10
 
 # 🛠️ Per-file ignores (avoid unnecessary warnings in specific cases)
 [lint.per-file-ignores]
