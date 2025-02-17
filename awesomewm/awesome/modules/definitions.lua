@@ -12,7 +12,7 @@ local M = {}
 
 -- M.opacity_hex = 'cc'
 -- M.opacity_hex = '7F'
-M.opacity_hex = '7F'
+M.opacity_hex = '50'
 M.opacity = 1.0
 -- M.opacity = 0.8
 M.colors = {}
