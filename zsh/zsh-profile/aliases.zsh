@@ -17,6 +17,7 @@ alias ggc='git diff | fabric --model models/gemini-1.5-pro --pattern create_git_
 alias get_idf='. $HOME/dev/esp/esp-idf/export.sh'
 alias lg='lazygit'
 alias fbf='fzf --preview "cat {}"'
-alias cat='bat --color=always --theme=gruvbox-dark'
+alias bt='bat --color=always --theme=gruvbox-dark'
 alias gg='_git_global'
 alias dcd='docker image prune -f --filter "dangling=true"'
+alias wt='worktree-switch'
