@@ -1,5 +1,7 @@
 local gears = require('gears')
 local beautiful = require('beautiful')
+local awful = require('awful')
+local naughty = require("naughty")
 
 beautiful.init(gears.filesystem.get_themes_dir() .. "xresources/theme.lua")
 -- beautiful.font = 'JetBrainsMonoNerdFontMono-ExtraBold 9'
@@ -49,5 +51,16 @@ M.colors.selected_fg = THEME.get_current_theme().background
 M.colors.unselected_fg = '#eeeec0'
 M.colors.unselected_bg = THEME.get_current_theme().background .. M.opacity_hex
 M.colors.red = '#cc3333'
+
+-- notify
+
+naughty.config.defaults.timeout = 5  -- Notification duration (seconds)
+naughty.config.defaults.screen = awful.screen.focused()
+naughty.config.defaults.position = "top_left"  -- Change to "bottom_left", "center", etc.
+naughty.config.defaults.margin = 16  -- Padding around the notification
+naughty.config.defaults.border_width = 2
+naughty.config.defaults.font = "Roboto 16"
+naughty.config.defaults.icon_size = 100  -- Icon size
+
 
 return M

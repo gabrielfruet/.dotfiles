@@ -19,3 +19,7 @@ vnv() {
         fi
     fi
 }
+
+notify-finish() {
+    notify-send "Command" "Command has executed successfully."
+}
