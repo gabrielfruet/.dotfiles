@@ -1,7 +1,7 @@
 try:
     import matplotlib
     try:
-        matplotlib.use('module://matplotlib-backend-kitty')
+        matplotlib.use('kitcat')
     except:
         print('Something went wrong with the kitty backend')
 except:

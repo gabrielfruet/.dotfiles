@@ -52,7 +52,7 @@ end
 
 
 -- This is used later as the default terminal and editor to run.
-terminal = "kitty"
+terminal = "wezterm"
 editor = "nvim"
 editor_cmd = terminal .. " -e " .. editor
 
