@@ -54,9 +54,11 @@ M.colors.red = '#cc3333'
 
 -- notify
 
+beautiful.notification_bg = M.colors.unselected_bg
+beautiful.notification_shape = gears.shape.rounded_rect
 naughty.config.defaults.timeout = 5  -- Notification duration (seconds)
 naughty.config.defaults.screen = awful.screen.focused()
-naughty.config.defaults.position = "top_left"  -- Change to "bottom_left", "center", etc.
+naughty.config.defaults.position = "top_right"  -- Change to "bottom_left", "center", etc.
 naughty.config.defaults.margin = 16  -- Padding around the notification
 naughty.config.defaults.border_width = 2
 naughty.config.defaults.font = "Roboto 16"
