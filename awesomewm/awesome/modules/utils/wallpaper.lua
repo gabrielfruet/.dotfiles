@@ -12,12 +12,17 @@ end
 
 function M.set_wallpaper(wallpaper, reload)
     current_wallpaper_path = wallpaper
+    print('INFO: wallpaper: Saving wallpaper to ' .. current_wallpaper_path)
     M.preview_wallpaper(wallpaper)
-    awful.spawn.easy_async_with_shell('wal -stn -i "' .. wallpaper .. '" --backend haishoku', function ()
-        if reload == true then
-            awesome.restart()
-        end
-    end)
+    awful.spawn.easy_async_with_shell('wal -stn -i "' .. wallpaper .. '" --backend wal',
+        function (stdout, stderr, exitreason, exitcode)
+            print('INFO: wallpaper | wal stdout: ' .. stdout)
+            print('INFO: wallpaper | wal stderr: ' .. stderr)
+            print('INFO: wallpaper | wal exit code: ' .. exitcode)
+            if reload == true then
+                awesome.restart()
+            end
+        end)
 end
 
 return M
