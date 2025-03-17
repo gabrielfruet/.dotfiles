@@ -54,7 +54,7 @@ M.colors.red = '#cc3333'
 
 -- notify
 
-beautiful.notification_bg = M.colors.unselected_bg
+beautiful.notification_bg = THEME.get_current_theme().background .. 'AA'
 beautiful.notification_shape = gears.shape.rounded_rect
 naughty.config.defaults.timeout = 5  -- Notification duration (seconds)
 naughty.config.defaults.screen = awful.screen.focused()

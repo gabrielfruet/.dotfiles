@@ -21,5 +21,5 @@ vnv() {
 }
 
 notify-finish() {
-    notify-send "Command" "Command has executed successfully."
+    notify-send "Command 🛠️" "Command has finished execution"
 }
