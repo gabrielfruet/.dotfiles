@@ -25,6 +25,8 @@ dvc-up () {
         user_name="root"
     fi
 
+    echo "Container user is $user_name" 
+
     devcontainer up \
         --mount "type=bind,source=$HOME/.config/nvim,target=/home/$user_name/.config/nvim" \
         --mount "type=bind,source=$HOME/.local/share/nvim,target=/home/$user_name/.local/share/nvim" \
