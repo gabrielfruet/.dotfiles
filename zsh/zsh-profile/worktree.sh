@@ -21,5 +21,11 @@ worktree-switch () {
         --ansi |
         awk '{print $2}'
     )
+
+    if [[ -z "$dir" ]]; then
+        echo "No worktree selected"
+        return 1
+    fi
+
     cd "$dir" || exit 1
 }
