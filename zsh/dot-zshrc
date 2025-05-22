@@ -59,7 +59,6 @@ bindkey '^ ' autosuggest-accept
 # -----------WARNING-----------------
 # HAS TO BE SOURCED AT THE END OF THE FILE
 eval "$(starship init zsh)"
-eval "$(navi widget zsh)"
 eval "$(opam env)"
 source $ZSH/oh-my-zsh.sh
 source $ZSH_CUSTOM/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
