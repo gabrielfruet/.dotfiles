@@ -3,7 +3,7 @@
 # Inserts a blank line between shell prompts
 add_newline = false 
 command_timeout=20000
-format = "${custom.start}$all$character"
+format = "${custom.start}$container$all$character"
 
 # Replace the "❯" symbol in the prompt with "➜"
 # [character] # The name of the module we are configuring is "character"
@@ -48,3 +48,11 @@ disabled = false
 disabled=true
 format = "🚀 "
 when = "true"
+
+# ~/.config/starship.toml
+
+[container]
+
+format = "[$symbol$name]($style) " 
+symbol = "📦 " 
+style = "bold blue"
