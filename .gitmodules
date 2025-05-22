@@ -1,0 +1,3 @@
+[submodule "ros-dev-env"]
+	path = ros-dev-env
+	url = /home/fruet/dev/docker/ros-dev-env
