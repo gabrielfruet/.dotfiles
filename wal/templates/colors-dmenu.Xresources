@@ -1,0 +1,5 @@
+dmenu.background : {background} 
+dmenu.foreground : {foreground}
+dmenu.selbackground : {color11}
+dmenu.selforeground : {color15}
+
