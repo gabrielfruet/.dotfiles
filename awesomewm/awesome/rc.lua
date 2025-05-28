@@ -193,8 +193,10 @@ root.buttons(gears.table.join(
 globalkeys = gears.table.join(
     awful.key({}, "Print", function () awful.spawn("gnome-screenshot -i") end,
         {description = "take a screenshot", group = "screenshot"}),
-    awful.key({ modkey,           }, "d", function () awful.spawn.with_shell('rofi -show drun -theme ~/.config/rofi/dmenu/style-1.rasi') end,
-        {description = "Rofi launch", group = "client"}),
+    -- awful.key({ modkey,           }, "d", function () awful.spawn.with_shell('rofi -show drun -theme ~/.config/rofi/dmenu/style-1.rasi') end,
+    --     {description = "Rofi launch", group = "client"}),
+    awful.key({ modkey,           }, "d", function () awful.spawn.with_shell('dmenu_run -l 10 -p Run') end,
+        {description = "Dmenu launc", group = "client"}),
     awful.key({ modkey,           }, "Shift_R", function () kbdcfg.switch() end,
         {description = "Switch keyboard layout", group = "client"}),
     awful.key({ modkey,           }, "s",      hotkeys_popup.show_help,
