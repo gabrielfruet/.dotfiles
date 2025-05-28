@@ -1,5 +1,8 @@
 dmenu.background : {background} 
-dmenu.foreground : {foreground}
-dmenu.selbackground : {color11}
-dmenu.selforeground : {color15}
-
+dmenu.foreground : #eeeec0
+dmenu.selbackground : {color12}
+dmenu.selforeground : {background}
+dmenu.selhiforeground: {color13}
+dmenu.selhibackground: {color12}
+dmenu.normhiforeground: {color10}
+dmenu.normhibackground: {background}
