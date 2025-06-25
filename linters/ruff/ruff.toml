@@ -18,7 +18,7 @@ ignore = [
 # 🔄 Auto-fixable rules (Enable all safe auto-fixes)
 fixable = ["ALL"]
 
-[mccabe]
+[lint.mccabe]
 max-complexity = 10
 
 # 🛠️ Per-file ignores (avoid unnecessary warnings in specific cases)
