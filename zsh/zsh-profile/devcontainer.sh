@@ -9,14 +9,7 @@ dvc-build () {
 
 
 get_container_user() {
-    python <<EOF
-import json
-with open(".devcontainer/devcontainer.json") as f:
-    data = json.load(f)
-    user = data.get('containerUser')
-    if user is not None:
-        print(user)
-EOF
+    jq -r '.containerUser // ""' .devcontainer/devcontainer.json
 }
 
 dvc-up () {
