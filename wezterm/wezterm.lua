@@ -4,6 +4,7 @@ local wezterm = require 'wezterm'
 local summer_colors = {
     primary = {
         background = '#292A2B',
+        -- background = background,
         foreground = '#AEB7B6',
     },
     normal = {

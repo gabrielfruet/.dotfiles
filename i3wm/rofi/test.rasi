@@ -1,55 +1,63 @@
-@import                          "shared/fonts.rasi"
-
-@import "~/.cache/wal/colors-rofi-dark"
-
 configuration {
-    modi: "window,run,ssh";
-    width: 50; /* Width as a percentage of the screen width */
-    lines: 5;
-    columns: 1;
-    font: "sans 10";
+    font: "monospace 10";
+    show-icons: false;
+    drun-display-format: "{name}";
+    modi: "run";
+    display-run: "Run";
+    location: 0;
+    fullscreen: false;
+}
+
+* {
+    background:  rgba(22, 22, 22, 0.8);  /* dark semi-transparent */
+    border-color: #b48ead;              /* lavender-pink border */
+    border: 2;
+    padding: 5;
+    margin: 0;
+    text-color: #eaeaea;                /* light gray text */
 }
 
 window {
-    anchor: center; /* Set anchor to center */
-    location: center; /* Set location to center */
-    width: 10%; /* Set width as a percentage */
-    height: 20%; /* Adjust height as needed */
-    children: [ mainbox ];
+    transparency: "real";
+    width: 30%;
 }
 
 mainbox {
-    orientation: vertical;
-    children: [ inputbar, listview ];
+    background-color: @background;
+    border: 2px solid @border-color;
 }
 
 inputbar {
-    children: [ prompt, entry ];
+    background-color: @background;
+    padding: 5px;
+    border: 2px solid @border-color;
+    text-color: @text-color;
 }
 
 prompt {
-    expand: false;
-    str: "Search: "; /* Customize your prompt text here */
+    text-color: @text-color;
 }
 
 entry {
-    expand: true;
-    horizontal-align: 0.5;
+    text-color: @text-color;
 }
 
 listview {
-    lines: 4;
-    scrollbar: false;
-    dynamic: false;
-    spacing: 2px;
+    lines: 10;
+    fixed-height: true;
+    background-color: @background;
+    border: 0;
+    spacing: 5;
 }
 
 element {
-    padding: 2px 10px;
-    border: 2px solid; /* Border around each element in the list */
+    padding: 5;
+    background-color: transparent;
+    text-color: @text-color;
 }
 
 element selected {
-    background-color: @selected-normal-background;
-    border-color: @selected-normal-foreground;
+    background-color: rgba(180, 142, 173, 0.5); /* semi-transparent highlight */
+    text-color: #ffffff;
 }
+

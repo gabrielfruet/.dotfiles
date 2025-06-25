@@ -175,10 +175,24 @@ M.mytasklist = function(s)
             {
                 {
                     {
-                        id     = 'icon_role',
-                        widget = wibox.widget.imagebox,
+                        {
+                            id     = 'icon_role',
+                            widget = wibox.widget.imagebox,
+                        },
+                        right=5,
+                        widget = wibox.container.margin,
                     },
-                    widget = wibox.layout.fixed.horizontal,
+                    {
+                        {
+                            id = 'text_role',
+                            bold = true,
+                            widget = wibox.widget.textbox,
+                        },
+                        width=60,
+                        widget = wibox.container.constraint
+                    },
+
+                    widget = wibox.layout.align.horizontal,
                 },
                 left = 10,
                 right = 10,
@@ -236,7 +250,7 @@ M.wibox_init = function() awful.screen.connect_for_each_screen(function(s)
     local batwidget = modules_wibox_widgets.bat()
     local volwidget = modules_wibox_widgets.vol()
     local powwidget = modules_wibox_widgets.power()
-
+    local systray = wibox.widget.systray()
     -- Create the wibox
     s.mywibox = awful.wibar({ position = "top", screen = s , bg = beautiful.bg_normal .. defs.opacity_hex, height=25})
     -- Add widgets to the wibox
@@ -274,7 +288,7 @@ M.wibox_init = function() awful.screen.connect_for_each_screen(function(s)
                 }
             },
             {
-                wibox.widget.systray(),
+                systray,
                 powwidget,
                 s.mylayoutbox,
                 layout = wibox.layout.fixed.horizontal,

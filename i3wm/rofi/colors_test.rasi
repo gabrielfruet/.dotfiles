@@ -1,0 +1,17 @@
+/* Define your color palette */
+@background-color: rgba(30, 30, 30, 0.9); /* Dark background with transparency */
+@inputbar-background: #282828;
+@prompt-color: #bbbbbb;
+@text-color: #eeeeee;
+@mode-switcher-background: #383838;
+@mode-button-color: #aaaaaa;
+@mode-button-background: #484848;
+@selected-mode-background: #5e81ac; /* Nord Blue */
+@selected-mode-color: #eceff4; /* Nord Foreground */
+@listview-background: rgba(30, 30, 30, 0.9);
+@selected-background: #5e81ac; /* Nord Blue */
+@selected-color: #eceff4; /* Nord Foreground */
+@urgent-background: #bf616a; /* Nord Red */
+@urgent-color: #eceff4;
+@active-background: #a3be8c; /* Nord Green */
+@active-color: #eceff4;

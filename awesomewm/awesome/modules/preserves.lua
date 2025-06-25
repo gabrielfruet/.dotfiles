@@ -47,16 +47,16 @@ awesome.connect_signal('startup', function()
 end)
 
 
-awesome.connect_signal('exit', function(reason_restart)
-    if not reason_restart then return end
-
-    local file = io.open(os.getenv('HOME') .. '/.cache/awesome/wallpaper', 'w')
-    if file == nil then return end
-
-    file:write(current_wallpaper_path)
-
-    file:close()
-end)
+-- awesome.connect_signal('exit', function(reason_restart)
+--     if not reason_restart then return end
+--
+--     local file = io.open(os.getenv('HOME') .. '/.cache/awesome/wallpaper', 'w')
+--     if file == nil then return end
+--
+--     file:write(current_wallpaper_path)
+--
+--     file:close()
+-- end)
 
 awesome.connect_signal('startup', function()
     local file = io.open(os.getenv('HOME') .. '/.cache/awesome/wallpaper', 'r')
@@ -68,4 +68,4 @@ awesome.connect_signal('startup', function()
     set_wallpaper(wallpaper_path)
 
 end)
-
+--

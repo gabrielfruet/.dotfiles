@@ -14,7 +14,7 @@ local M = {}
 
 -- M.opacity_hex = 'cc'
 -- M.opacity_hex = '7F'
-M.opacity_hex = '50'
+M.opacity_hex = '90'
 M.opacity = 1.0
 -- M.opacity = 0.8
 M.colors = {}
@@ -42,9 +42,13 @@ beautiful.useless_gap = 8
 beautiful.border_width = 1
 beautiful.tasklist_bg_normal = THEME.get_current_theme().background .. '00'
 
+--systray
+beautiful.bg_systray = THEME.get_current_theme().background .. M.opacity_hex
+
 --beautiful.taglist_bg_focus = THEME.get_current_theme().color10
 beautiful.taglist_bg_focus = gradient
 beautiful.tasklist_bg_focus = gradient
+beautiful.tasklist_bg_minimize = THEME.get_current_theme().color6 .. M.opacity_hex
 
 M.colors.selected_bg = gradient
 M.colors.selected_fg = THEME.get_current_theme().background

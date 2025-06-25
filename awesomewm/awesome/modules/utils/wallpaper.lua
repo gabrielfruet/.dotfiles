@@ -12,17 +12,26 @@ end
 
 function M.set_wallpaper(wallpaper, reload)
     current_wallpaper_path = wallpaper
-    print('INFO: wallpaper: Saving wallpaper to ' .. current_wallpaper_path)
-    M.preview_wallpaper(wallpaper)
-    awful.spawn.easy_async_with_shell('wal -stn -i "' .. wallpaper .. '" --backend wal',
-        function (stdout, stderr, exitreason, exitcode)
-            print('INFO: wallpaper | wal stdout: ' .. stdout)
-            print('INFO: wallpaper | wal stderr: ' .. stderr)
-            print('INFO: wallpaper | wal exit code: ' .. exitcode)
+    awful.spawn.easy_async_with_shell('feh --bg-fill "' .. wallpaper .. '"',
+        function(stdout, stderr, exitreason, exitcode)
+            print('INFO: wallpaper | feh stdout: ' .. stdout)
+            print('INFO: wallpaper | feh stderr: ' .. stderr)
+            print('INFO: wallpaper | feh exit code: ' .. exitcode)
             if reload == true then
                 awesome.restart()
             end
         end)
+    -- print('INFO: wallpaper: Saving wallpaper to ' .. current_wallpaper_path)
+    -- M.preview_wallpaper(wallpaper)
+    -- awful.spawn.easy_async_with_shell('wal -stn -i "' .. wallpaper .. '" --backend wal',
+    --     function (stdout, stderr, exitreason, exitcode)
+    --         print('INFO: wallpaper | wal stdout: ' .. stdout)
+    --         print('INFO: wallpaper | wal stderr: ' .. stderr)
+    --         print('INFO: wallpaper | wal exit code: ' .. exitcode)
+    --         if reload == true then
+    --             awesome.restart()
+    --         end
+    --     end)
 end
 
 return M
