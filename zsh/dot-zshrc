@@ -1,87 +1,134 @@
-#!/bin/env zsh
+# ------------------------------------------------------------------------------
+# SECTION 1: EXPORTS AND ENVIRONMENT VARIABLES
+# ------------------------------------------------------------------------------
+#
+zmodload zsh/zprof
 
+export EDITOR="nvim"
+export TERMINAL="wezterm"
+export HISTFILE="$HOME/.zsh_history"
+export HISTSIZE=500000
+export SAVEHIST=500000
 set -o vi
+
+typeset -U path
+path=(
+  "$HOME/go/bin"
+  "$HOME/dev/docker/ros-dev-env"
+  "$HOME/bin"
+  "$HOME/bin/flatpak"
+  "$HOME/.local/bin"
+  "/var/lib/flatpak/exports/bin"
+  "$HOME/.bin"
+  "$DENO_INSTALL/bin"
+  "/usr/local/go/bin"
+  "/usr/local/bin"
+  "$HOME/bin"
+  $path
+)
+export PATH
+
+# ------------------------------------------------------------------------------
+# SECTION 2: ZINIT BOOTSTRAP
+# ------------------------------------------------------------------------------
+
+# Download and install zinit if not present (recommended official method)
+if [[ ! -f "$HOME/.local/share/zinit/zinit.git/zinit.zsh" ]]; then
+  mkdir -p "$HOME/.local/share/zinit"
+  git clone https://github.com/zdharma-continuum/zinit.git "$HOME/.local/share/zinit/zinit.git"
+fi
+source "$HOME/.local/share/zinit/zinit.git/zinit.zsh"
+
+# ------------------------------------------------------------------------------
+# SECTION 3: Zsh options and plugins via zinit
+# ------------------------------------------------------------------------------
+
 KEYTIMEOUT=1
 
-# Path configuration
-export PATH="~/bin:/usr/local/bin:$PATH"
-export PATH="$PATH:/usr/local/go/bin"
-export PATH="$DENO_INSTALL/bin:$PATH"
-export PATH="~/.bin:$PATH"
-export PATH="/var/lib/flatpak/exports/bin:$PATH"
-export PATH="$PATH:$HOME/.local/bin"
-export PATH="$PATH:$HOME/bin/flatpak"
-export PATH="$PATH:$HOME/bin"
-export PATH="$PATH:$HOME/go/bin"
-export PATH="$PATH:$HOME/dev/docker/ros-dev-env"
-export EDITOR="nvim"
+# Plugins (using zinit)
+zinit ice wait'1' for \
+    zsh-users/zsh-syntax-highlighting \
+    zsh-users/zsh-autosuggestions \
+    zinit snippet OMZ::plugins/git \
+    zinit snippet OMZ::plugins/docker
 
-# ZSH and Oh-My-Zsh configuration
-export ZSH="$HOME/.oh-my-zsh"
-export ZSH_PROFILE="$HOME/zsh-profile"
+zinit light-mode for \
+  agkozak/zsh-z \
+  zsh-users/zsh-completions \
+  zdharma-continuum/fast-syntax-highlighting
 
 
-# Starship prompt
 
-# Plugins
-plugins=(
-    git 
-    gnu-utils
-    docker
-    zsh-autosuggestions
-    colored-man-pages
-    colorize
-    common-aliases
-    alias-finder
-)
+# OMZ plugin equivalents (add more as needed)
+zinit snippet OMZ::plugins/gnu-utils
+zinit snippet OMZ::plugins/colored-man-pages
+zinit snippet OMZ::plugins/colorize
+zinit snippet OMZ::plugins/common-aliases
+# zinit snippet OMZ::plugins/alias-finder  # Disabled for performance
+if ls --color=auto &>/dev/null; then
+  alias ls='ls --color=auto'
+else
+  alias ls='ls -G'
+fi
+alias ll='ls -la'
+alias la='ls -A'
+alias l='ls -CF'
 
-# ~/.zshrc
-
-zstyle ':omz:plugins:alias-finder' autoload yes # disabled by default
-zstyle ':omz:plugins:alias-finder' longer yes # disabled by default
-zstyle ':omz:plugins:alias-finder' exact yes # disabled by default
-zstyle ':omz:plugins:alias-finder' cheaper yes # disabled by default
-
+# zsh-autosuggestions config
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=11'
-
-# Auto suggestions
-bindkey '^ ' autosuggest-accept
-
-
-# User configuration (Commented configurations are not active but kept for reference)
-# export MANPATH="/usr/local/man:$MANPATH"
-# export LANG=en_US.UTF-8
-# Preferred editor settings
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-#   export EDITOR='mvim'
-# fi
-
-# -----------WARNING-----------------
-# HAS TO BE SOURCED AT THE END OF THE FILE
-eval "$(starship init zsh)"
-eval "$(opam env)"
-source $ZSH/oh-my-zsh.sh
-source $ZSH_CUSTOM/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-source <(fzf --zsh)
-complete -C '$(which aws_completer)' aws
-
-if [ -n "$VIRTUAL_ENV" ]; then
-    echo "Sourcing venv"
-    . "$VIRTUAL_ENV/bin/activate"
+if zle -l | grep -q autosuggest-accept; then
+  bindkey '^ ' autosuggest-accept
 fi
 
-# if [ -f "/home/fruet/.config/fabric/fabric-bootstrap.inc" ]; then . "/home/fruet/.config/fabric/fabric-bootstrap.inc"; fi
+# ------------------------------------------------------------------------------
+# SECTION 4: LAZY LOADING & TOOL INITIALIZATION
+# ------------------------------------------------------------------------------
+
+zinit ice wait'2' atload'export NVM_DIR="$HOME/.nvm"; [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"'
+
+# FZF integration
+# zinit ice wait"1" atload'fzf --zsh'
+# zinit snippet 'https://github.com/junegunn/fzf?at=master'
+## FZF integration (use local install)
+
+# AWS Completer
+# if command -v aws &> /dev/null; then
+#   autoload -Uz compinit && compinit
+#   source <(aws_completer zsh)
+# fi
+# ------------------------------------------------------------------------------
+# SECTION 5: CUSTOM FUNCTIONS AND SOURCES
+# ------------------------------------------------------------------------------
 
 function y() {
 	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
 	yazi "$@" --cwd-file="$tmp"
-	IFS= read -r -d '' cwd < "$tmp"
-	[ -n "$cwd" ] && [ "$cwd" != "$PWD" ] && builtin cd -- "$cwd"
+	if IFS= read -r -d '' cwd < "$tmp"; then
+	    if [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+	        builtin cd -- "$cwd"
+	    fi
+	fi
 	rm -f -- "$tmp"
 }
 
-autoload bashcompinit && bashcompinit
-autoload -Uz compinit && compinit
-source $ZSH_PROFILE/sourcerer.zsh
+# Source your custom profile scripts
+ZSH_PROFILE="$HOME/zsh-profile"
+if [ -f "$ZSH_PROFILE/sourcerer.zsh" ]; then
+    source "$ZSH_PROFILE/sourcerer.zsh"
+fi
+
+# ------------------------------------------------------------------------------
+# SECTION 6: FINAL EVALS AND PROMPT
+# ------------------------------------------------------------------------------
+
+if command -v opam &> /dev/null; then
+  eval "$(opam env)"
+fi
+
+if command -v starship &> /dev/null; then
+  eval "$(starship init zsh)"
+fi
+
+# Zinit handles compinit/init automatically.
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh

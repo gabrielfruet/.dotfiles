@@ -61,7 +61,14 @@ config.font_rules = {
 }
 
 
-config.window_background_opacity = 0.7
+HOME = os.getenv("HOME")
+
+function file_exists(name)
+   local f=io.open(name,"r")
+   if f~=nil then io.close(f) return true else return false end
+end
+
+config.window_background_opacity = file_exists(HOME .. '/.gnome') and 0.9 or 0.7
 config.window_close_confirmation = 'NeverPrompt'
 config.window_decorations = "RESIZE" -- Removes the top bar (title bar)
 config.enable_tab_bar = false
