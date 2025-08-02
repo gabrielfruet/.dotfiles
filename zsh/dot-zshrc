@@ -63,7 +63,6 @@ zinit light-mode for \
 zinit snippet OMZ::plugins/gnu-utils
 zinit snippet OMZ::plugins/colored-man-pages
 zinit snippet OMZ::plugins/colorize
-zinit snippet OMZ::plugins/common-aliases
 # zinit snippet OMZ::plugins/alias-finder  # Disabled for performance
 if ls --color=auto &>/dev/null; then
   alias ls='ls --color=auto'
