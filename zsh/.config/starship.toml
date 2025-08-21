@@ -10,12 +10,6 @@ format = "${custom.start}$container$all$character"
 # success_symbol = "[➜](bold green)" # The "success_symbol" segment is being set to "➜" with the color "bold green"
 # error_symbol = "[✘](bold red)"
 
-[python]
-disabled=true
-
-[package]
-disabled=true
-
 [character]
 success_symbol = "[❯](green)"
 error_symbol = "[❯](red)"
