@@ -32,6 +32,8 @@ local summer_colors = {
 local config = {}
 config.font_size = 14
 
+config.line_height = 1.3
+
 config.font = wezterm.font_with_fallback {
     {
         family = 'JetBrainsMono Nerd Font',

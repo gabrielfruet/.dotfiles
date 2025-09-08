@@ -42,9 +42,6 @@ dvc-up () {
              "ghcr.io/devcontainers-extra/features/fzf:1" : {}
              "ghcr.io/duduribeiro/devcontainer-features/neovim:1" :{}
              "ghcr.io/duduribeiro/devcontainer-features/tmux:1": {}
-             "ghcr.io/devcontainers/features/node:1": {
-                 "version": "16"
-             }
-         }'
-         # --remove-existing-container
+         }' \
+         --remove-existing-container
 }
