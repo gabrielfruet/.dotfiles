@@ -11,6 +11,14 @@ export HISTSIZE=500000
 export SAVEHIST=500000
 set -o vi
 
+setopt append_history
+setopt inc_append_history
+setopt share_history
+setopt extended_history
+
+
+PROMPT_COMMAND='history -a; history -n; history -c; history -r'
+
 typeset -U path
 path=(
   "$HOME/go/bin"
