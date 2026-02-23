@@ -7,18 +7,23 @@ add_newline = false
 command_timeout = 50
 
 # Main prompt layout
-format = "$directory$git_branch$git_status$line_break$character"
+format = "$directory$git_branch$git_status$python$line_break$character"
 
 # Symbols for prompt state
 [character]
 success_symbol = "[❯](bold green)"
 error_symbol = "[❯](bold red)"
 
+[python]
+format = "[$virtualenv]($style) "
+style = "yellow"
+
 # Show Git branch only
 [git_branch]
 style = "bold purple"
 
 [git_status]
+#crucial for speed
 untracked=""
 
 # Disable everything else for speed

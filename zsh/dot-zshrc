@@ -139,3 +139,6 @@ fi
 # Zinit handles compinit/init automatically.
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+# opencode
+export PATH=/home/fruet/.opencode/bin:$PATH

@@ -1,0 +1,60 @@
+# Get editor completions based on the config schema
+#"$schema" = "$HOME/.config/schema.json" 
+# Inserts a blank line between shell prompts
+add_newline = false 
+command_timeout=20000
+format = "${custom.start}$container$character"
+
+# Replace the "❯" symbol in the prompt with "➜"
+# [character] # The name of the module we are configuring is "character"
+# success_symbol = "[➜](bold green)" # The "success_symbol" segment is being set to "➜" with the color "bold green"
+# error_symbol = "[✘](bold red)"
+
+[character]
+success_symbol = "[❯](green)"
+error_symbol = "[❯](red)"
+vimcmd_symbol = "[❮](green)"
+
+
+# Disable the package module, hiding it from the prompt completely
+#[package]
+#disabled = false
+[aws]
+disabled=true
+
+[battery]
+full_symbol = "🔋 "
+charging_symbol = "⚡️ "
+discharging_symbol = "💀 "
+
+[[battery.display]]
+threshold = 20
+style = "bold red"
+
+[git_commit]
+commit_hash_length = 4
+tag_symbol = "🔖 "
+
+[time]
+disabled = true
+format = '[$time]($style) '
+time_format = "%R"
+utc_time_offset = "-3"
+
+[sudo]
+style = "bold purple"
+symbol = "🦸 "
+disabled = false
+
+[custom.start]
+disabled=true
+format = "🚀 "
+when = "true"
+
+# ~/.config/starship.toml
+
+[container]
+
+format = "[$symbol$name]($style) " 
+symbol = "📦 " 
+style = "bold blue"
