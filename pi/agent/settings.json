@@ -1,0 +1,16 @@
+{
+  "skills": [
+    "/home/fruet/.dotfiles/opencode/skills"
+  ],
+  "lastChangelogVersion": "0.56.3",
+  "defaultProvider": "minimax",
+  "defaultModel": "MiniMax-M2.5",
+  "theme": "dark",
+  "packages": [
+    "npm:pi-hooks"
+  ],
+  "lsp": {
+    "hookMode": "edit_write"
+  },
+  "permissionLevel": "high"
+}
