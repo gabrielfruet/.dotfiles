@@ -23,5 +23,5 @@ Spawn a subagent to run a task independently.
 
 ```bash
 ./subagent.sh "List files in src/"
-./subagent.sh "Find all TODO comments" --model github-copilot/claude-haiku-4.5 --thinking off
+./subagent.sh "Find all TODO comments" --model minimax/MiniMax-M2.5
 ```
