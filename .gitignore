@@ -1,0 +1,2 @@
+# Pi auth (contains sensitive tokens)
+pi/agent/auth.json
