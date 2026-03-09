@@ -15,7 +15,7 @@ Spawn a subagent to run a task independently.
 
 ### Options
 
-- `--model <model>` - Model to use (e.g., `github-copilot/claude-haiku-4.5`)
+- `--model <model>` - Model to use (use minimax by default, `minimax/MiniMax-M2.5`)
 - `--thinking <level>` - Thinking level: `off`, `low`, `medium`, `high`
 - `--cwd <dir>` - Working directory
 
