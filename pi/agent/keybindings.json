@@ -1,0 +1,4 @@
+{
+  "selectUp": ["up", "ctrl+k"],
+  "selectDown": ["down", "ctrl+j"]
+}

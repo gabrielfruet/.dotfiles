@@ -5,12 +5,13 @@
   "lastChangelogVersion": "0.56.3",
   "defaultProvider": "minimax",
   "defaultModel": "MiniMax-M2.5",
-  "theme": "dark",
+  "theme": "gruvbox",
   "packages": [
-    "npm:pi-hooks"
+    "npm:pi-hooks",
+    "npm:pi-vim"
   ],
   "lsp": {
     "hookMode": "edit_write"
   },
-  "permissionLevel": "high"
+  "permissionLevel": "medium"
 }
