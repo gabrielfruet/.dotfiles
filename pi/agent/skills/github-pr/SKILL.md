@@ -1,29 +1,29 @@
 ---
 name: github-pr
-description: Fetch GitHub PR info, CI/CD status, and file changes. Requires GITHUB_TOKEN env var.
+description: Fetch GitHub PR info, CI/CD status, file changes, and failure summaries with gh.
 ---
 
 # GitHub PR Tool
 
-## Setup
-
-Set your GitHub token before running pi:
+Prefer the single entrypoint:
 
 ```bash
-export GITHUB_TOKEN=ghp_your_token_here
+./pr.sh info <PR_URL>
+./pr.sh cicd <PR_URL>
+./pr.sh files <PR_URL>
+./pr.sh errors <PR_URL>
+./pr.sh mine [state]
 ```
 
-Get a token at: https://github.com/settings/tokens
+Options:
+- `--json` for stable agent-friendly output
+- `--logs` on `errors` for failed-step log summaries
 
-## Usage
+Requirements:
+- `gh` CLI installed and authenticated
+- `jq` installed
 
-```bash
-./pr_info.sh <PR_URL>
-./pr_cicd.sh <PR_URL>
-./pr_files.sh <PR_URL>
-```
-
-## Examples
-
-- `https://github.com/owner/repo/pull/123`
-- `https://github.com/owner/repo/pull/123.diff`
+Examples:
+- `./pr.sh info https://github.com/owner/repo/pull/123 --json`
+- `./pr.sh errors https://github.com/owner/repo/pull/123 --logs`
+- `./pr.sh mine all --json`
