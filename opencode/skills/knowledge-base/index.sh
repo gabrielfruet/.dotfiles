@@ -1,8 +1,12 @@
 #!/bin/bash
 # Indexes all knowledge entries by reading their frontmatter
-# Run from ~/.dotfiles/opencode/knowledge/
 
-KNOWLEDGE_DIR="$(cd "$(dirname "$0")/../knowledge" && pwd)"
+KNOWLEDGE_DIR="$HOME/.dotfiles/opencode/knowledge"
+
+if [ ! -d "$KNOWLEDGE_DIR" ]; then
+  echo "Error: knowledge directory not found at $KNOWLEDGE_DIR"
+  exit 1
+fi
 
 echo "=== Knowledge Index ==="
 echo
