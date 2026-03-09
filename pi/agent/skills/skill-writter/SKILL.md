@@ -21,4 +21,4 @@ Tips:
 - Description helps agent decide when to use
 - Frontmatter must match directory name
 - Can reference other skills - agent can load them with `skill(name="other-skill")`
-- In .dotfiles repos, write to `~/.dotfiles/opencode/skills/`
+- In .dotfiles repos, write to `~/.dotfiles/pi/skills/`
