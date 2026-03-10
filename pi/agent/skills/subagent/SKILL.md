@@ -1,6 +1,6 @@
 ---
 name: subagent
-description: Spawn a subagent to run a task in parallel. Use when you want to delegate work to a separate pi instance.
+description: Spawn a subagent to run a task. Use when you want to delegate work to a separate pi instance.
 ---
 
 # Subagent Skill
