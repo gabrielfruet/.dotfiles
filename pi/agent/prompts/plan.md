@@ -5,7 +5,11 @@ Create a plan. DO NOT modify anything. Wait for clear user approval.
 
 Task: $@
 
-Break into steps with file paths.
+- If the task is unclear, ask questions first. Do not guess.
+- Investigate/search the codebase first to find all dependencies.
+- Break into steps with exact file paths.
+- Ensure all places that use the modified function/class are updated.
+- Include a final step for testing/validating the changes.
 
 ## Examples of approval
 
