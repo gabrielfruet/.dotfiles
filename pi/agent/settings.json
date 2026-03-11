@@ -15,5 +15,6 @@
   "lsp": {
     "hookMode": "edit_write"
   },
-  "permissionLevel": "medium"
+  "permissionLevel": "medium",
+  "defaultThinkingLevel": "medium"
 }
