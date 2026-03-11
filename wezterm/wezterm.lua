@@ -66,15 +66,20 @@ config.font_rules = {
 HOME = os.getenv("HOME")
 
 function file_exists(name)
-   local f=io.open(name,"r")
-   if f~=nil then io.close(f) return true else return false end
+    local f = io.open(name, "r")
+    if f ~= nil then
+        io.close(f)
+        return true
+    else
+        return false
+    end
 end
 
 config.window_background_opacity = file_exists(HOME .. '/.gnome') and 0.98 or 0.7
 config.window_close_confirmation = 'NeverPrompt'
 config.window_decorations = "RESIZE" -- Removes the top bar (title bar)
 config.enable_tab_bar = false
-config.enable_kitty_graphics=true
+config.enable_kitty_graphics = true
 config.show_tabs_in_tab_bar = false
 config.initial_cols = 72
 config.initial_rows = 20
@@ -118,11 +123,13 @@ config.color_scheme = "Argonaut (Gogh)"
 -- config.color_scheme = "Sweet Eliverlara (Gogh)"
 -- config.color_scheme = "Dark Pastel (Gogh)"
 
+config.macos_window_background_blur = 30
 
 
-config.colors ={
-    background=summer_colors.primary.background,
-    foreground=summer_colors.primary.foreground,
+
+config.colors = {
+    background = summer_colors.primary.background,
+    foreground = summer_colors.primary.foreground,
     cursor_bg = summer_colors.primary.foreground,
 }
 
