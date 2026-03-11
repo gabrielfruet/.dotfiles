@@ -16,5 +16,6 @@
     "hookMode": "edit_write"
   },
   "permissionLevel": "medium",
-  "defaultThinkingLevel": "medium"
+  "defaultThinkingLevel": "medium",
+  "hideThinkingBlock": false
 }
