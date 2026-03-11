@@ -31,6 +31,9 @@ local summer_colors = {
 
 local config = {}
 config.font_size = 14
+if wezterm.target_triple:match("darwin") then
+    config.font_size = 16
+end
 
 config.line_height = 1.3
 
