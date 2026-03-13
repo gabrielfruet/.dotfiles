@@ -26,6 +26,12 @@ style = "bold purple"
 #crucial for speed
 untracked=""
 
+[hostname]
+ssh_only = true
+ssh_symbol = "🌐 "
+style = "bold yellow"
+format = "[$ssh_symbol$hostname]($style) in "
+
 # Disable everything else for speed
 [line_break]
 disabled = false

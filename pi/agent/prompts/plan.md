@@ -35,6 +35,7 @@ $@
 2. If unclear, ask questions first — do NOT guess
 3. Use grep/read/search to investigate the codebase
 4. Find all dependencies, usages, and related files
+5. For more direct exploration tasks, you can use subagents. 
 
 ### Phase 2: Plan
 
