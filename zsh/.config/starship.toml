@@ -7,7 +7,7 @@ add_newline = false
 command_timeout = 50
 
 # Main prompt layout
-format = "$directory$git_branch$git_status$python$line_break$character"
+format = "$hostname$directory$git_branch$git_status$python$line_break$character"
 
 # Symbols for prompt state
 [character]
