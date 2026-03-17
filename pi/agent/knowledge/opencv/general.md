@@ -17,3 +17,6 @@ tags: [opencv, cv2, image-processing, computer-vision]
 - avoid unnecessary copies; use np.asarray when you only need a view
 - use cv2.imencode/imdecode for streaming instead of imread/imwrite for large files
 - never use cv2.waitKey in production loops, only for visualization
+- opencv defaults to BGR.
+- always prefer cv2.namedWindow with cv2.WINDOW_NORMAL than creating windows in loops
+- use cv2.setNumThreads(0) when mixing OpenCV with Python multiprocessing (like PyTorch DataLoaders) to prevent silent hangs, CPU thrashing, and deadlocks
