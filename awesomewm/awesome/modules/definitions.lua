@@ -8,6 +8,7 @@ beautiful.init(gears.filesystem.get_themes_dir() .. "xresources/theme.lua")
 beautiful.font = 'Roboto 9'
 beautiful.hotkeys_font = 'Roboto 12'
 beautiful.hotkeys_description_font = 'Roboto 12'
+beautiful.systray_skip_bg = true
 THEME = beautiful.xresources
 
 local M = {}
@@ -24,17 +25,17 @@ local shine_color = '#ffffff'
 
 -- Create a linear gradient pattern
 -- Adjust the coordinates to control the direction of the gradient
-local gradient = gears.color.create_linear_pattern{
+local gradient = gears.color.create_linear_pattern {
     type = "linear",
-    from = { 0, -30 }, -- Gradient starts from the top
-    to = { 0, 15 },   -- Gradient ends 30 pixels down
+    from = { 0, -30 },      -- Gradient starts from the top
+    to = { 0, 15 },         -- Gradient ends 30 pixels down
     stops = {
-        { 0, shine_color },  -- Start with a shine at the top
-        { 1, main_color }, -- Transition to the main color in the middle
+        { 0, shine_color }, -- Start with a shine at the top
+        { 1, main_color },  -- Transition to the main color in the middle
     }
 }
 
-M.text_pango_wrapper = function (text)
+M.text_pango_wrapper = function(text)
     return string.format('<span foreground=\'%s\'><big><b>%s</b></big></span>', M.colors.unselected_fg, text)
 end
 
@@ -43,7 +44,7 @@ beautiful.border_width = 1
 beautiful.tasklist_bg_normal = THEME.get_current_theme().background .. '00'
 
 --systray
-beautiful.bg_systray = THEME.get_current_theme().background .. M.opacity_hex
+beautiful.bg_systray = THEME.get_current_theme().backgroundd
 
 --beautiful.taglist_bg_focus = THEME.get_current_theme().color10
 beautiful.taglist_bg_focus = gradient
@@ -54,19 +55,20 @@ M.colors.selected_bg = gradient
 M.colors.selected_fg = THEME.get_current_theme().background
 M.colors.unselected_fg = '#eeeec0'
 M.colors.unselected_bg = THEME.get_current_theme().background .. M.opacity_hex
+
 M.colors.red = '#cc3333'
 
 -- notify
 
 beautiful.notification_bg = THEME.get_current_theme().background .. 'AA'
 beautiful.notification_shape = gears.shape.rounded_rect
-naughty.config.defaults.timeout = 5  -- Notification duration (seconds)
+naughty.config.defaults.timeout = 5            -- Notification duration (seconds)
 naughty.config.defaults.screen = awful.screen.focused()
-naughty.config.defaults.position = "top_right"  -- Change to "bottom_left", "center", etc.
-naughty.config.defaults.margin = 16  -- Padding around the notification
+naughty.config.defaults.position = "top_right" -- Change to "bottom_left", "center", etc.
+naughty.config.defaults.margin = 16            -- Padding around the notification
 naughty.config.defaults.border_width = 2
 naughty.config.defaults.font = "Roboto 16"
-naughty.config.defaults.icon_size = 100  -- Icon size
+naughty.config.defaults.icon_size = 100 -- Icon size
 
 
 return M

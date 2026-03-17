@@ -13,7 +13,7 @@ mkdir -p "$SCROT_FOLDER"
 selected=$(printf "%s\n" "${opts[@]}" | dmenu -l 10)
 
 DELAY=1
-SCROT_COPY_TO_CLIPBOARD=='xclip -selection clipboard -t image/png -i $f'
+SCROT_COPY_TO_CLIPBOARD='xclip -selection clipboard -t image/png -i "$f"'
 
 case $selected in
     "all")
