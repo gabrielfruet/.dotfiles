@@ -8,7 +8,7 @@ description: Access the knowledge base to retrieve relevant information before e
 Before starting any task, run the index script to see available knowledge:
 
 ```bash
-~/.dotfiles/opencode/skills/knowledge-base/index.sh
+~/.dotfiles/pi/agent/skills/knowledge-base/index.sh
 ```
 
 This prints all knowledge entries with their descriptions, domains, and tags.

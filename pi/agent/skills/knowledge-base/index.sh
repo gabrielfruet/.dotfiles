@@ -1,7 +1,7 @@
 #!/bin/bash
 # Indexes all knowledge entries by reading their frontmatter
 
-KNOWLEDGE_DIR="$HOME/.dotfiles/opencode/knowledge"
+KNOWLEDGE_DIR="$HOME/.dotfiles/pi/agent/knowledge"
 
 if [ ! -d "$KNOWLEDGE_DIR" ]; then
   echo "Error: knowledge directory not found at $KNOWLEDGE_DIR"
