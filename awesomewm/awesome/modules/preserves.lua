@@ -66,6 +66,5 @@ awesome.connect_signal('startup', function()
     file:close()
 
     set_wallpaper(wallpaper_path)
-
 end)
 --

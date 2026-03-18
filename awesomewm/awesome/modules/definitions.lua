@@ -40,7 +40,7 @@ M.text_pango_wrapper = function(text)
 end
 
 beautiful.useless_gap = 8
-beautiful.border_width = 1
+beautiful.border_width = 0
 beautiful.tasklist_bg_normal = THEME.get_current_theme().background .. '00'
 
 --systray

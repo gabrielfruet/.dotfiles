@@ -8,6 +8,7 @@ source $CURRDIR/tmux.sh
 source $CURRDIR/zoxide.zsh
 source $CURRDIR/aliases.zsh
 source $CURRDIR/pyenv.zsh
+source $CURRDIR/venv.zsh
 source $CURRDIR/docker.zsh
 source $HOME/.env
 source $CURRDIR/gum_colors.sh

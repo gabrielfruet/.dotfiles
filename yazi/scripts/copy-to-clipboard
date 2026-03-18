@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+file="$1"
+mime_type=$(file --mime-type -b "$file" 2>/dev/null)
+
+# Instantly abort if the file is not an image
+if [[ "$mime_type" != image/* ]]; then
+    exit 1
+fi
+
+# Route directly to the correct display server's clipboard
+if [ "$XDG_SESSION_TYPE" = "wayland" ] || [ -n "$WAYLAND_DISPLAY" ]; then
+    wl-copy -t "$mime_type" < "$file"
+else
+    xclip -selection clipboard -t "$mime_type" -i "$file"
+fi
