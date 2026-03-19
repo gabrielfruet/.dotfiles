@@ -120,7 +120,8 @@ config.initial_rows = 20
 -- config.color_scheme = "Seti UI (Gogh)"
 -- config.color_scheme = "Argonaut (Gogh)"
 -- config.color_scheme = "Argonaut (Gogh)"
-config.color_scheme = "Everforest Dark (Gogh)"
+-- config.color_scheme = "Everforest Dark (Gogh)"
+config.color_scheme = "Monokai Pro (Gogh)"
 -- config.color_scheme = "Obsidian (Gogh)"
 -- config.color_scheme = "Liquid Carbon Transparent (Gogh)"
 -- config.color_scheme = "Summer Pop (Gogh)"
@@ -159,9 +160,9 @@ config.keys = {
 
 
 config.colors = {
-    --     background = summer_colors.primary.background,
-    -- foreground = summer_colors.primary.foreground,
-    --     cursor_bg = summer_colors.primary.foreground,
+    background = "#2d353b",
+    foreground = "#eeeec0",
+    cursor_bg = summer_colors.primary.foreground,
 }
 
 return config
