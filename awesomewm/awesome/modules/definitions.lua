@@ -21,7 +21,7 @@ M.opacity = 1.0
 -- M.opacity = 0.8
 M.colors = {}
 
-local main_color = THEME.get_current_theme().color13 -- Adjust the color as needed
+local main_color = THEME.get_current_theme().color14 -- Adjust the color as needed
 local shine_color = '#ffffff'
 
 -- Create a linear gradient pattern
@@ -39,8 +39,6 @@ local gradient = gears.color.create_linear_pattern {
 M.text_pango_wrapper = function(text)
     return string.format('<span foreground=\'%s\'><big><b>%s</b></big></span>', M.colors.unselected_fg, text)
 end
-
-local background_color = "#2d353b"
 
 beautiful.useless_gap = 8
 beautiful.border_width = 0
