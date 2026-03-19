@@ -6,7 +6,7 @@ local M = {}
 local keys_callback = {}
 
 setmetatable(keys_callback, {
-    __index = utils_metatables.default_value_on_index(function () return {} end)
+    __index = utils_metatables.default_value_on_index(function() return {} end)
 })
 
 function M.register_key(key, callback)

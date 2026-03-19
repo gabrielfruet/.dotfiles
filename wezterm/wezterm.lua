@@ -35,7 +35,7 @@ if wezterm.target_triple:match("darwin") then
     config.font_size = 16
 end
 
-config.line_height = 1.3
+config.line_height = 1.5
 
 config.font = wezterm.font_with_fallback {
     {
@@ -78,7 +78,7 @@ function file_exists(name)
     end
 end
 
-config.window_background_opacity = file_exists(HOME .. '/.gnome') and 0.98 or 0.80
+config.window_background_opacity = file_exists(HOME .. '/.gnome') and 0.98 or 0.8
 config.window_close_confirmation = 'NeverPrompt'
 config.window_decorations = "RESIZE" -- Removes the top bar (title bar)
 config.enable_tab_bar = false

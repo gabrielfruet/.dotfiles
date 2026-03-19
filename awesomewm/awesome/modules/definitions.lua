@@ -10,7 +10,7 @@ beautiful.hotkeys_font = 'Roboto 12'
 beautiful.hotkeys_description_font = 'Roboto 12'
 beautiful.systray_skip_bg = true
 THEME = beautiful.xresources
-beautiful.bg_normal = "#1d252b"
+beautiful.bg_normal = "#2d353b"
 
 local M = {}
 

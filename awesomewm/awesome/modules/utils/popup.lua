@@ -9,11 +9,11 @@ local groups_popup = {}
 local event_group_handler = {}
 
 setmetatable(groups_popup, {
-    __index = utils_metatables.default_value_on_index(function () return {} end)
+    __index = utils_metatables.default_value_on_index(function() return {} end)
 })
 
 setmetatable(event_group_handler, {
-    __index = utils_metatables.default_value_on_index(function () return {} end)
+    __index = utils_metatables.default_value_on_index(function() return {} end)
 })
 
 --- Adds a popup or a table of popups to a specific group.
@@ -21,7 +21,7 @@ setmetatable(event_group_handler, {
 -- @param popups A popup identifier or a table of popup identifiers.
 -- @param group The group identifier to which the popups will be added.
 function M.add_popup_to_group(popups, group)
-    for _,pop in pairs(popups) do
+    for _, pop in pairs(popups) do
         groups_popup[group] = groups_popup[group] or {}
         table.insert(groups_popup[group], pop)
     end
@@ -44,11 +44,11 @@ function M.register_event_to_group(event, group, callback, call_when)
 end
 
 function M.impl_is_mouse_ontop(popup)
-    popup:connect_signal('mouse:enter', function ()
+    popup:connect_signal('mouse:enter', function()
         popup.is_mouse_ontop = true
     end)
 
-    popup:connect_signal('mouse:leave', function ()
+    popup:connect_signal('mouse:leave', function()
         popup.is_mouse_ontop = false
     end)
 end
