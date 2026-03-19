@@ -119,7 +119,8 @@ config.initial_rows = 20
 -- config.color_scheme = "Seti UI (Gogh)"
 -- config.color_scheme = "Seti UI (Gogh)"
 -- config.color_scheme = "Argonaut (Gogh)"
-config.color_scheme = "Argonaut (Gogh)"
+-- config.color_scheme = "Argonaut (Gogh)"
+config.color_scheme = "Everforest Dark (Gogh)"
 -- config.color_scheme = "Obsidian (Gogh)"
 -- config.color_scheme = "Liquid Carbon Transparent (Gogh)"
 -- config.color_scheme = "Summer Pop (Gogh)"
@@ -128,12 +129,39 @@ config.color_scheme = "Argonaut (Gogh)"
 
 config.macos_window_background_blur = 30
 
+local act = wezterm.action
+
+config.keys = {
+    {
+        key = 'T',
+        mods = 'CTRL|SHIFT',
+        action = act.InputSelector {
+            title = 'Select Theme',
+            choices = (function()
+                local themes = {}
+                -- Get all built-in schemes
+                for name, _ in pairs(wezterm.get_builtin_color_schemes()) do
+                    table.insert(themes, { label = name })
+                end
+                table.sort(themes, function(a, b) return a.label < b.label end)
+                return themes
+            end)(),
+            fuzzy = true,
+            action = wezterm.action_callback(function(window, pane, id, label)
+                if label then
+                    window:set_config_overrides({ color_scheme = label })
+                end
+            end),
+        },
+    },
+}
+
 
 
 config.colors = {
-    background = summer_colors.primary.background,
-    foreground = summer_colors.primary.foreground,
-    cursor_bg = summer_colors.primary.foreground,
+    --     background = summer_colors.primary.background,
+    -- foreground = summer_colors.primary.foreground,
+    --     cursor_bg = summer_colors.primary.foreground,
 }
 
 return config

@@ -10,6 +10,7 @@ beautiful.hotkeys_font = 'Roboto 12'
 beautiful.hotkeys_description_font = 'Roboto 12'
 beautiful.systray_skip_bg = true
 THEME = beautiful.xresources
+beautiful.bg_normal = "#1d252b"
 
 local M = {}
 
@@ -39,12 +40,14 @@ M.text_pango_wrapper = function(text)
     return string.format('<span foreground=\'%s\'><big><b>%s</b></big></span>', M.colors.unselected_fg, text)
 end
 
+local background_color = "#2d353b"
+
 beautiful.useless_gap = 8
 beautiful.border_width = 0
 beautiful.tasklist_bg_normal = THEME.get_current_theme().background .. '00'
 
 --systray
-beautiful.bg_systray = THEME.get_current_theme().backgroundd
+beautiful.bg_systray = THEME.get_current_theme().background
 
 --beautiful.taglist_bg_focus = THEME.get_current_theme().color10
 beautiful.taglist_bg_focus = gradient
