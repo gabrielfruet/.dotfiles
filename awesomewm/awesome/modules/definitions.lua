@@ -5,7 +5,7 @@ local naughty = require("naughty")
 
 beautiful.init(gears.filesystem.get_themes_dir() .. "xresources/theme.lua")
 -- beautiful.font = 'JetBrainsMonoNerdFontMono-ExtraBold 9'
-beautiful.font = 'Roboto 9'
+beautiful.font = 'Roboto 11'
 beautiful.hotkeys_font = 'Roboto 12'
 beautiful.hotkeys_description_font = 'Roboto 12'
 beautiful.systray_skip_bg = true
@@ -16,7 +16,7 @@ local M = {}
 
 -- M.opacity_hex = 'cc'
 -- M.opacity_hex = '7F'
-M.opacity_hex = '90'
+M.opacity_hex = '50'
 M.opacity = 1.0
 -- M.opacity = 0.8
 M.colors = {}
@@ -28,7 +28,7 @@ local shine_color = '#ffffff'
 -- Adjust the coordinates to control the direction of the gradient
 local gradient = gears.color.create_linear_pattern {
     type = "linear",
-    from = { 0, -30 },      -- Gradient starts from the top
+    from = { 0, -40 },      -- Gradient starts from the top
     to = { 0, 15 },         -- Gradient ends 30 pixels down
     stops = {
         { 0, shine_color }, -- Start with a shine at the top
