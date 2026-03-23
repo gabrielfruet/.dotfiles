@@ -15,3 +15,4 @@ source $CURRDIR/gum_colors.sh
 source $CURRDIR/globalgit.sh
 source $CURRDIR/devcontainer.sh
 source $CURRDIR/worktree.sh
+source $CURRDIR/gitfzf.sh
