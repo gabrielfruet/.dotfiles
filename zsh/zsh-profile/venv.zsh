@@ -6,11 +6,13 @@ autoload -U add-zsh-hook
 # Define the function
 auto_activate_venv() {
     if [[ -f .venv/bin/activate ]]; then
-        export VIRTUAL_ENV_DISABLE_PROMPT=1
         source .venv/bin/activate
     # Deactivate if leaving the environment directory
     elif [[ -n "$VIRTUAL_ENV" && ! -f .venv/bin/activate ]]; then
-        deactivate
+        if typeset -f deactivate > /dev/null; then
+            VIRTUAL_ENV=""
+            deactivate
+        fi
     fi
 }
 
