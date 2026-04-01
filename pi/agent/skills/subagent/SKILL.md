@@ -7,6 +7,8 @@ description: Spawn a subagent to run a task. Use when you want to delegate work 
 
 Spawn a subagent to run a task independently.
 
+The script is at `~/.pi/agent/skills/subagent/subagent.sh`
+
 ## Usage
 
 ```bash
