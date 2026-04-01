@@ -1,0 +1,68 @@
+#!/bin/bash
+# Simple FZF-based SSH keychain selector
+# Usage: keychain          # interactive select
+#        keychain -s       # show current
+#        keychain -c       # clear/disable
+
+KEYCHAINS_DIR="${HOME}/.ssh/keychains"
+CURRENT_FILE="${HOME}/.ssh/.current_keychain"
+
+# Ensure keychains directory exists
+mkdir -p "$KEYCHAINS_DIR"
+
+case "${1:-}" in
+    -s|--show)
+        if [ -f "$CURRENT_FILE" ]; then
+            echo "Current: $(cat "$CURRENT_FILE")"
+        else
+            echo "No keychain selected"
+        fi
+        ;;
+    -c|--clear)
+        ssh-add -D 2>/dev/null
+        rm -f "$CURRENT_FILE"
+        echo "Keychain cleared"
+        ;;
+    *)
+        # Get list of keychains
+        keychains=$(ls "$KEYCHAINS_DIR"/*.txt 2>/dev/null | xargs -I{} basename {} .txt)
+
+        if [ -z "$keychains" ]; then
+            echo "No keychains found in $KEYCHAINS_DIR"
+            echo "Create files like: ~/.ssh/keychains/personal.txt"
+            exit 1
+        fi
+
+        # FZF selection with preview
+        selected=$(echo "$keychains" | fzf \
+            --prompt="Select keychain: " \
+            --height=~50% \
+            --border \
+            --reverse \
+            --preview="cat ${KEYCHAINS_DIR}/{}.txt" \
+            --preview-window="right:50%:wrap")
+
+        if [ -n "$selected" ]; then
+            # Clear existing keys
+            ssh-add -D 2>/dev/null
+
+            # Load keys from selected keychain
+            keys_file="${KEYCHAINS_DIR}/${selected}.txt"
+            while IFS= read -r key; do
+                # Skip empty lines and comments
+                [ -z "$key" ] || [[ "$key" =~ ^# ]] && continue
+                # Expand ~ to $HOME
+                key="${key/#\~/$HOME}"
+                if [ -f "$key" ]; then
+                    ssh-add "$key" 2>/dev/null || echo "Failed to add: $key"
+                else
+                    echo "Key not found: $key"
+                fi
+            done < "$keys_file"
+
+            # Save current keychain
+            echo "$selected" > "$CURRENT_FILE"
+            echo "Activated: $selected"
+        fi
+        ;;
+esac
