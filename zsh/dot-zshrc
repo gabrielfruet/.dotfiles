@@ -139,3 +139,5 @@ fi
 
 # opencode
 export PATH=/home/fruet/.opencode/bin:$PATH
+
+. "$HOME/.cargo/env"
