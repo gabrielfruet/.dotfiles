@@ -1,6 +1,6 @@
 ---
 name: git-workflow
-description: Git commit workflow. Load when staging or committing. Never git add -A.
+description: Git commit workflow. Load when staging or committing. 
 ---
 
 # Git Workflow
