@@ -1,6 +1,6 @@
 ---
 name: plan-mode
-description: Enforce planning before acting. Use when user says "plan", "create a plan", or "before implementing".
+description: Enforce planning before acting. Load when user says "plan", "create a plan", or "before implementing".
 ---
 
 ## Plan Mode Rules
