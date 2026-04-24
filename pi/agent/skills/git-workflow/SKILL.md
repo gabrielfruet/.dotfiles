@@ -19,8 +19,16 @@ description: Git commit workflow. Load when staging or committing.
 3. Identify logical changes
 4. Stage intentionally (`git add <file>` or `git add -p`)
 5. Run `git diff --staged` to verify
-6. Commit with meaningful message
+6. Commit with concise message (see below)
 7. Repeat for remaining changes
+
+## Commit Messages
+
+- **Subject line**: max 72 characters
+- **Format**: `type: description` (e.g., `feat: add mask function`)
+- **No body/description** unless absolutely needed
+- **No bullet points or paragraphs**
+- Keep it scannable in `git log`
 
 ## Multiple Commits
 
