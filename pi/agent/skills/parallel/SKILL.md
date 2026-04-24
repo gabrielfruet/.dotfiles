@@ -5,64 +5,90 @@ description: Run multiple commands in parallel and aggregate outputs. Load when 
 
 # Parallel Execution
 
-Run independent commands concurrently.
+Run independent commands concurrently for efficiency.
 
-⚠️ **Danger: Temp file race conditions**  
-When running commands that use temp files (like `ddgs`), ensure they write to a **dedicated temp directory** (e.g., `/tmp/agent-research/`), not the current working directory. Variable temp paths or `$$` in filenames cause pollution across parallel invocations.
-
-## Basic Pattern
+## Working Pattern (ddgs)
 
 ```bash
-mkdir -p /tmp/my-temp
-{
-    cmd1 > /tmp/my-temp/r1.txt &
-    PID1=$!
-    cmd2 > /tmp/my-temp/r2.txt &
-    PID2=$!
-} &
-PIDS+=($!)
-wait $PID1 $PID2
-cat /tmp/my-temp/r1.txt /tmp/my-temp/r2.txt
+mkdir -p /tmp/parallel-work
+
+(ddgs text -q "query1" -m 15 > /tmp/parallel-work/01.txt) &
+PID1=$!
+(ddgs text -q "query2" -m 15 > /tmp/parallel-work/02.txt) &
+PID2=$!
+(ddgs text -q "query3" -m 15 > /tmp/parallel-work/03.txt) &
+PID3=$!
+(ddgs text -q "query4" -m 15 > /tmp/parallel-work/04.txt) &
+PID4=$!
+
+wait $PID1 $PID2 $PID3 $PID4
+cat /tmp/parallel-work/0*.txt
 ```
 
-## Batch Pattern
+## Generic Pattern
 
 ```bash
 mkdir -p /tmp/my-temp
+
+(cmd1 > /tmp/my-temp/r1.txt) &
+PID1=$!
+(cmd2 > /tmp/my-temp/r2.txt) &
+PID2=$!
+(cmd3 > /tmp/my-temp/r3.txt) &
+PID3=$!
+
+wait $PID1 $PID2 $PID3
+cat /tmp/my-temp/r*.txt
+```
+
+## Batch Pattern (Loop)
+
+```bash
+mkdir -p /tmp/parallel-work
 PIDS=()
+
 for item in "${ITEMS[@]}"; do
-    process "$item" > "/tmp/my-temp/r_$item.txt" &
+    (process "$item" > "/tmp/parallel-work/r_$item.txt") &
     PIDS+=($!)
 done
+
 wait "${PIDS[@]}"
-cat /tmp/my-temp/r_*.txt
+cat /tmp/parallel-work/r_*.txt
 ```
 
 ## With Timeout
 
 ```bash
-timeout 30s cmd > /tmp/my-temp/result.txt &
+(timeout 60s cmd > /tmp/my-temp/result.txt) &
 ```
 
 ## Error Handling
 
 ```bash
+(cmd > /tmp/my-temp/r.txt) &
+PID=$!
+
 if wait $PID; then
+    echo "Success"
     cat /tmp/my-temp/r.txt
 else
-    echo "Failed: $?"
+    echo "Failed with exit code: $?"
 fi
 ```
 
-## Web Search (ddgs) Pattern
+## Guidelines
 
-```bash
-mkdir -p /tmp/agent-research
-{
-    ./web-search.sh "query1" > /tmp/agent-research/s1.txt &
-    ./web-search.sh "query2" > /tmp/agent-research/s2.txt &
-} &
-PIDS+=($!)
-wait $PIDS
-cat /tmp/agent-research/s1.txt /tmp/agent-research/s2.txt
-```
+| Guideline | Reason |
+|-----------|--------|
+| **Use 4-6 concurrent** | Sweet spot for most systems |
+| **Unique temp dir per run** | Avoids file collisions |
+| **Use absolute paths** | Avoids cwd confusion |
+| **Always `wait`** | Ensures all processes finish |
+| **Parenthesize each bg job** | `(cmd &)` not `{ cmd & }` |
+
+⚠️ **Critical: Use subshells for background jobs**  
+Pattern `(command > output.txt) &` works reliably.  
+Pattern `{ command > output.txt & }` does NOT work with ddgs.
+
+⚠️ **Danger: Temp file race conditions**  
+Never use `$$` or variable temp paths in filenames across parallel invocations.
