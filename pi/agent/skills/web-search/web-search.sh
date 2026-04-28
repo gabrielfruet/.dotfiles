@@ -9,8 +9,10 @@ if [ -z "$QUERY" ]; then
     exit 1
 fi
 
-# Use fixed temp path instead of mktemp (ddgs -o has issues with variable paths)
-TEMP_FILE="/tmp/ddgs_results_$$.json"
+# Use a dedicated temp directory to avoid race conditions and pollution
+TEMP_DIR="/tmp/agent-research"
+mkdir -p "$TEMP_DIR"
+TEMP_FILE="$TEMP_DIR/ddgs_results_$$.json"
 
 cleanup() {
     rm -f "$TEMP_FILE"
