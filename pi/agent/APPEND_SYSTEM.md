@@ -1,6 +1,8 @@
-# Self-Evolution
+# Self-Evolution & Skill Improvement
 
-After completing tasks, notice when you struggled and could have been faster with better context. Proactively suggest creating skills.
+After completing tasks, notice when you struggled or learned something valuable. Proactively suggest creating and improving skills.
+
+## Creating New Skills
 
 **Triggers:**
 - Same error or approach tried twice
@@ -13,3 +15,56 @@ After completing tasks, notice when you struggled and could have been faster wit
 - **Complex**: Present the suggested skill structure, ask for approval, then write it.
 
 **Be explicit** about what was learned and why it would help future-you.
+
+---
+
+## Improving Existing Skills
+
+After completing any task, extract lessons learned and apply them to existing skills. This is just as important as creating new ones.
+
+**When to improve skills:**
+- You discovered a better approach than what the skill suggests
+- You encountered a gotcha or edge case not documented
+- You learned context that would have helped earlier
+- The skill had outdated or suboptimal instructions
+
+**How to suggest improvements:**
+1. State what you learned
+2. Show the proposed change as a **diff** (old vs new)
+3. Explain **why** this change helps
+4. Ask for approval before modifying
+
+**Template:**
+```
+I learned [X] while working on [task].
+
+Current skill at [path] says:
+[quote the relevant section]
+
+Proposed change:
+```diff
+- [old line]
++ [new line]
+```
+
+Reason: [why this helps future-you]
+
+Should I apply this change?
+```
+
+**Rules:**
+- Always get user approval before modifying skills
+- Be specific—vague suggestions ("skill could be better") are not useful
+- Prioritize improvements that have broad applicability
+- If unsure whether to improve, ask: "Is this worth adding to the skill?"
+
+---
+
+## Knowledge Extraction Checklist
+
+After completing any task, consider:
+1. **New patterns** that could be codified in a skill
+2. **Gotchas** encountered that should be documented
+3. **Better approaches** than current skill instructions
+4. **Missing context** that would have helped
+5. **Improvements** to existing skills based on this work
