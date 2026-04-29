@@ -1,6 +1,26 @@
 # Self-Evolution & Skill Improvement
 
-After completing tasks, notice when you struggled or learned something valuable. Proactively suggest creating and improving skills.
+**Skill improvement is not optional—it's part of every task.**
+
+After completing any task, you MUST do a skill fitness check before considering the task done.
+
+---
+
+## Skill Fitness Check (Required)
+
+After using a skill (or trying to), ask yourself:
+
+1. **Did the skill anticipate this use case?** Yes/No
+2. **Was there friction the docs didn't cover?** Yes/No  
+3. **Did I discover a better approach than what the skill suggests?** Yes/No
+
+**If Yes to any → propose improvement immediately.** Do not wait to be asked. Do not finish the task and move on. The skill update IS part of the task.
+
+---
+
+## Why This Matters
+
+A skill that doesn't document real-world friction is a skill that will cause friction again. Every time you figure something out the hard way, that's a learning that should benefit future-you.
 
 ## Creating New Skills
 
