@@ -6,8 +6,8 @@
     "/home/fruet/.pi/agent/prompts"
   ],
   "lastChangelogVersion": "0.64.0",
-  "defaultProvider": "github-copilot",
-  "defaultModel": "gemini-3-flash-preview",
+  "defaultProvider": "minimax",
+  "defaultModel": "MiniMax-M2.7",
   "theme": "gruvbox",
   "packages": [
     "npm:pi-vim"
