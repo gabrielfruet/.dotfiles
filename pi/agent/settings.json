@@ -5,9 +5,9 @@
   "prompts": [
     "/home/fruet/.pi/agent/prompts"
   ],
-  "lastChangelogVersion": "0.64.0",
-  "defaultProvider": "minimax",
-  "defaultModel": "MiniMax-M2.7",
+  "lastChangelogVersion": "0.72.1",
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-5.4-mini",
   "theme": "gruvbox",
   "packages": [
     "npm:pi-vim"
