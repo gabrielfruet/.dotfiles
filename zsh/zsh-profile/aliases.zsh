@@ -23,4 +23,4 @@ alias dcd='docker image prune -f --filter "dangling=true"'
 alias wt='worktree-switch'
 alias fin='notify-finish'
 alias copyimg="xclip -selection clipboard -t image/png -i"
-alias gdmh='master_branch=$(git remote show origin | sed -n "/HEAD branch/s/.*: //p"); git diff "$master_branch"..HEAD'
+alias gdmh='master_branch=$(git remote show origin | sed -n "/HEAD branch/s/.*: //p"); git diff "$master_branch"'
