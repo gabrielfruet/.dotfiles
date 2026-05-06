@@ -16,11 +16,12 @@ description: Git commit workflow. Load when staging or committing.
 
 1. Run `git diff --staged`
 2. Run `git diff`
-3. Identify logical changes
-4. Stage intentionally (`git add <file>` or `git add -p`)
-5. Run `git diff --staged` to verify
-6. Commit with concise message (see below)
-7. Repeat for remaining changes
+3. Run `git status` and flag unrelated modified files
+4. Identify logical changes
+5. Stage intentionally (`git add <file>` or `git add -p`)
+6. Run `git diff --staged` to verify
+7. Commit with concise message (see below)
+8. Repeat for remaining changes
 
 ## Commit Messages
 
