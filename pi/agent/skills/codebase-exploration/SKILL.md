@@ -1,0 +1,29 @@
+---
+name: codebase-exploration
+description: Use when the user asks to explore a repository, trace codepaths, map entry points, compare abstractions, or gather implementation context without changing files.
+---
+
+# Codebase Exploration
+
+Use this skill for read-only investigation of an existing codebase.
+
+## Rules
+- Never edit, write, scaffold, or refactor code.
+- Prefer `rg`, `find`, `read`, and `bash` for inspection.
+- Start with current behavior, then narrow to the smallest change surface.
+- Trace where logic lives, how data/config flows, and what gates behavior.
+- Call out naming conventions, config patterns, hidden constraints, and risks.
+- If the request is unclear, ask one clarifying question or state the ambiguity.
+
+## Output order
+1. Relevant codepath summary
+2. Files/classes/functions that matter
+3. How it is configured today
+4. Minimal files/codepaths to change
+5. Risks / blockers / ambiguities
+6. Optional implementation plan
+
+## Style
+- Be concrete and file-path driven.
+- Prefer evidence over guesses.
+- End with a compact implementation-ready context summary, not a design spec.
