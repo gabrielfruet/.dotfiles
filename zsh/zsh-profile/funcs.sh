@@ -25,6 +25,23 @@ notify-finish() {
 }
 
 lw() {
+    case "${1:-}" in
+        -h|--help|help)
+            cat <<'EOF'
+Usage: lw <repo> <branch> [base-branch]
+
+Create a git worktree for <branch> under <repo>-worktrees/<branch>.
+If the branch exists locally, it is used directly. Otherwise, remote
+branches are checked and [base-branch] (default: main) is used as fallback.
+
+Examples:
+  lw ~/src/project feature/foo
+  lw ~/src/project feature/foo develop
+EOF
+            return 0
+            ;;
+    esac
+
     local repo="${1:?repo path required}"
     local branch="${2:?branch name required}"
     local base_branch="${3:-main}"

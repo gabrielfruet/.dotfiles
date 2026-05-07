@@ -10,6 +10,7 @@ Use this skill for read-only investigation of an existing codebase.
 ## Rules
 - Never edit, write, scaffold, or refactor code.
 - Prefer `rg`, `find`, `read`, and `bash` for inspection.
+- Before editing or citing a file, confirm the active checkout matches the runtime import path when multiple worktrees/clones may exist (e.g. check `pwd`, `realpath src`, and `python -c 'import pkg; print(pkg.__file__)'`).
 - If the needed source lives in a GitHub repo and raw URLs fail, use `gh api repos/<owner>/<repo>/contents/<path>?ref=<sha>` or `gh api search/code` as a fallback.
 - Start with current behavior, then narrow to the smallest change surface.
 - Trace where logic lives, how data/config flows, and what gates behavior.
