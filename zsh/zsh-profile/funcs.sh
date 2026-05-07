@@ -46,40 +46,45 @@ EOF
     local branch="${2:?branch name required}"
     local base_branch="${3:-main}"
     local safe_branch="${branch//\//-}"
-    local worktrees="${repo%/}-worktrees"
+    local repo_root="$(git -C "$repo" rev-parse --show-toplevel 2>/dev/null)" || {
+        echo "not a git repo: $repo"
+        return 1
+    }
+    local repo_name="$(basename "$repo_root")"
+    local worktrees="$(dirname "$repo_root")/${repo_name}-worktrees"
     local wt="$worktrees/$safe_branch"
     local remote_ref=""
     local has_local_branch=0
 
-    if ! git -C "$repo" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    if ! git -C "$repo_root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
         echo "not a git repo: $repo"
         return 1
     fi
 
-    if git -C "$repo" show-ref --verify --quiet "refs/heads/$branch"; then
+    if git -C "$repo_root" show-ref --verify --quiet "refs/heads/$branch"; then
         has_local_branch=1
     else
         while read -r remote; do
             [ -z "$remote" ] && continue
-            if git -C "$repo" ls-remote --exit-code --heads "$remote" "$branch" >/dev/null 2>&1; then
+            if git -C "$repo_root" ls-remote --exit-code --heads "$remote" "$branch" >/dev/null 2>&1; then
                 remote_ref="$remote/$branch"
                 break
             fi
-        done < <(git -C "$repo" remote)
+        done < <(git -C "$repo_root" remote)
     fi
 
     mkdir -p "$worktrees" || return 1
 
     if [ "$has_local_branch" -eq 1 ]; then
-        git -C "$repo" worktree add "$wt" "$branch" || return 1
+        git -C "$repo_root" worktree add "$wt" "$branch" || return 1
     elif [ -n "$remote_ref" ]; then
-        git -C "$repo" worktree add -b "$branch" "$wt" "$remote_ref" || return 1
+        git -C "$repo_root" worktree add -b "$branch" "$wt" "$remote_ref" || return 1
     else
-        git -C "$repo" worktree add -b "$branch" "$wt" "$base_branch" || return 1
+        git -C "$repo_root" worktree add -b "$branch" "$wt" "$base_branch" || return 1
     fi
 
-    if [ -e "$repo/.venv" ] && [ ! -e "$wt/.venv" ]; then
-        ln -s "$repo/.venv" "$wt/.venv"
+    if [ -e "$repo_root/.venv" ] && [ ! -e "$wt/.venv" ]; then
+        ln -s "$repo_root/.venv" "$wt/.venv"
     fi
 
     cd "$wt" || return 1
