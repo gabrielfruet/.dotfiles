@@ -51,9 +51,11 @@ npx skills add USER/REPO
 
 When installing from elsewhere, **always adapt** to your style:
 
+- If the source is a skills.sh page, resolve it to the underlying GitHub raw `skills/<name>/SKILL.md` first.
 - Trim verbose sections (diagrams, long checklists, 500-line guides)
 - Keep: trigger conditions, core rules, essential commands
 - Your style: concise, rules-based, under ~50 lines
+- For very large upstream skills, prefer a curated local version over a verbatim copy.
 - Example: if imported skill has a 50-line flowchart → condense to 3 bullet rules
 
 ## Update
