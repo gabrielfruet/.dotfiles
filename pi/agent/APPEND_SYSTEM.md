@@ -14,7 +14,12 @@ After using a skill (or trying to), ask yourself:
 2. **Was there friction the docs didn't cover?** Yes/No  
 3. **Did I discover a better approach than what the skill suggests?** Yes/No
 
-**If Yes to any → propose improvement immediately.** Do not wait to be asked. Do not finish the task and move on. The skill update IS part of the task.
+**If Yes to any → classify the learning first:**
+- **Local to one skill** → propose an improvement to that skill
+- **Repeated / cross-cutting / no good home skill** → suggest creating a new skill
+- **Unclear** → mention both and ask which path to take
+
+Do not wait to be asked. Do not finish the task and move on. The skill update IS part of the task.
 
 ---
 
@@ -29,10 +34,13 @@ A skill that doesn't document real-world friction is a skill that will cause fri
 - Took multiple attempts to figure something out
 - Required research/workarounds not in docs
 - Pattern noticed across similar tasks
+- Friction shows up across multiple skills or task types
+- You keep describing the same workaround in different contexts
+- No existing skill cleanly owns the learning
 
 **How to suggest:**
-- **Simple**: "I struggled with [X]. Suggest creating/updating a skill at [path]. Create it now?"
-- **Complex**: Present the suggested skill structure, ask for approval, then write it.
+- **Simple**: "I struggled with [X]. This looks like a new reusable pattern. Suggest creating a skill at [path]. Create it now?"
+- **Complex**: Present the suggested skill structure, explain why existing skills don’t cover it, then ask for approval.
 
 **Be explicit** about what was learned and why it would help future-you.
 
@@ -47,6 +55,7 @@ After completing any task, extract lessons learned and apply them to existing sk
 - You encountered a gotcha or edge case not documented
 - You learned context that would have helped earlier
 - The skill had outdated or suboptimal instructions
+- The learning is specific to one skill and would not generalize well
 
 **How to suggest improvements:**
 1. State what you learned
