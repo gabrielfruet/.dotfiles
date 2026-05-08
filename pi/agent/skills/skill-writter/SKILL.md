@@ -19,7 +19,7 @@ Tips:
 - Prefer simple list of rules
 - Do not repeat yourself.
 - Description helps agent decide when to use
-- Frontmatter must match directory name
+- Frontmatter must match directory name; quote any values containing `:` or other YAML-sensitive characters
 - Can reference other skills - agent can load them with `skill(name="other-skill")`
 - In `.pi/agent/skills/` — e.g., `~/.pi/agent/skills/skill-name/SKILL.md`
 
