@@ -1,26 +1,39 @@
 ---
 name: gh-cli
-description: Use when working with GitHub from the command line with gh: auth, repositories, issues/PRs, Actions, releases, API requests, aliases, and automation.
+description: "Use when working with GitHub from the command line with gh for auth, repo/issue/PR triage, reviews, Actions, releases, API requests, aliases, and automation."
 ---
 
 # gh-cli
 
-Use gh for GitHub CLI tasks. Prefer JSON + jq for scripted output.
+Use gh for GitHub tasks. Prefer JSON + jq for scripted output.
 
 ## Rules
-- Check auth first: `gh auth status`
-- Use `gh <group> --help` when unsure; do not memorize long option lists
-- Prefer `--json`, `--jq`, `--template`, and `--paginate` for automation
-- Use `gh pr ...` for PR work; this skill replaces the separate `github-pr` helper
-- Scope cross-repo work with `--repo owner/name`
+- Check auth first: `gh auth status`.
+- Use `gh <group> --help` when unsure.
+- Prefer `--json`, `--jq`, `--template`, and `--paginate`.
+- Use `gh pr ...` for PR work.
+- Scope cross-repo work with `--repo owner/name`.
+
+## Triage recipes
+```bash
+gh repo view --json nameWithOwner,url -q '.nameWithOwner + " " + .url'
+gh issue list --state all --limit 20 --json number,title,state,labels,author
+gh pr list --state open --limit 20 --json number,title,author,updatedAt
+gh pr list --state merged --limit 20 --json number,title,mergedAt,author
+```
+
+## Review inspection
+```bash
+gh pr view 123 --json reviews,comments,files
+```
+- Group comments by reviewer and ignore empty/bot noise when summarizing.
+- If review data looks incomplete, fall back to `gh api repos/<owner>/<repo>/pulls/<num>/reviews`.
 
 ## Common commands
 ```bash
 gh auth login
 gh auth status
-gh repo view --web
 gh repo clone owner/repo
-gh issue list
 gh pr view 123 --web
 gh pr checkout 123
 gh run list
