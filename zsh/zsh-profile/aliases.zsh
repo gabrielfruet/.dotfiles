@@ -21,6 +21,7 @@ alias bt='bat --color=always --theme=gruvbox-dark'
 alias gg='_git_global'
 alias dcd='docker image prune -f --filter "dangling=true"'
 alias wt='worktree-switch'
+alias wtr='worktree-remove'
 alias fin='notify-finish'
 alias copyimg="xclip -selection clipboard -t image/png -i"
 gdmh() {

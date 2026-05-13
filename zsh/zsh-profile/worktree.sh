@@ -11,6 +11,24 @@ _label_worktree() {
     done
 }
 
+worktree-remove () {
+    selected_worktree=$(git worktree list | _label_worktree | column -t | fzf --ansi | awk '{print $1}')
+
+    if [[ -z "$selected_worktree" ]]; then
+        echo "No worktree selected"
+        return 1
+    fi
+
+    sure_you_want_to_remove=$(printf "Yes\nNo" | fzf --prompt="Are you sure you want to remove $selected_worktree? (Yes/No) " --height=3 --border=rounded)
+
+    if [[ "$sure_you_want_to_remove" != "Yes" ]]; then
+        echo "Aborting worktree removal."
+        return 1
+    fi
+
+    git worktree remove $selected_worktree
+}
+
 worktree-switch () {
     dir=$(
         git worktree list |
