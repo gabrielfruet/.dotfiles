@@ -11,6 +11,7 @@ description: Git commit workflow. Load when staging or committing.
 - Show diff before every commit
 - Separate commits by logical change
 - Commit automatically after review
+- If the task includes a PR description or plan, inspect `.github/pull_request_template.md` and any relevant files in `.github/`
 
 ## Commit Workflow
 
