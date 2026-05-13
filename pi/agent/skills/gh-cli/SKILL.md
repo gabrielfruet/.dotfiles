@@ -12,6 +12,8 @@ Use gh for GitHub tasks. Prefer JSON + jq for scripted output.
 - Use `gh <group> --help` when unsure.
 - Prefer `--json`, `--jq`, `--template`, and `--paginate`.
 - Use `gh pr ...` for PR work.
+- For new PRs, push the branch first; `gh pr create` needs a remote branch. Use `--head`
+  only for an already-pushed branch.
 - For multiline PR bodies, prefer `--body-file` (or a heredoc/file) instead of inline `--body` to avoid literal `\n` in GitHub.
 - For existing PRs, use `gh pr view <branch-or-number> --json isDraft,number,title,url,body` and `gh pr edit <number> --body-file <file>`.
 - Scope cross-repo work with `--repo owner/name`.
