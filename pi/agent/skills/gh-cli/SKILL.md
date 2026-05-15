@@ -1,6 +1,6 @@
 ---
 name: gh-cli
-description: "Use when working with GitHub from the command line with gh for auth, repo/issue/PR triage, reviews, Actions, releases, API requests, aliases, and automation."
+description: "Use when working with GitHub from the command line with gh for auth, repo/issue/PR triage, reviews, inline review comments, Actions, releases, API requests, aliases, and automation."
 ---
 
 # gh-cli
@@ -29,7 +29,9 @@ gh pr list --state merged --limit 20 --json number,title,mergedAt,author
 ## Review inspection
 ```bash
 gh pr view 123 --json reviews,comments,files
+gh api repos/<owner>/<repo>/pulls/123/comments --paginate
 ```
+- `gh pr view` gives review summaries and issue comments; fetch inline review comments separately with the PR comments API.
 - Group comments by reviewer and ignore empty/bot noise when summarizing.
 - If review data looks incomplete, fall back to `gh api repos/<owner>/<repo>/pulls/<num>/reviews`.
 
