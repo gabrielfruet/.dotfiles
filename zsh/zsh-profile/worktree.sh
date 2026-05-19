@@ -12,7 +12,7 @@ _label_worktree() {
 }
 
 worktree-remove () {
-    selected_worktree=$(git worktree list | _label_worktree | column -t | fzf --ansi | awk '{print $1}')
+    selected_worktree=$(git worktree list | _label_worktree | column -t | fzf --ansi | awk '{print $2}')
 
     if [[ -z "$selected_worktree" ]]; then
         echo "No worktree selected"
