@@ -13,12 +13,17 @@ description: Use when analyzing remote MLflow tracking servers from the CLI to i
 ## Workflow
 1. Find the experiment with `mlflow experiments search`, then confirm it with `mlflow experiments get -x <id>` or `-n <name>`.
 2. Inspect runs with `mlflow runs list --experiment-id <id>`; use `--view active_only|deleted_only|all` when needed.
-3. Describe candidate runs with `mlflow runs describe --run-id <run_id>` to capture params, metrics, tags, and artifact roots.
+3. Describe candidate runs with `mlflow runs describe --run-id <run_id>` to capture params, metrics, tags, artifact roots, and metric history context.
 4. Inspect artifacts with `mlflow artifacts list -r <run_id> [-a <path>]`, then download interesting paths with `mlflow artifacts download`.
 5. Export the full run table with `mlflow experiments csv -x <id> -o <file>` for offline sorting/comparison.
+6. If the run is/was launched on Slurm, compare MLflow status with the live job state before concluding.
 
 ## What to extract
 - best metrics and the run IDs that achieved them
+- final metrics and the gap to best metrics
+- metric history shape: steady rise, plateau, peak+decay, or collapse
+- runtime/perf: throughput, step time, GPU util, GPU memory, total time
+- run completeness: finished, truncated, or still running
 - key hyperparameters and data/version tags
 - artifact files that explain behavior (`MLmodel`, `requirements.txt`, `conda.yaml`, plots, checkpoints, logs)
 - repeated patterns across runs that suggest what changed
