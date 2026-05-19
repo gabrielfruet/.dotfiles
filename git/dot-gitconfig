@@ -10,9 +10,12 @@
 
 [merge]
     conflictStyle = zdiff3
+	tool = vimdiff
 
 [user]
 	email = gabrielfruet538@gmail.com
 	name = gabrielfruet
 [color]
 	ui = auto
+[diff]
+	tool = vimdiff
