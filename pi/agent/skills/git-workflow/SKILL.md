@@ -12,6 +12,7 @@ description: Git commit workflow. Load when staging or committing.
 - Separate commits by logical change
 - Commit automatically after review
 - If a commit hook rewrites files, re-run `git add` on the touched files before retrying the commit.
+- Before switching branches or popping a stash, check for untracked files that may conflict with tracked paths on the target branch; back them up first if needed.
 - If the task includes a PR description or plan, inspect `.github/pull_request_template.md` and any relevant files in `.github/`
 
 ## Commit Workflow
