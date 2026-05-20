@@ -7,6 +7,8 @@ description: Use when analyzing remote MLflow tracking servers from the CLI to i
 
 - Remote-first: assume `MLFLOW_TRACKING_URI` points to the target server; if it is missing, ask for the server URL before querying.
 - Prefer the installed MLflow `--help` / subcommand help first; use docs only to fill gaps.
+- If `mlflow` is not available, try the project environment (`uv run mlflow --help` or `.venv/bin/mlflow --help`) before giving up.
+- If MLflow is still unavailable, stop and report this to the user instead of silently falling back to another API/client.
 - Read-only only: use search/list/describe/export/download. Do not create, delete, restore, serve, or deploy.
 - Prefer `--output json` where supported and `mlflow experiments csv` for comparisons.
 
