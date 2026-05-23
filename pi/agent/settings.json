@@ -10,7 +10,8 @@
   "defaultModel": "gpt-5.4-mini",
   "theme": "gruvbox",
   "packages": [
-    "npm:pi-vim"
+    "npm:pi-vim",
+    "npm:pi-rtk-optimizer"
   ],
   "lsp": {
     "hookMode": "edit_write"

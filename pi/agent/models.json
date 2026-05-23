@@ -1,25 +1,51 @@
 {
-  "providers": {
-    "minimax": {
-      "baseUrl": "https://api.minimax.io/anthropic",
-      "api": "anthropic-messages",
-      "apiKey": "MINIMAX_API_KEY",
-      "models": [
-        {
-          "id": "MiniMax-M2.7",
-          "name": "MiniMax M2.7",
-          "reasoning": true,
-          "input": ["text"],
-          "contextWindow": 204800,
-          "maxTokens": 131072,
-          "cost": {
-            "input": 0.3,
-            "output": 1.2,
-            "cacheRead": 0,
-            "cacheWrite": 0
-          }
+    "providers": {
+        "lightly-qwen": {
+            "baseUrl": "http://compute-01-ubuntu-2x4090.tail9085c9.ts.net:8337/v1",
+            "api": "openai-chat-completions",
+            "apiKey": "None",
+            "models": [
+                {
+                    "id": "cyankiwi/Qwen3.6-27B-AWQ-BF16-INT4",
+                    "name": "Qwen3.6 27B (240k)",
+                    "tools": true,
+                    "reasoning": true,
+                    "contextWindow": 240000,
+                    "maxOutputTokens": 32768,
+                    "options": {
+                        "temperature": 0.6,
+                        "top_p": 0.95,
+                        "extraBody": {
+                            "top_k": 20,
+                            "presence_penalty": 0.0,
+                            "chat_template_kwargs": {
+                                "enable_thinking": true
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        "minimax": {
+            "baseUrl": "https://api.minimax.io/anthropic",
+            "api": "anthropic-messages",
+            "apiKey": "MINIMAX_API_KEY",
+            "models": [
+                {
+                    "id": "MiniMax-M2.7",
+                    "name": "MiniMax M2.7",
+                    "reasoning": true,
+                    "input": ["text"],
+                    "contextWindow": 204800,
+                    "maxTokens": 131072,
+                    "cost": {
+                        "input": 0.3,
+                        "output": 1.2,
+                        "cacheRead": 0,
+                        "cacheWrite": 0
+                    }
+                }
+            ]
         }
-      ]
     }
-  }
 }
