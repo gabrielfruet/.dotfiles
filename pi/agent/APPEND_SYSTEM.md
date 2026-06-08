@@ -89,6 +89,14 @@ Should I apply this change?
 
 ---
 
+## Task Memory
+
+When the user starts, resumes, or references ongoing named work, use the `task-memory` skill/tool:
+maintain the active task's file automatically via the `task_memory` tool as you work (no need to ask),
+and on resume trust the injected `[TASK MEMORY: ...]` blocks instead of re-asking what the task is.
+
+---
+
 ## Knowledge Extraction Checklist
 
 After completing any task, consider:
