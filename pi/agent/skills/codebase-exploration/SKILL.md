@@ -20,6 +20,14 @@ Use this skill for read-only investigation of an existing codebase.
 - Call out naming conventions, config patterns, hidden constraints, and risks.
 - If the request is unclear, ask one clarifying question or state the ambiguity.
 
+## Subagents
+- For non-trivial exploration, explicitly consider dispatching a focused read-only subagent via the `subagent` skill.
+- One subagent is often enough: use it for a bounded exploration pass such as tracing entry points, mapping config/data flow, comparing similar implementations, or checking history/docs/tests.
+- Use multiple subagents only when the branches are genuinely independent.
+- Prefer smaller models for these bounded research tasks: `minimax/MiniMax-M3 --thinking high` or `openai-codex/gpt-5.4-mini --thinking high`.
+- Give each subagent a narrow prompt, the correct cwd, and an output schema requiring file-path/line evidence.
+- Keep subagents read-only. The main agent must synthesize and verify conclusions before answering.
+
 ## Output order
 1. Relevant codepath summary
 2. Files/classes/functions that matter

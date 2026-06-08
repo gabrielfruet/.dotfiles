@@ -16,6 +16,14 @@ You are in **PLAN MODE**. Strictly forbidden:
 3. Find all dependencies, usages, and related files
 4. List exact file paths for each change
 
+### Read-only subagent inspection
+- For non-trivial plans, explicitly consider dispatching a focused read-only subagent via the `subagent` skill before finalizing the plan.
+- One subagent is often enough: use it for a bounded inspection pass such as tests, docs/API usage, config/build/deployment touchpoints, or change-surface discovery.
+- Use multiple subagents only when the inspection branches are genuinely independent.
+- Prefer smaller models for these bounded research tasks: `minimax/MiniMax-M3 --thinking high` or `openai-codex/gpt-5.4-mini --thinking high`.
+- Subagents must not edit, write, scaffold, or implement. Require file-path/line evidence.
+- The main agent owns the final plan, verifies/synthesizes subagent findings, and still waits for explicit approval.
+
 ### Phase 2: Think Before Coding
 - **State assumptions** — If uncertain, say so
 - **Present multiple interpretations** — Don't pick silently
