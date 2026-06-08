@@ -9,11 +9,12 @@ Cluster-first workflow for benchmark jobs.
 
 ## Rules
 
+0. If the hostname does not resolve, check `~/.ssh/config` for the actual SSH alias before assuming the host is unavailable.
 1. Always do the work on the target cluster host via SSH.
 2. If local Slurm tools are missing, do not switch to local execution.
 3. Sync changed files to the cluster before submitting.
 4. If possible, sync through git on the cluster repo/worktree; if not, use `rsync`/`scp`.
-5. Prefer an existing remote repo checkout or worktree over cloning inside the job.
+5. Prefer an existing remote repo checkout or worktree over cloning inside the job. If other experiments are running on the same host, use a dedicated worktree and never run job-time `git checkout` commands against a shared checkout.
 6. If a pinned commit is needed, verify it exists in the remote checkout before launch.
 7. Prefer `uv` if it already exists on the cluster.
 8. If `uv` is unavailable, use `python3.13` + `python -m venv` + `python -m pip`.

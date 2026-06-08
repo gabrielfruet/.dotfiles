@@ -13,10 +13,9 @@ description: Use before any creative work — features, components, functionalit
 2. **Ask questions** — one at a time, prefer multiple choice
 3. **Propose 2-3 approaches** — with trade-offs, lead with recommendation
 4. **Present design** — scaled to complexity, get approval section by section
-5. **Write spec** — save to `docs/YYYY-MM-DD-<topic>-design.md` and commit
-6. **Self-review** — fix placeholders, contradictions, ambiguity inline
-7. **User reviews spec** — wait for approval
-8. **Transition** — invoke `plan-mode` skill for implementation plan
+5. **Self-review** — fix placeholders, contradictions, ambiguity inline
+6. **User reviews spec** — wait for approval
+7. **Transition** — invoke `plan-mode` skill for implementation plan
 
 ## Key Rules
 
