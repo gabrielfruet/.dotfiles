@@ -5,9 +5,9 @@
   "prompts": [
     "/home/fruet/.pi/agent/prompts"
   ],
-  "lastChangelogVersion": "0.72.1",
+  "lastChangelogVersion": "0.78.1",
   "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-5.4-mini",
+  "defaultModel": "gpt-5.5",
   "theme": "gruvbox",
   "packages": [
     "npm:pi-vim",
@@ -24,5 +24,6 @@
     "github-copilot/gemini-3-flash-preview",
     "gpt-5.4-mini",
     "gpt-5.5"
-  ]
+  ],
+  "showHardwareCursor": true
 }
