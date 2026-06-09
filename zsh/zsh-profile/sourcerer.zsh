@@ -10,6 +10,7 @@ source $CURRDIR/aliases.zsh
 source $CURRDIR/pyenv.zsh
 source $CURRDIR/venv.zsh
 source $CURRDIR/docker.zsh
+source $CURRDIR/ssh.zsh
 source $HOME/.env
 source $CURRDIR/gum_colors.sh
 source $CURRDIR/globalgit.sh
