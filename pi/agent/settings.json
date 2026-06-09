@@ -6,8 +6,8 @@
     "/home/fruet/.pi/agent/prompts"
   ],
   "lastChangelogVersion": "0.78.1",
-  "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-5.5",
+  "defaultProvider": "minimax",
+  "defaultModel": "MiniMax-M3",
   "theme": "gruvbox",
   "packages": [
     "npm:pi-vim",
@@ -20,7 +20,7 @@
   "defaultThinkingLevel": "high",
   "hideThinkingBlock": false,
   "enabledModels": [
-    "minimax/MiniMax-M2.7",
+    "minimax/MiniMax-M3",
     "github-copilot/gemini-3-flash-preview",
     "gpt-5.4-mini",
     "gpt-5.5"
