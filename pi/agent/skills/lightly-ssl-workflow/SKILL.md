@@ -15,3 +15,23 @@ description: Use when modifying or adding a Lightly SSL transform, loss, model, 
 - For new docs pages, wire them into the relevant parent toctree (for example `docs/source/examples/models.rst`) so they are discoverable.
 - When adding or changing an example script, run `make generate-example-notebooks` and commit the regenerated notebook(s) if the repo tracks them.
 - Verify: import works, docs page is linked from the right toctree, and the smallest meaningful test passes.
+
+## Pre-commit and CI gate
+
+Before opening a PR, run local CI equivalents in this order:
+1. `make format` to auto-fix headers, ruff formatting/lint, markdown, docs code blocks, and pre-commit hooks.
+2. `make static-checks` to run CI-style format checks plus `mypy src tests docs/format_code.py`.
+3. `make test` to run the full unit suite.
+
+`make all-checks` runs `static-checks` + `test`. CI workflows map roughly as:
+- `check_code_format.yml` -> `make static-checks`
+- `test_unit.yml` -> `make test`
+- `test_unit_minimal_dependencies.yml` -> pinned/minimal install then pytest
+- `test_documentation.yml` -> docs install/build
+- `test_build.yml` -> `make dist`
+
+## License headers for third-party ports
+
+- `make format` calls `make add-header`; `add-header` hard-codes which files get which `dev_tools/*_licenseheader.tmpl`.
+- When porting third-party code, choose an existing compatible header template or add a new upstream-specific template, wire files into `Makefile:add-header`, add the upstream license under `licences/`, and update `NOTICE`.
+- Run `make add-header` or `make format`, then inspect `git diff` to confirm only intended header/licensing changes were made.
