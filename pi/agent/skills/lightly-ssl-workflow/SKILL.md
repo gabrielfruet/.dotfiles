@@ -18,6 +18,8 @@ description: Use when modifying or adding a Lightly SSL transform, loss, model, 
 
 ## Pre-commit and CI gate
 
+For Python 3.8/minimal-deps CI, avoid runtime-evaluated modern typing constructs in values passed to helpers such as `typing.cast`, `isinstance`, `issubclass`, or module-level aliases. `from __future__ import annotations` only defers annotations. Prefer explicit runtime validation/narrowing when values need checking.
+
 Before opening a PR, run local CI equivalents in this order:
 1. `make format` to auto-fix headers, ruff formatting/lint, markdown, docs code blocks, and pre-commit hooks.
 2. `make static-checks` to run CI-style format checks plus `mypy src tests docs/format_code.py`.
