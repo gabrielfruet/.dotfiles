@@ -1,2 +1,6 @@
 # Pi auth (contains sensitive tokens)
 pi/agent/auth.json
+
+# macOS / editor / backup junk
+.DS_Store
+*.bak
