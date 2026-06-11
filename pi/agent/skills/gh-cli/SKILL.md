@@ -12,6 +12,7 @@ Use gh for GitHub tasks. Prefer JSON + jq for scripted output.
 - Use `gh <group> --help` when unsure.
 - Prefer `--json`, `--jq`, `--template`, and `--paginate`.
 - Use `gh pr ...` for PR work.
+- If `gh` repeatedly times out against `api.github.com` due a bad DNS-resolved IP, verify with `curl -I https://api.github.com`; as a last resort, use the GitHub REST API with `curl --resolve api.github.com:443:<reachable-ip>` and an auth token from `gh auth token`.
 - For new PRs, push the branch first; `gh pr create` needs a remote branch. Use `--head`
   only for an already-pushed branch.
 - For multiline PR bodies, prefer `--body-file` (or a heredoc/file) instead of inline `--body` to avoid literal `\n` in GitHub.
