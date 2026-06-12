@@ -12,6 +12,7 @@ Use gh for GitHub tasks. Prefer JSON + jq for scripted output.
 - Use `gh <group> --help` when unsure.
 - Prefer `--json`, `--jq`, `--template`, and `--paginate`.
 - Use `gh pr ...` for PR work.
+- In a PR context, "comments" usually means **inline review comments** (line-level notes on the diff), NOT the top-level PR conversation. Fetch them with `gh api repos/<owner>/<repo>/pulls/<num>/comments --paginate`. `gh pr view --comments` and `gh issue view --comments` return only the conversation, not the review.
 - If `gh` repeatedly times out against `api.github.com` due a bad DNS-resolved IP, verify with `curl -I https://api.github.com`; as a last resort, use the GitHub REST API with `curl --resolve api.github.com:443:<reachable-ip>` and an auth token from `gh auth token`.
 - For new PRs, push the branch first; `gh pr create` needs a remote branch. Use `--head`
   only for an already-pushed branch.
@@ -29,11 +30,13 @@ gh pr list --state merged --limit 20 --json number,title,mergedAt,author
 
 ## Review inspection
 ```bash
-gh pr view 123 --json reviews,comments,files
-gh api repos/<owner>/<repo>/pulls/123/comments --paginate
+gh pr view 123 --json reviews,comments,files                 # top-level conversation + review summaries
+gh api repos/<owner>/<repo>/pulls/123/comments --paginate    # INLINE review comments (line-level, the "review")
 ```
-- `gh pr view` gives review summaries and issue comments; fetch inline review comments separately with the PR comments API.
-- Group comments by reviewer and ignore empty/bot noise when summarizing.
+- **"Review comments"** = line-level notes on the PR diff. Fetched via the PR comments API above. They are NOT returned by `gh pr view --comments`.
+- **"Issue / conversation comments"** = the top-level PR discussion. Fetched via `gh pr view --comments` or `gh issue view --comments`.
+- When a user asks to "look at the comments" / "check the comments" / "see the review" on a PR, default to **review comments**, not the conversation.
+- Group by reviewer; ignore empty/bot noise when summarizing.
 - If review data looks incomplete, fall back to `gh api repos/<owner>/<repo>/pulls/<num>/reviews`.
 
 ## Common commands
