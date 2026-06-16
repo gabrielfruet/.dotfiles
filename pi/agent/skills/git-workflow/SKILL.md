@@ -10,7 +10,7 @@ description: Git commit workflow. Load when staging or committing.
 - Never `git add -A`
 - Show diff before every commit
 - Separate commits by logical change
-- Commit automatically after review
+- Commit automatically after review, then push the branch unless the user says not to.
 - If a commit hook rewrites files, re-run `git add` on the touched files before retrying the commit.
 - Before switching branches or popping a stash, check for untracked files that may conflict with tracked paths on the target branch; back them up first if needed.
 - If the task includes a PR description or plan, inspect `.github/pull_request_template.md` and any relevant files in `.github/`
@@ -24,7 +24,9 @@ description: Git commit workflow. Load when staging or committing.
 5. Stage intentionally (`git add <file>` or `git add -p`)
 6. Run `git diff --staged` to verify
 7. Commit with concise message (see below)
-8. Repeat for remaining changes
+8. Push the branch
+9. If push is rejected with `fetch first`, run `git fetch` and `git rebase` onto the tracked branch, then retry
+10. Repeat for remaining changes
 
 ## Commit Messages
 
