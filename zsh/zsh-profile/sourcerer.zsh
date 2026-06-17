@@ -17,3 +17,4 @@ source $CURRDIR/globalgit.sh
 source $CURRDIR/devcontainer.sh
 source $CURRDIR/worktree.sh
 source $CURRDIR/gitfzf.sh
+source $CURRDIR/makefzf.sh
