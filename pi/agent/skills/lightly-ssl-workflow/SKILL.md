@@ -10,7 +10,7 @@ description: Use when modifying or adding a Lightly SSL transform, loss, model, 
 - Prefer the smallest coherent change; do not add examples/tests/docs unless the feature needs them.
 - **Transforms:** preserve view order/contract, export it, add autodoc, add a minimal shape/order test.
 - **Losses:** export it, add docs, add a focused numerical/shape test.
-- **Models:** export it, add docs, add a runnable example if needed, and test the forward/contract.
+- **Models:** export it, add docs, add a runnable example if needed, and test the forward/contract. For wrapper tests, prefer small real configurations and observation hooks over monkeypatching `forward` or replacing submodules; reserve mocks for external/network/filesystem boundaries. For weight-loading tests, cover checkpoint unwrapping and strict missing/unexpected-key failures rather than same-model roundtrips.
 - When the change implements a paper or official recipe, cite both the paper and upstream implementation in docs/docstrings.
 - For new docs pages, wire them into the relevant parent toctree (for example `docs/source/examples/models.rst`) so they are discoverable.
 - When adding or changing an example script, run `make generate-example-notebooks` and commit the regenerated notebook(s) if the repo tracks them.
