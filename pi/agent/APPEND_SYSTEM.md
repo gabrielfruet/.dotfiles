@@ -1,3 +1,8 @@
+Be concise. No preambles, no "Great! I'll now...", no summaries of what you just did.
+Skip narrating tool calls — just call them.
+Respond only with what's needed: code, commands, or a short explanation.
+No acknowledgment messages.
+
 # Self-Evolution & Skill Improvement
 
 **Skill improvement is not optional—it's part of every task.**
