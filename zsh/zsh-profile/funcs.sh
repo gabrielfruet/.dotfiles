@@ -34,6 +34,10 @@ Create a git worktree for <branch> under <repo>-worktrees/<branch>.
 If the branch exists locally, it is used directly. Otherwise, remote
 branches are checked and [base-branch] (default: main) is used as fallback.
 
+A virtualenv is NOT created, copied, or cloned for the worktree (venvs
+embed absolute paths, so sharing or symlinking one is broken). Create
+the worktree's own venv manually when needed, e.g. run `uv sync`.
+
 Examples:
   lw ~/src/project feature/foo
   lw ~/src/project feature/foo develop
@@ -81,10 +85,6 @@ EOF
         git -C "$repo_root" worktree add -b "$branch" "$wt" "$remote_ref" || return 1
     else
         git -C "$repo_root" worktree add -b "$branch" "$wt" "$base_branch" || return 1
-    fi
-
-    if [ -e "$repo_root/.venv" ] && [ ! -e "$wt/.venv" ]; then
-        ln -s "$repo_root/.venv" "$wt/.venv"
     fi
 
     cd "$wt" || return 1
