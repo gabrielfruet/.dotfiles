@@ -1,6 +1,6 @@
 ---
 name: git-workflow
-description: Git commit workflow. Load when staging or committing. 
+description: Git commit workflow. Load when finishing any code-change task (after verification) to commit and push, or when explicitly staging/committing.
 ---
 
 # Git Workflow
