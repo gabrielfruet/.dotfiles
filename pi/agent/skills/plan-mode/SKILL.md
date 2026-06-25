@@ -15,6 +15,8 @@ You are in **PLAN MODE**. Strictly forbidden:
 2. Identify all places that need changes (files, functions, configs)
 3. Find all dependencies, usages, and related files
 4. List exact file paths for each change
+5. For every claim about an external/library API or inherited behavior, inspect the source or official docs and cite the exact file/line or docs section. If not verified, label it as unverified and do not build the plan on it.
+6. Record user constraints explicitly, including testing preferences such as "no mocks", before proposing the plan.
 
 ### Read-only subagent inspection
 - For non-trivial plans, explicitly consider dispatching a focused read-only subagent via the `subagent` skill before finalizing the plan.
@@ -28,6 +30,8 @@ You are in **PLAN MODE**. Strictly forbidden:
 - **State assumptions** — If uncertain, say so
 - **Present multiple interpretations** — Don't pick silently
 - **Push back** — If a simpler approach exists, suggest it
+- **Avoid inventing default behavior** — Do not add fallback/default implementations unless the issue requires them or evidence shows they are necessary.
+- **Prefer the minimal semantic change** — If an existing method already computes the desired value but discards it, plan to return/propagate that value before proposing new computation paths.
 - **Stop when confused** — Name what's unclear
 
 ### Phase 3: Build Plan
@@ -41,6 +45,7 @@ Create a numbered list:
 Each step must have:
 - **Specific action** (not vague)
 - **Verification check** (how to confirm it worked)
+- **Test style**: prefer behavior/integration tests over mocks. If proposing mocks, justify why real behavior cannot be tested cheaply.
 
 ### Phase 4: Present
 - State assumptions and tradeoffs

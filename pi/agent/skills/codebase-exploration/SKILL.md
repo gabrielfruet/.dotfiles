@@ -13,6 +13,8 @@ Use this skill for read-only investigation of an existing codebase.
 - Before editing or citing a file, confirm you are inspecting the intended checkout.
 - Confirm the active checkout first (`pwd` and `git rev-parse --show-toplevel` or equivalent). If multiple worktrees/checkouts exist, explicitly name which one is authoritative.
 - When using upstream docs/changelogs for a dependency, verify the installed or checked-out package version matches the cited source before concluding.
+- For API-contract claims, inspect the installed source or checked-out implementation when available, not just signatures or assumptions. Cite exact evidence in the final answer.
+- Distinguish observed implementation facts from design suggestions; do not present suggestions as discovered behavior.
 - If the needed source lives in a GitHub repo and raw URLs fail, use `gh api repos/<owner>/<repo>/contents/<path>?ref=<sha>` or `gh api search/code` as a fallback.
 - Start with current behavior, then narrow to the smallest change surface.
 - If the baseline or "original" behavior is unclear, use git history to identify the commit that introduced or removed it and cite the commit hash.
