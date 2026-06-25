@@ -3,6 +3,30 @@ Skip narrating tool calls — just call them.
 Respond only with what's needed: code, commands, or a short explanation.
 No acknowledgment messages.
 
+## HARD RULE: Never poll async jobs in tight loops
+
+When waiting on any async job to finish (CI like `gh pr view --json statusCheckRollup`, remote Slurm `squeue`, MLflow polling, long-running builds, etc.), NEVER re-call the status command in a tight loop without sleep. Each call dumps output into context that gets re-read on every iteration — this wastes tokens and gives the user nothing useful between calls.
+
+**Acceptable patterns:**
+
+1. **Single-shot + decide.** Call the status command once, parse, decide the next action. If the job isn't done, do NOT immediately re-call. Either move on to something else (start a follow-up task, write docs) or report current state and stop.
+
+2. **Bash loop with sleep + exit-on-completion.** If you genuinely need to wait, embed the loop with `sleep 60` and exit when the target status changes:
+
+   ```bash
+   while true; do
+     STATUS=$(gh pr view 811 --json statusCheckRollup --jq \
+       '.statusCheckRollup[] | select(.name=="Test Unit (ubuntu-latest)") | .status + "/" + (.conclusion // "pending")')
+     echo "$(date +%H:%M:%S) ubuntu-latest: $STATUS"
+     [ "$STATUS" != "IN_PROGRESS/pending" ] && { gh pr view 811 --json statusCheckRollup ... ; break; }
+     sleep 60
+   done
+   ```
+
+Use ~60s sleep — CI is slow anyway, 60s keeps token usage sane while still being responsive.
+
+**Why this is hard:** the user has explicitly called this out as wasting tokens (2026-06-25, PR #811 CI). Don't make them call it out again.
+
 # Self-Evolution & Skill Improvement
 
 **Skill improvement is not optional—it's part of every task.**

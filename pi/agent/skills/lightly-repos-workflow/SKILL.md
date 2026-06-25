@@ -42,6 +42,30 @@ Before opening a PR, run local CI equivalents in this order:
 - `test_documentation.yml` -> docs install/build
 - `test_build.yml` -> `make dist`
 
+### CI monitoring: NEVER poll in tight loops (token-waster)
+
+**Hard rule:** when waiting on CI to finish (e.g. `Test Unit`, `Test Unit Minimal Dependencies`), do NOT call `gh pr view --json statusCheckRollup` in a tight loop without sleep. Each call dumps the full rollup JSON into context — 4 jobs × many checks = ~50+ lines of output re-read every iteration. This wastes tokens fast and gives the user nothing useful between calls.
+
+Two acceptable patterns:
+
+1. **Single-shot + decide.** If you only need a snapshot to decide the next action, call `gh pr view` once, parse, decide. If the job is not done, choose between waiting or moving on (start the docs follow-up, work on something else, or report and stop). Do NOT immediately re-call to "check again".
+
+2. **Bash loop with sleep + exit-on-completion.** If you genuinely need to wait, embed the loop:
+
+   ```bash
+   while true; do
+     STATUS=$(gh pr view 811 --json statusCheckRollup --jq \
+       '.statusCheckRollup[] | select(.workflowName=="Test Unit" and .name=="Test Unit (ubuntu-latest)") | .status + "/" + (.conclusion // "pending")')
+     echo "$(date +%H:%M:%S) ubuntu-latest: $STATUS"
+     [ "$STATUS" != "IN_PROGRESS/pending" ] && { gh pr view 811 --json statusCheckRollup --jq ... ; break; }
+     sleep 60
+   done
+   ```
+
+Use ~60s sleep. CI status polls are slow anyway and 60s keeps token usage sane while still being responsive when a job finishes.
+
+This rule applies to any async job wait (CI, remote Slurm, MLflow polling, etc.), not just `gh`.
+
 ### License headers for third-party ports (both repos)
 
 - `make format` calls `make add-header`; `add-header` hard-codes which files get which `dev_tools/*_licenseheader.tmpl`.
