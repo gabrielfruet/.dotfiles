@@ -53,3 +53,23 @@ git commit -m "type: description"
 git reset HEAD~1       # undo last commit (keep changes)
 git reset --soft HEAD~1 # undo last commit (keep staged)
 ```
+
+## Rebase gotcha: `git rebase --continue` hangs in pi bash
+
+If `EDITOR=nvim` (or any TTY-bound editor) is set in the environment,
+`git rebase --continue` will spawn that editor to confirm the commit message
+and **hang indefinitely** in pi's non-interactive bash tool — the tool reports
+"Command aborted" after the shell timeout, and git is left in a half-finished
+rebase state.
+
+**Fix:** bypass the editor with `core.editor=true`:
+
+```bash
+git -c core.editor=true rebase --continue
+```
+
+Equivalent: `GIT_EDITOR=true git rebase --continue`.
+
+Apply this whenever `--continue` / `--abort` / `--skip` appear to hang. The same
+applies to other git operations that spawn an editor (interactive rebase,
+`git commit` without `-m`, `git tag -a`, etc.).
