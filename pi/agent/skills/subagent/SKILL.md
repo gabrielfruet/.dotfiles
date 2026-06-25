@@ -17,7 +17,7 @@ The script is at `~/.pi/agent/skills/subagent/subagent.sh`
 
 ### Options
 
-- `--model <model>` - Model to use (use minimax by default, `minimax/MiniMax-M2.5`)
+- `--model <model>` - Model to use (use minimax by default, `minimax/MiniMax-M3`)
 - `--thinking <level>` - Thinking level: `off`, `low`, `medium`, `high`
 - `--cwd <dir>` - Working directory
 
@@ -25,5 +25,5 @@ The script is at `~/.pi/agent/skills/subagent/subagent.sh`
 
 ```bash
 ./subagent.sh "List files in src/"
-./subagent.sh "Find all TODO comments" --model minimax/MiniMax-M2.5
+./subagent.sh "Find all TODO comments" --model minimax/MiniMax-M3
 ```

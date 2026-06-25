@@ -86,7 +86,7 @@ To delegate to a subagent, use the subagent skill:
 Examples:
 - `./subagent.sh "Find all Python files in src/" --thinking high`
 - `./subagent.sh "Read and summarize the README.md file"`
-- `./subagent.sh "Create a plan to refactor the auth module" --model minimax/MiniMax-M2.5`
+- `./subagent.sh "Create a plan to refactor the auth module" --model minimax/MiniMax-M3`
 
 ---
 
