@@ -50,6 +50,28 @@ Updated: <YYYY-MM-DD>
 - The active tasks are already injected as `[TASK MEMORY: ...]` — trust them; don't re-ask the user.
 - `task_memory show` (or `/recall`) to print the current active task(s).
 - `task_memory list` (or `/tasks`) to see all known tasks.
+- **Stale re-injection after rescoping**: if the user changed scope mid-session, a stale
+  planning-phase task can keep getting re-injected while a maintained task already reflects
+  the new authoritative state. Trust the **maintained** task (the one you've been
+  `update`-ing); treat the stale block as noise and do NOT re-flag it every turn. If the
+  stale task is still active in the directory, `deactivate` it once and overwrite the
+  authoritative task so future injections match reality.
+
+## Rescoping
+When the user changes scope mid-session (e.g. "for now just X, not Y", "docs in a
+follow-up PR", "no compile call, raise instead"), do two things in one shot:
+
+1. `update` the active task with the new authoritative state (Goal, Status, Key
+   facts & decisions) — clearly mark the old state as superseded (e.g. "Earlier
+   planning-phase memory mentioning Y is STALE & superseded").
+2. `deactivate` any stale sibling tasks that reflect the old scope (e.g. an
+   original "Plan integration" task that covered both pretrain and fine-tune when
+   the user rescoped to fine-tune only).
+
+The goal is that the next `[TASK MEMORY: ...]` injection matches what you're
+actually doing. Do not paste the old scope into the maintained task as a
+"changelog" — keep the maintained task clean and authoritative; note superseded
+state in a single short line.
 
 ## Notes
 - Task files are global (shared across directories); only the active set is per-directory.
