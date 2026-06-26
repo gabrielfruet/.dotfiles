@@ -46,11 +46,19 @@ Before opening a PR, run local CI equivalents in this order:
 
 **Hard rule:** when waiting on CI to finish (e.g. `Test Unit`, `Test Unit Minimal Dependencies`), do NOT call `gh pr view --json statusCheckRollup` in a tight loop without sleep. Each call dumps the full rollup JSON into context — 4 jobs × many checks = ~50+ lines of output re-read every iteration. This wastes tokens fast and gives the user nothing useful between calls.
 
-Two acceptable patterns:
+Three acceptable patterns, in order of preference:
 
-1. **Single-shot + decide.** If you only need a snapshot to decide the next action, call `gh pr view` once, parse, decide. If the job is not done, choose between waiting or moving on (start the docs follow-up, work on something else, or report and stop). Do NOT immediately re-call to "check again".
+1. **`watch` tool with `mode="poll"` (preferred when available).** If your agent harness provides a `watch` tool, use it instead of the bash loop. The check command should exit 0 when CI is done (`running==0 && total>0`) and print the final `statusCheckRollup` (its stdout becomes the wake-up message body). The watcher runs in the background and resumes the agent once. Frees the bash tool from being tied up for the CI duration (~10-30 min) and avoids the abort risk on long-running bash commands. Example:
 
-2. **Bash loop with sleep + exit-on-completion.** If you genuinely need to wait, embed the loop:
+   ```bash
+   watch(mode="poll", interval=60, label="PR #811 CI", \
+         command="ROLLUP=$(gh pr view 811 --json statusCheckRollup); RUNNING=$(echo \"$ROLLUP\" | jq '[.statusCheckRollup[] | select(.status==\"IN_PROGRESS\" or .status==\"QUEUED\" or .status==\"PENDING\")] | length'); [ \"$(echo \"$ROLLUP\" | jq '.statusCheckRollup | length')\" -gt 0 ] && [ \"$RUNNING\" -eq 0 ] && echo \"$ROLLUP\" | jq -r '.statusCheckRollup[] | \"\\(.workflowName // \\\"?\\\") | \\(.name): \\(.status)/\\(.conclusion // \\\"pending\\\")\"'", \
+         resumePrompt="CI finished — read wake-up; if ALL GREEN report success, else diagnose via gh run view --log-failed.")
+   ```
+
+2. **Single-shot + decide.** If you only need a snapshot to decide the next action, call `gh pr view` once, parse, decide. If the job is not done, choose between waiting or moving on (start the docs follow-up, work on something else, or report and stop). Do NOT immediately re-call to "check again".
+
+3. **Bash loop with sleep + exit-on-completion.** If you genuinely need to wait and the harness has no `watch` tool, embed the loop:
 
    ```bash
    while true; do
