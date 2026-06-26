@@ -23,7 +23,7 @@ Tell them apart fast: check the import package name in `pyproject.toml` (`name=.
 - Map touchpoints before editing; prefer the smallest coherent change and do not add examples/tests/docs unless the feature needs them.
 - Cite both the paper and the upstream implementation in docs/docstrings when the change implements a paper or official recipe.
 - Wire any new docs page into the relevant parent toctree so it is discoverable.
-- **Tests:** prefer small real configurations and observation hooks over monkeypatching `forward` or replacing submodules; reserve mocks for external/network/filesystem boundaries. For weight-loading tests, cover checkpoint unwrapping and strict missing/unexpected-key failures rather than same-model roundtrips.
+- **Tests:** prefer small real configurations and observation hooks over monkeypatching `forward` or replacing submodules; reserve mocks for external/network/filesystem boundaries. Keep tests behavior-focused: avoid asserting private attributes, exact helper classes, hook internals, or exhaustive config permutations unless they are the public contract or guard a known regression. For weight-loading tests, cover checkpoint unwrapping and strict missing/unexpected-key failures rather than same-model roundtrips.
 - Verify before opening a PR: import works, docs page is linked from the right toctree, and the smallest meaningful test passes.
 
 ### Pre-commit and CI gate (both repos)
