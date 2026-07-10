@@ -56,6 +56,18 @@ Updated: <YYYY-MM-DD>
   `update`-ing); treat the stale block as noise and do NOT re-flag it every turn. If the
   stale task is still active in the directory, `deactivate` it once and overwrite the
   authoritative task so future injections match reality.
+- **Duplicate-task-file stale injection** (related variant): if the same work has been
+  tracked under multiple names across sessions (e.g. `ecvit-lt-detr-benchmarks`,
+  `ltdetrv2-m-l-x`, `lt-detr-v2-default-config-benchmarks-ltdetrv2-m-l-x` all for one
+  ticket), they may all be active in the directory's set at once. The system injects
+  only ONE of them (often the oldest or first-activated), so `task_memory update` against
+  the most-recent file won't change what you see in the `[TASK MEMORY: ...]` block.
+  Symptom: `task_memory show <canonical-name>` shows your updated content but the injected
+  block is stale, and `task_memory list` shows multiple tasks marked active with
+  overlapping content. Fix: `task_memory list` → `task_memory deactivate <stale>` on each
+  duplicate → `task_memory activate <canonical>` on the one you want injected. Then
+  `update` it to reflect current state. The injection only refreshes on session resume,
+  so a new session is needed to see the updated block.
 
 ## Rescoping
 When the user changes scope mid-session (e.g. "for now just X, not Y", "docs in a
