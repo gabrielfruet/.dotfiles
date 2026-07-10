@@ -149,3 +149,5 @@ if [ -f '/Users/gabrielfruet/Downloads/google-cloud-sdk/path.zsh.inc' ]; then . 
 
 # The next line enables shell command completion for gcloud.
 if [ -f '/Users/gabrielfruet/Downloads/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/gabrielfruet/Downloads/google-cloud-sdk/completion.zsh.inc'; fi
+
+. "$HOME/.cargo/env"
