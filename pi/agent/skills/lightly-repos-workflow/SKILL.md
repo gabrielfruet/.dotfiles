@@ -33,7 +33,7 @@ For Python 3.8/minimal-deps CI, avoid runtime-evaluated modern typing constructs
 Before opening a PR, run local CI equivalents in this order:
 1. `make format` to auto-fix headers, formatting/lint, markdown, docs code blocks, and pre-commit hooks.
 2. `make static-checks` (lightly-ssl) / `make static-checks` = `format-check` + `type-check` (lightly-train) to run CI-style format checks plus mypy.
-3. `make test` to run the full unit suite.
+3. `make test` runs the full unit suite, but it is large (`pytest tests`) and often too slow to run to completion locally. **Prefer targeted tests** covering your change surface (the new feature's tests + adjacent tests for files you touched) and let CI run the full suite — don't block on the local full run.
 
 `make all-checks` runs `static-checks` + `test`. Both repos have the same 5 CI workflows mapping roughly as:
 - `check_code_format.yml` -> `make static-checks`
