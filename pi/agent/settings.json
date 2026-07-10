@@ -17,7 +17,7 @@
     "hookMode": "edit_write"
   },
   "permissionLevel": "medium",
-  "defaultThinkingLevel": "high",
+  "defaultThinkingLevel": "medium",
   "hideThinkingBlock": false,
   "enabledModels": [
     "minimax/MiniMax-M3",
