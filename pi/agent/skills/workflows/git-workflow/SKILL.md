@@ -10,6 +10,15 @@ description: Git commit workflow. Load when finishing any code-change task (afte
 - Never `git add -A`
 - Show diff before every commit
 - Separate commits by logical change
+- Never invent a commit author identity. Before any `git commit`, read the
+  author from git config (local first, then global):
+  ```bash
+  git config user.name; git config user.email
+  ```
+  If both are empty, prompt the user for their name and email and set them
+  (prefer repo-local config: `git config user.name "..."` / `user.email "..."`)
+  before committing. Never use placeholder identities like `pi <pi@local>`,
+  `<agent> <agent@local>`, etc. — those end up in `git log` and on the PR.
 - Commit automatically after review, then push the branch unless the user says not to.
 - If a commit hook rewrites files, re-run `git add` on the touched files before retrying the commit.
 - Before switching branches or popping a stash, check for untracked files that may conflict with tracked paths on the target branch; back them up first if needed.
