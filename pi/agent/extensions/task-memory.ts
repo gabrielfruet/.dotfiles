@@ -199,19 +199,31 @@ export default function taskMemory(pi: ExtensionAPI): void {
 		},
 	});
 
+	// Track last-injected content per slug so we don't re-inject unchanged memories
+	// every turn. Without this, the same [TASK MEMORY: ...] block arrives as a
+	// user-role message on every LLM call, which triggers acknowledgment filler
+	// responses. Cleared on session_start so resume re-injects fresh content.
+	const lastInjectedContent = new Map<string, string>();
+
 	// Inject each active task's memory before every LLM call (survives compaction).
+	// Only re-injects when content has actually changed since last injection, so
+	// unchanged memories don't pollute every turn with a stale user-role message.
 	pi.on("context", async (event, ctx) => {
 		const slugs = getActiveSlugs(ctx.cwd);
-		if (!slugs.length) return;
+		if (!slugs.length) {
+			lastInjectedContent.clear();
+			return;
+		}
 		const blocks = [];
 		for (const slug of slugs) {
 			const content = readTask(slug);
-			if (content) {
-				blocks.push({
-					role: "user" as const,
-					content: [{ type: "text" as const, text: `[TASK MEMORY: ${taskName(slug)}]\n${content}` }],
-				});
-			}
+			if (!content) continue;
+			if (lastInjectedContent.get(slug) === content) continue; // unchanged, skip
+			lastInjectedContent.set(slug, content);
+			blocks.push({
+				role: "user" as const,
+				content: [{ type: "text" as const, text: `[TASK MEMORY: ${taskName(slug)}]\n${content}` }],
+			});
 		}
 		if (!blocks.length) return;
 		return { messages: [...event.messages, ...blocks] };
@@ -219,6 +231,7 @@ export default function taskMemory(pi: ExtensionAPI): void {
 
 	// Auto-restore this directory's active set on startup/resume/reload.
 	pi.on("session_start", async (event, ctx) => {
+		lastInjectedContent.clear(); // resume re-injects all active memories fresh
 		updateStatus(ctx);
 		if (ctx.hasUI && event.reason === "resume") {
 			const names = getActiveSlugs(ctx.cwd).map(taskName);
