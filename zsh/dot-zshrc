@@ -151,22 +151,3 @@ if [ -f '/Users/gabrielfruet/Downloads/google-cloud-sdk/path.zsh.inc' ]; then . 
 if [ -f '/Users/gabrielfruet/Downloads/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/gabrielfruet/Downloads/google-cloud-sdk/completion.zsh.inc'; fi
 
 . "$HOME/.cargo/env"
-
-# Claude Code: switch between Z.ai (GLM) and Anthropic (real Claude)
-# Token is read from ~/.claude/settings.json so it stays in one place.
-claude-zai() {
-  local token
-  token=$(jq -r '.env.ANTHROPIC_AUTH_TOKEN // empty' ~/.claude/settings.json)
-  if [[ -z "$token" ]]; then
-    echo "claude-zai: no ANTHROPIC_AUTH_TOKEN in ~/.claude/settings.json" >&2
-    return 1
-  fi
-  ANTHROPIC_BASE_URL=https://api.z.ai/api/anthropic \
-  ANTHROPIC_AUTH_TOKEN="$token" \
-  command claude "$@"
-}
-
-claude-anth() {
-  # Real Anthropic: drop Z.ai overrides and use OAuth / ANTHROPIC_API_KEY.
-  env -u ANTHROPIC_BASE_URL -u ANTHROPIC_AUTH_TOKEN command claude "$@"
-}
