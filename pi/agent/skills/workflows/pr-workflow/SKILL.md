@@ -15,6 +15,9 @@ description: Use when opening a PR and driving it to green CI — push the branc
    - Already open → reuse it, don't create a duplicate.
 4. Watch CI: `gh pr checks <number-or-branch> --watch --fail-fast`
    - This blocks until checks finish (or one fails, with `--fail-fast`).
+   - If backgrounding is available, run this in the background instead of
+     blocking the session — keep working (or wait idle) and pick back up
+     when it reports back.
 5. If a check is red:
    - Find the real failure: `gh run view <run-id> --log-failed`
    - Fix the root cause in the code — don't skip/disable the check.
@@ -43,8 +46,9 @@ description: Use when opening a PR and driving it to green CI — push the branc
   to the `git-workflow` skill.
 - For `gh` mechanics (auth, JSON output, inline vs review comments), defer to
   the `gh-cli` skill.
-- Treat "watch CI" as blocking: never report done before `gh pr checks` shows
-  every check green.
+- Treat "watch CI" as blocking on the *result*: never report done before
+  `gh pr checks` shows every check green — but the watch itself can run in
+  the background if the tool supports it, rather than tying up the session.
 - If new commits land on an already-open PR (yours or requested by the user),
   re-enter the loop at step 4 (watch CI) — and only touch the description if
   the PR's intent actually shifted.
