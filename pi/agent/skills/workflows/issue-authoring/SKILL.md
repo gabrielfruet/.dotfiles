@@ -11,21 +11,12 @@ Guidelines for writing a good GitHub issue. Assumes investigation is done
 
 ## Principles (always apply)
 
-1. **Sound human.** Write prose with voice, not stacked headers of corporate
-   hedging. Read it aloud — if it sounds bot-generated, rewrite. "We've decided
-   to remove the integration" beats "This issue proposes the removal of...".
+For general prose style (sound human, concise & decisive, scope-honest),
+defer to the `writing-style` skill. On top of that, for issues specifically:
 
-2. **Concise and decisive.** State what matters; cut the rest. Don't over-cite
-   or over-justify — one telling detail beats a table of every supporting fact.
-   If a reader needs the full evidence, link it; don't reproduce it.
-
-3. **Match detail to purpose.** A chore wants action (checklist). A discussion
+1. **Match detail to purpose.** A chore wants action (checklist). A discussion
    or spike wants findings. Don't dump investigation output into a task that
    wants a handoff — and don't force a checklist onto an open question.
-
-4. **Be scope-honest.** If something looks in-scope but belongs elsewhere, say
-   so and defer it with a link. Scope creep turns a `good first issue` into a
-   trap for the contributor who picks it up.
 
 ## Audience
 
@@ -41,9 +32,8 @@ labels. Match the row; let it steer the draft.
 
 ## Self-check (run over the draft before creating)
 
-1. **Human?** Read it aloud. Bot-sounding? Rewrite.
-2. **Earns its place?** Any over-citing or over-justifying to cut?
-3. **Detail matches purpose?** Action for chores, findings for discussions?
-4. **Scope-honest?** Anything smuggled in that belongs in another issue? Link & defer.
-5. **Right audience default?** Tone and labels match who will read it?
-6. **Labels honest?** `good first issue` only if genuinely scoped and trap-free.
+Run the `writing-style` self-check first, then these issue-specific checks:
+
+1. **Detail matches purpose?** Action for chores, findings for discussions?
+2. **Right audience default?** Tone and labels match who will read it?
+3. **Labels honest?** `good first issue` only if genuinely scoped and trap-free.
