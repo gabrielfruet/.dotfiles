@@ -23,26 +23,31 @@ description: Use when opening a PR and driving it to green CI — push the branc
    - Fix the root cause in the code — don't skip/disable the check.
    - Commit, push.
    - If the fix changed the PR's actual goal/approach (not just a bugfix),
-     update the description (see below).
+     update the title and description (see below).
    - Go back to step 4.
    - If failure looks like pure infra flake (not caused by the diff), rerun
      instead of pushing a no-op: `gh run rerun <run-id> --failed`.
 6. All checks green → done. Report the PR URL.
 
-## Description
+## Title & Description
 - Write a high-level summary of *what the PR is trying to accomplish* — the
   goal/approach, not a changelog of every commit or CI fix. The diff already
   shows what changed.
+- The title makes the same claim as the description, just compressed to one
+  line — if the description names the approach (e.g. "sort coords" vs "skip
+  degenerate boxes"), the title must match it. A stale title that names the
+  old approach is misleading even if the body is accurate.
 - Apply the `human-voice` skill: sound human, concise and decisive, and
   scope-honest (call out anything that belongs in a follow-up rather than
   smuggling it in).
 - Check for `.github/pull_request_template.md` and use it if present.
 - Create with `gh pr create --title "..." --body-file <file>` (avoids
   literal `\n` issues with inline `--body`).
-- Update an existing PR with `gh pr edit <number> --body-file <file>`.
-- Only rewrite the description when the PR's *purpose* changes (new goal,
-  dropped goal, different approach) — not for routine CI fixes, typos, or
-  review nitpicks.
+- Update an existing PR with `gh pr edit <number> --title "..." --body-file <file>`.
+- Only rewrite the title/description when the PR's *purpose or approach*
+  changes (new goal, dropped goal, different implementation) — not for
+  routine CI fixes, typos, or review nitpicks. When it does change, update
+  both together — a title that still names the old approach is a common miss.
 
 ## Rules
 - For commit-by-commit hygiene (staging, diff review, message format), defer
@@ -54,5 +59,5 @@ description: Use when opening a PR and driving it to green CI — push the branc
   `gh pr checks` shows every check green — but the watch itself can run in
   the background if the tool supports it, rather than tying up the session.
 - If new commits land on an already-open PR (yours or requested by the user),
-  re-enter the loop at step 4 (watch CI) — and only touch the description if
-  the PR's intent actually shifted.
+  re-enter the loop at step 4 (watch CI) — and only touch the title/description
+  if the PR's intent actually shifted.
