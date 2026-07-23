@@ -12,7 +12,7 @@ Guidelines for writing a good GitHub issue. Assumes investigation is done
 ## Principles (always apply)
 
 For general prose style (sound human, concise & decisive, scope-honest),
-defer to the `writing-style` skill. On top of that, for issues specifically:
+defer to the `human-voice` skill. On top of that, for issues specifically:
 
 1. **Match detail to purpose.** A chore wants action (checklist). A discussion
    or spike wants findings. Don't dump investigation output into a task that
@@ -32,7 +32,7 @@ labels. Match the row; let it steer the draft.
 
 ## Self-check (run over the draft before creating)
 
-Run the `writing-style` self-check first, then these issue-specific checks:
+Run the `human-voice` self-check first, then these issue-specific checks:
 
 1. **Detail matches purpose?** Action for chores, findings for discussions?
 2. **Right audience default?** Tone and labels match who will read it?

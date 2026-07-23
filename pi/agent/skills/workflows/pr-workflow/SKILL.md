@@ -33,7 +33,7 @@ description: Use when opening a PR and driving it to green CI — push the branc
 - Write a high-level summary of *what the PR is trying to accomplish* — the
   goal/approach, not a changelog of every commit or CI fix. The diff already
   shows what changed.
-- Apply the `writing-style` skill: sound human, concise and decisive, and
+- Apply the `human-voice` skill: sound human, concise and decisive, and
   scope-honest (call out anything that belongs in a follow-up rather than
   smuggling it in).
 - Check for `.github/pull_request_template.md` and use it if present.
@@ -49,7 +49,7 @@ description: Use when opening a PR and driving it to green CI — push the branc
   to the `git-workflow` skill.
 - For `gh` mechanics (auth, JSON output, inline vs review comments), defer to
   the `gh-cli` skill.
-- For PR description tone/detail/scope, defer to the `writing-style` skill.
+- For PR description tone/detail/scope, defer to the `human-voice` skill.
 - Treat "watch CI" as blocking on the *result*: never report done before
   `gh pr checks` shows every check green — but the watch itself can run in
   the background if the tool supports it, rather than tying up the session.
