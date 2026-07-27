@@ -82,6 +82,39 @@ For a longer technical update (test results, an investigation recap), the same s
 
 Imperative mood, one line if possible ("Fix off-by-one in crop selector", not "This commit fixes an off-by-one error in the crop selector logic"). Body only if the *why* isn't obvious from the diff.
 
+## Code formatting
+
+Prefer code blocks over excessive inline code. Use inline code only for short identifiers, filenames, function names, or commands. When code or a condition is long, put it in a fenced code block instead of stuffing it into backticks mid-sentence. Text should read like text; code should look like code.
+
+Compare:
+
+> In `src/lightly_train/_task_models/ltdetr_object_detection/train_model.py`, extract the existing `edgecrafter-detection` try/except currently inside the `patch_size == "auto"` branch, around lines 259–264, where `LTDETRObjectDetection.parse_model_name(model_name)["package_name"] == "edgecrafter"`...
+
+vs.
+
+> In:
+>
+> ```text
+> src/lightly_train/_task_models/ltdetr_object_detection/train_model.py
+> ```
+>
+> extract the existing `edgecrafter-detection` `try`/`except` logic from the `patch_size == "auto"` branch into a module-level helper:
+>
+> ```python
+> def _is_edgecrafter_model(model_name: str) -> bool:
+>     ...
+> ```
+>
+> The current check is roughly:
+>
+> ```python
+> LTDETRObjectDetection.parse_model_name(model_name)["package_name"] == "edgecrafter"
+> ```
+>
+> Use the new helper at the existing call site.
+
+Same content, but the path, the condition, and the target signature are each their own code block instead of one run-on sentence of backticks.
+
 ## Quick self-check before sending
 
 Before posting, check the draft against these:
@@ -91,6 +124,7 @@ Before posting, check the draft against these:
 3. Is there an opener or closer that isn't the actual content? → cut it.
 4. Would a terse teammate write this in half the words? → shorten to that.
 5. Does every sentence sound the same length and shape? → break the rhythm, use a fragment.
+6. Is a long path/condition/snippet crammed into inline backticks instead of a code block? → break it out.
 
 If a message survives all five checks, send it as-is — don't add anything back in for "completeness." Terse and slightly incomplete reads as human. Thorough and even-handed reads as AI.
 
