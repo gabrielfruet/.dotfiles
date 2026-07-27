@@ -40,13 +40,13 @@ description: Use when opening a PR and driving it to green CI — push the branc
 - Apply the `human-voice` skill: sound human, concise and decisive, and
   scope-honest (call out anything that belongs in a follow-up rather than
   smuggling it in).
-- Before referencing an internal tracker (Linear ticket ID, Slack thread/message
-  link, internal Notion doc, etc.), check whether the repo is public:
-  `gh repo view --json isPrivate -q .isPrivate`. If public, leave out internal
-  links or bare ticket IDs (e.g. `TRN-1234`, `linear.app/...`, `slack.com/archives/...`)
-  — external readers can't open them and they're noise. Describe the "why" in
-  plain prose instead, or link a public GitHub issue if one exists. If private,
-  internal references are fine as usual.
+- Never include internal/private links in a PR description — Notion docs,
+  Linear ticket links or bare ticket IDs (`TRN-1234`), Slack thread/message
+  links, or any other tool only teammates can open. This applies regardless
+  of whether the repo is public or private — internal tools get reorganized,
+  renamed, or lose access over time, so these links rot even for the team.
+  Describe the "why" in plain prose instead, or link a public GitHub issue if
+  one exists.
 - Check for `.github/pull_request_template.md` and use it if present.
 - Create with `gh pr create --title "..." --body-file <file>` (avoids
   literal `\n` issues with inline `--body`).
