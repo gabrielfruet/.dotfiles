@@ -37,3 +37,32 @@ This repository contains dotfiles managed by a script using GNU Stow to symlink 
 - The `-s` option simulates the stow process, which is useful for testing.
 - Use the `-u` option to uninstall or remove all symlinks created by the script.
 
+## macOS PR watcher
+
+`~/bin` is managed by the existing `zsh` package; the `macos` package installs
+the user LaunchAgent.
+It checks GitHub PR URLs from today's planning note every 15 minutes and sends a
+single native notification for new reviewer activity, lifecycle changes, and
+failing CI.
+
+```sh
+./stowit.sh zsh
+./stowit.sh macos
+plutil -lint "$HOME/Library/LaunchAgents/com.gabrielfruet.obsidian-pr-watch.plist"
+launchctl bootstrap "gui/$(id -u)" "$HOME/Library/LaunchAgents/com.gabrielfruet.obsidian-pr-watch.plist"
+launchctl kickstart -k "gui/$(id -u)/com.gabrielfruet.obsidian-pr-watch"
+```
+
+The first successful run silently records the PRs in the note. Run it manually
+without changing state or showing a notification with:
+
+```sh
+obsidian-pr-watch --dry-run
+```
+
+Diagnostics are written to `~/Library/Logs/obsidian-pr-watch.log`. To unload the
+agent, run:
+
+```sh
+launchctl bootout "gui/$(id -u)" "$HOME/Library/LaunchAgents/com.gabrielfruet.obsidian-pr-watch.plist"
+```

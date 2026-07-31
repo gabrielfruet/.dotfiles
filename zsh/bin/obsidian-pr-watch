@@ -1,0 +1,248 @@
+#!/bin/bash
+# Watch GitHub pull requests linked from today's Obsidian planning note.
+# Compatible with the system Bash shipped by macOS (3.2).
+
+set -euo pipefail
+
+export PATH="/opt/homebrew/bin:/usr/local/bin:${PATH:-/usr/bin:/bin}"
+GH_BIN="${GH_BIN:-gh}"
+JQ_BIN="${JQ_BIN:-jq}"
+OSASCRIPT_BIN="${OSASCRIPT_BIN:-/usr/bin/osascript}"
+VAULT_ROOT="${PR_WATCH_VAULT:-$HOME/docs/zettelkasten}"
+NOTE_FILE="$VAULT_ROOT/60 - Planning/$(date +%F).md"
+STATE_FILE="${PR_WATCH_STATE_FILE:-$HOME/Library/Application Support/obsidian-pr-watch/state.json}"
+DRY_RUN=0
+
+usage() {
+  cat <<'EOF'
+Usage: obsidian-pr-watch [--note PATH] [--state-file PATH] [--dry-run]
+
+Watch GitHub pull requests linked from an Obsidian daily planning note.
+The first successful observation of a pull request is stored silently.
+EOF
+}
+
+log() {
+  printf '%s obsidian-pr-watch: %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*" >&2
+}
+
+die() {
+  log "$*"
+  exit 1
+}
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --note)
+      [ "$#" -ge 2 ] || die "--note needs a path"
+      NOTE_FILE="$2"; shift 2
+      ;;
+    --state-file)
+      [ "$#" -ge 2 ] || die "--state-file needs a path"
+      STATE_FILE="$2"; shift 2
+      ;;
+    --dry-run) DRY_RUN=1; shift ;;
+    --help|-h) usage; exit 0 ;;
+    *) usage >&2; exit 2 ;;
+  esac
+done
+
+command -v "$GH_BIN" >/dev/null 2>&1 || die "gh is required"
+command -v "$JQ_BIN" >/dev/null 2>&1 || die "jq is required"
+[ -x "$OSASCRIPT_BIN" ] || die "osascript is required"
+# Missing daily notes are expected before the user writes one.
+[ -f "$NOTE_FILE" ] || exit 0
+
+RUN_DIR="$(mktemp -d "${TMPDIR:-/tmp}/obsidian-pr-watch.XXXXXX")"
+LOCK_DIR=""
+cleanup() {
+  [ -n "$LOCK_DIR" ] && rmdir "$LOCK_DIR" 2>/dev/null || true
+  rm -rf "$RUN_DIR"
+}
+trap cleanup EXIT HUP INT TERM
+
+if [ "$DRY_RUN" -eq 0 ]; then
+  STATE_DIR="$(dirname "$STATE_FILE")"
+  mkdir -p "$STATE_DIR"
+  LOCK_DIR="$STATE_DIR/.obsidian-pr-watch.lock"
+  if ! mkdir "$LOCK_DIR" 2>/dev/null; then
+    log "another watcher run is already active"
+    exit 0
+  fi
+fi
+
+URLS_FILE="$RUN_DIR/urls"
+# v1 intentionally accepts only GitHub pull-request URLs; this also removes
+# Markdown punctuation, fragments, and query strings while canonicalizing.
+grep -Eo 'https://github\.com/[^/[:space:]?#]+/[^/[:space:]?#]+/pull/[0-9]+' "$NOTE_FILE" 2>/dev/null | sort -u > "$URLS_FILE" || true
+"$JQ_BIN" -Rn '[inputs]' < "$URLS_FILE" > "$RUN_DIR/urls.json"
+
+if [ -f "$STATE_FILE" ]; then
+  "$JQ_BIN" -e 'type == "object" and .version == 1 and (.prs | type == "object")' "$STATE_FILE" >/dev/null || die "state file is invalid: $STATE_FILE"
+  cp "$STATE_FILE" "$RUN_DIR/next-state.json"
+else
+  printf '%s\n' '{"version":1,"prs":{}}' > "$RUN_DIR/next-state.json"
+fi
+NEXT_STATE="$RUN_DIR/next-state.json"
+EVENTS_FILE="$RUN_DIR/events.json"
+printf '%s\n' '[]' > "$EVENTS_FILE"
+
+if ! VIEWER="$($GH_BIN api --method GET user --jq '.login')"; then
+  die "could not determine the authenticated GitHub user"
+fi
+
+add_event() {
+  local url="$1" label="$2" message="$3" next="$RUN_DIR/events.next.json"
+  "$JQ_BIN" --arg url "$url" --arg label "$label" --arg message "$message" '. + [{url: $url, label: $label, message: $message}]' "$EVENTS_FILE" > "$next"
+  mv "$next" "$EVENTS_FILE"
+}
+
+fetch_json() {
+  local endpoint="$1" output="$2"
+  "$GH_BIN" api --method GET "$endpoint" > "$output" && "$JQ_BIN" -e . "$output" >/dev/null
+}
+
+fetch_pages() {
+  local endpoint="$1" output="$2" normalized="$2.normalized"
+  "$GH_BIN" api --method GET --paginate --slurp "$endpoint" > "$output" || return 1
+  "$JQ_BIN" -e 'type == "array"' "$output" >/dev/null || return 1
+  "$JQ_BIN" -c '[.[][]]' "$output" > "$normalized" || return 1
+  mv "$normalized" "$output"
+}
+
+fetch_check_runs() {
+  local endpoint="$1" output="$2"
+  "$GH_BIN" api --method GET --paginate --slurp "$endpoint" > "$output" || return 1
+  "$JQ_BIN" -e 'type == "array" and all(.[]; type == "object" and has("check_runs"))' "$output" >/dev/null || return 1
+  "$JQ_BIN" -c '[.[] | .check_runs[]?]' "$output" > "$output.normalized" || return 1
+  mv "$output.normalized" "$output"
+}
+
+contains_id() {
+  "$JQ_BIN" -e --arg id "$2" 'index($id) != null' <<<"$1" >/dev/null
+}
+
+review_message() {
+  case "$2" in
+    APPROVED) printf '%s approved' "$1" ;;
+    CHANGES_REQUESTED) printf '%s requested changes' "$1" ;;
+    COMMENTED) printf '%s submitted a review comment' "$1" ;;
+    DISMISSED) printf "%s's review was dismissed" "$1" ;;
+  esac
+}
+
+while IFS= read -r url; do
+  [ -n "$url" ] || continue
+  path="${url#https://github.com/}"
+  owner="${path%%/*}"
+  path="${path#*/}"
+  repo="${path%%/*}"
+  number="${path##*/}"
+  api_base="repos/$owner/$repo"
+  pr_dir="$RUN_DIR/$owner-$repo-$number"
+  mkdir -p "$pr_dir"
+
+  ok=1
+  fetch_json "$api_base/pulls/$number" "$pr_dir/pr.json" || ok=0
+  [ "$ok" -eq 1 ] && fetch_pages "$api_base/pulls/$number/reviews?per_page=100" "$pr_dir/reviews.json" || ok=0
+  [ "$ok" -eq 1 ] && fetch_pages "$api_base/issues/$number/comments?per_page=100" "$pr_dir/issue-comments.json" || ok=0
+  [ "$ok" -eq 1 ] && fetch_pages "$api_base/pulls/$number/comments?per_page=100" "$pr_dir/review-comments.json" || ok=0
+  if [ "$ok" -eq 1 ]; then
+    head_sha="$($JQ_BIN -r '.head.sha // empty' "$pr_dir/pr.json")"
+    [ -n "$head_sha" ] || ok=0
+  fi
+  [ "$ok" -eq 1 ] && fetch_json "$api_base/commits/$head_sha/status" "$pr_dir/status.json" || ok=0
+  [ "$ok" -eq 1 ] && fetch_check_runs "$api_base/commits/$head_sha/check-runs?filter=latest&per_page=100" "$pr_dir/checks.json" || ok=0
+  if [ "$ok" -eq 0 ]; then
+    log "could not read $url; keeping its previous state"
+    continue
+  fi
+
+  previous="$($JQ_BIN -c --arg url "$url" '.prs[$url] // null' "$NEXT_STATE")"
+  baseline=0
+  [ "$previous" = null ] && baseline=1
+  title="$($JQ_BIN -r '.title // "untitled"' "$pr_dir/pr.json")"
+  pr_state="$($JQ_BIN -r '.state' "$pr_dir/pr.json")"
+  merged="$($JQ_BIN -r '.merged_at != null' "$pr_dir/pr.json")"
+  label="$owner/$repo#$number"
+
+  review_states="$($JQ_BIN -c --arg viewer "$VIEWER" '[.[] | select(.user.login != $viewer) | {key: (.id | tostring), value: .state}] | from_entries' "$pr_dir/reviews.json")"
+  issue_ids="$($JQ_BIN -c '[.[] | (.id | tostring)]' "$pr_dir/issue-comments.json")"
+  review_comment_ids="$($JQ_BIN -c '[.[] | (.id | tostring)]' "$pr_dir/review-comments.json")"
+  combined_failed="$($JQ_BIN -r '.state == "failure"' "$pr_dir/status.json")"
+  checks_failed=false
+  if "$JQ_BIN" -e 'any(.[]; .conclusion == "failure" or .conclusion == "timed_out" or .conclusion == "action_required" or .conclusion == "startup_failure")' "$pr_dir/checks.json" >/dev/null; then
+    checks_failed=true
+  fi
+  ci_failed=false
+  if [ "$combined_failed" = true ] || [ "$checks_failed" = true ]; then ci_failed=true; fi
+
+  if [ "$baseline" -eq 0 ]; then
+    while IFS=$'\t' read -r review_id review_state actor; do
+      [ -n "$review_id" ] || continue
+      old_state="$($JQ_BIN -r --arg id "$review_id" '.reviews[$id] // empty' <<<"$previous")"
+      case "$review_state" in
+        APPROVED|CHANGES_REQUESTED|COMMENTED|DISMISSED)
+          [ "$old_state" = "$review_state" ] || add_event "$url" "$label" "$(review_message "$actor" "$review_state")"
+          ;;
+      esac
+    done < <("$JQ_BIN" -r --arg viewer "$VIEWER" '.[] | select(.user.login != $viewer) | [(.id | tostring), .state, .user.login] | @tsv' "$pr_dir/reviews.json")
+
+    old_issue_ids="$($JQ_BIN -c '.issue_comment_ids // []' <<<"$previous")"
+    while IFS=$'\t' read -r comment_id actor; do
+      [ -n "$comment_id" ] || continue
+      if ! contains_id "$old_issue_ids" "$comment_id" && [ "$actor" != "$VIEWER" ]; then
+        add_event "$url" "$label" "$actor added a PR comment"
+      fi
+    done < <("$JQ_BIN" -r '.[] | [(.id | tostring), .user.login] | @tsv' "$pr_dir/issue-comments.json")
+
+    old_review_ids="$($JQ_BIN -c '.review_comment_ids // []' <<<"$previous")"
+    while IFS=$'\t' read -r comment_id actor; do
+      [ -n "$comment_id" ] || continue
+      if ! contains_id "$old_review_ids" "$comment_id" && [ "$actor" != "$VIEWER" ]; then
+        add_event "$url" "$label" "$actor added an inline review comment"
+      fi
+    done < <("$JQ_BIN" -r '.[] | [(.id | tostring), .user.login] | @tsv' "$pr_dir/review-comments.json")
+
+    old_pr_state="$($JQ_BIN -r '.state // empty' <<<"$previous")"
+    old_merged="$($JQ_BIN -r '.merged // false' <<<"$previous")"
+    if [ "$old_pr_state" != "$pr_state" ]; then
+      if [ "$pr_state" = closed ] && [ "$merged" = true ]; then
+        add_event "$url" "$label" "PR merged"
+      elif [ "$pr_state" = closed ]; then
+        add_event "$url" "$label" "PR closed"
+      elif [ "$pr_state" = open ]; then
+        add_event "$url" "$label" "PR reopened"
+      fi
+    elif [ "$old_merged" != "$merged" ] && [ "$merged" = true ]; then
+      add_event "$url" "$label" "PR merged"
+    fi
+
+    old_head="$($JQ_BIN -r '.head_sha // empty' <<<"$previous")"
+    old_ci_failed="$($JQ_BIN -r '.ci_failed // false' <<<"$previous")"
+    if [ "$ci_failed" = true ] && { [ "$old_ci_failed" != true ] || [ "$old_head" != "$head_sha" ]; }; then
+      add_event "$url" "$label" "CI is failing"
+    fi
+  fi
+
+  snapshot="$($JQ_BIN -cn --arg title "$title" --arg state "$pr_state" --argjson merged "$merged" --arg head_sha "$head_sha" --argjson ci_failed "$ci_failed" --argjson reviews "$review_states" --argjson issue_comment_ids "$issue_ids" --argjson review_comment_ids "$review_comment_ids" '{title: $title, state: $state, merged: $merged, head_sha: $head_sha, ci_failed: $ci_failed, reviews: $reviews, issue_comment_ids: $issue_comment_ids, review_comment_ids: $review_comment_ids}')"
+  "$JQ_BIN" --arg url "$url" --argjson snapshot "$snapshot" '.prs[$url] = $snapshot' "$NEXT_STATE" > "$NEXT_STATE.next"
+  mv "$NEXT_STATE.next" "$NEXT_STATE"
+done < "$URLS_FILE"
+
+"$JQ_BIN" --argjson urls "$(cat "$RUN_DIR/urls.json")" '.prs |= with_entries(select(.key as $key | $urls | index($key)))' "$NEXT_STATE" > "$NEXT_STATE.pruned"
+mv "$NEXT_STATE.pruned" "$NEXT_STATE"
+
+event_count="$($JQ_BIN 'length' "$EVENTS_FILE")"
+if [ "$event_count" -gt 0 ]; then
+  digest="$($JQ_BIN -r 'sort_by(.label) | group_by(.label) as $groups | ($groups | map(.[0].label + " — " + (map(.message) | join("; ")))) as $lines | ($lines[:6] + (if ($lines | length) > 6 then ["+ " + (($lines | length) - 6 | tostring) + " more PRs"] else [] end)) | join("\n")' "$EVENTS_FILE")"
+  pr_count="$($JQ_BIN 'map(.label) | unique | length' "$EVENTS_FILE")"
+  notification_title="PR updates ($pr_count)"
+  if [ "$DRY_RUN" -eq 1 ]; then
+    printf '%s\n%s\n' "$notification_title" "$digest"
+  else
+    "$OSASCRIPT_BIN" -e 'on run argv' -e 'display notification (item 1 of argv) with title (item 2 of argv)' -e 'end run' "$digest" "$notification_title"
+  fi
+fi
+
+if [ "$DRY_RUN" -eq 0 ]; then mv "$NEXT_STATE" "$STATE_FILE"; fi
