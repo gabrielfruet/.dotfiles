@@ -13,8 +13,14 @@ description: Use when opening a PR and driving it to green CI — push the branc
    `gh pr view <branch> --json number,url,body,state`
    - None open → create one (see Description below).
    - Already open → reuse it, don't create a duplicate.
-4. Watch CI: `gh pr checks <number-or-branch> --watch --fail-fast`
-   - This blocks until checks finish (or one fails, with `--fail-fast`).
+4. Watch CI: `gh pr checks <number-or-branch> --watch`
+   - This blocks until every check reaches a final state, polling on its own —
+     never wrap it in a manual `sleep`/poll loop, that's what `--watch` is for.
+   - Avoid `--fail-fast` here: it returns the instant *any single* check goes
+     red, even while others are still pending/running, which tempts you into
+     acting (e.g. deciding to rerun) before the full picture is in. Let
+     `--watch` run to completion so you see the final state of every check at
+     once.
    - If backgrounding is available, run this in the background instead of
      blocking the session — keep working (or wait idle) and pick back up
      when it reports back.
@@ -26,7 +32,9 @@ description: Use when opening a PR and driving it to green CI — push the branc
      update the title and description (see below).
    - Go back to step 4.
    - If failure looks like pure infra flake (not caused by the diff), rerun
-     instead of pushing a no-op: `gh run rerun <run-id> --failed`.
+     instead of pushing a no-op: `gh run rerun <run-id> --failed`. If the
+     parent workflow run is still in progress, wait for it to finish first
+     (via `--watch`, not a manual sleep) — a run can't be rerun while active.
 6. All checks green → done. Report the PR URL.
 
 ## Title & Description
