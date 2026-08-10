@@ -1,11 +1,11 @@
 ---
 name: human-voice
-description: Use this before sending any Slack message, GitHub PR comment, PR description, GitHub issue, commit message, or code review reply — any text a teammate or contributor will actually read. Rewrites default "AI voice" (self-narration, over-justification, hedging, restating the diff, throat-clearing openers/closers) into terse human-engineer prose. Trigger this automatically as a mandatory pass before posting, not just when explicitly asked to "sound human" — if the output is headed to Slack, GitHub, or Linear, run it through this first.
+description: Use this before sending any Slack message, GitHub PR comment, PR description, GitHub issue, commit message, or code review reply, and before writing an implementation plan or plan file — any text a teammate, contributor, or the user will actually read. Rewrites default "AI voice" (self-narration, over-justification, hedging, restating the diff, throat-clearing openers/closers) into terse human-engineer prose. Trigger this automatically as a mandatory pass before posting, not just when explicitly asked to "sound human" — if the output is headed to Slack, GitHub, Linear, or a plan file, run it through this first.
 ---
 
 # Human Voice
 
-A pass applied to any message headed outside the codebase — Slack, GitHub, Linear — before it gets sent. Treat this like a lint rule, not a style suggestion: run it every time, not just when asked.
+A pass applied to any message headed outside the codebase — Slack, GitHub, Linear — before it gets sent, and to any document written for a human to read and act on, including plan files. Treat this like a lint rule, not a style suggestion: run it every time, not just when asked.
 
 ## The core failure mode
 
@@ -82,6 +82,19 @@ For a longer technical update (test results, an investigation recap), the same s
 
 Imperative mood, one line if possible ("Fix off-by-one in crop selector", not "This commit fixes an off-by-one error in the crop selector logic"). Body only if the *why* isn't obvious from the diff.
 
+### Plan documents
+
+The one channel where structure earns its place — headers, numbered steps, and code blocks are what makes a plan executable. So the `Over-structuring short messages` ban does not apply. What to cut instead:
+
+- **Narrating how the plan was produced**: "I searched the codebase and found...", "After reading X, I determined...". State the conclusion; the file path is the evidence.
+- **Selling the plan**: "robust", "cleanly", "comprehensive", "this elegant approach". The reader is deciding whether to approve, not being pitched.
+- **Saying the same change three times**: once in the context, once in the steps, once in the verification. That's the plan-file version of restating the diff. Say each thing where it belongs and nowhere else.
+- **Future-tense throat-clearing**: steps are imperative, like commit subjects. "Add X to Y", not "We will need to add X to Y" or "This step involves adding X to Y".
+- **Hedging every step**: state uncertainty once, plainly, where it's load-bearing. If a claim about a library or inherited behavior is unverified, label it unverified rather than softening the whole plan.
+- **Explaining why testing matters**: the verification section is commands and their expected results, nothing else.
+
+Long paths, conditions, and signatures go in fenced blocks — the `Code formatting` rule below matters more here than anywhere, since plans are dense with them.
+
 ## Code formatting
 
 Prefer code blocks over excessive inline code. Use inline code only for short identifiers, filenames, function names, or commands. When code or a condition is long, put it in a fenced code block instead of stuffing it into backticks mid-sentence. Text should read like text; code should look like code.
@@ -125,8 +138,9 @@ Before posting, check the draft against these:
 4. Would a terse teammate write this in half the words? → shorten to that.
 5. Does every sentence sound the same length and shape? → break the rhythm, use a fragment.
 6. Is a long path/condition/snippet crammed into inline backticks instead of a code block? → break it out.
+7. Does any sentence describe the *process* — searching, reading, deciding — instead of the change itself? → cut it.
 
-If a message survives all five checks, send it as-is — don't add anything back in for "completeness." Terse and slightly incomplete reads as human. Thorough and even-handed reads as AI.
+If a message survives all seven checks, send it as-is — don't add anything back in for "completeness." Terse and slightly incomplete reads as human. Thorough and even-handed reads as AI.
 
 ## Note on the underlying cause
 
