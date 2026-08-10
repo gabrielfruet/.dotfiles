@@ -1,6 +1,6 @@
 ---
 name: pr-workflow
-description: Use when opening a PR and driving it to green CI — push the branch, write a high-level PR description, watch checks, fix failures, and keep looping until green; also use when an already-open PR gets new commits.
+description: Use when opening a PR and driving it to green CI — push the branch, write a high-level PR description, watch checks, fix failures, and keep looping until green; also use when an already-open PR gets new commits, or when addressing review comments from humans or bots (CodeRabbit, Codex, Copilot).
 ---
 
 # PR Workflow
@@ -64,7 +64,31 @@ description: Use when opening a PR and driving it to green CI — push the branc
   routine CI fixes, typos, or review nitpicks. When it does change, update
   both together — a title that still names the old approach is a common miss.
 
+## Review comments
+Bot reviewers read the whole file, not your diff. A comment landing on a line
+is not evidence that line is yours.
+
+- Before acting on any comment, check whether this PR introduced the code it
+  flags: `git diff <base>...HEAD -- <path>`. Already on the base branch → out
+  of scope. Leave it.
+- Refactor suggestions on pre-existing code ("split this into helpers",
+  "extract a function") are the common trap. Folding one in makes the diff
+  bigger than the change it supports, and a human reviewer will ask for it
+  back out.
+- Act on a bot comment when it names a real defect in code this PR introduced
+  or broke.
+- If the out-of-scope work looks worth doing, it goes in a follow-up PR —
+  never this one. Ask the user first; never open one unprompted. If they pass,
+  leave a TODO or drop it.
+- Human comments outrank bot ones. When a human says a change is unnecessary,
+  drop it — don't defend it.
+- To undo a whole commit a reviewer rejected: `git revert --no-commit <sha>`,
+  then commit with the review as the stated reason. Cleaner than unwinding the
+  diff by hand.
+
 ## Rules
+- Addressing review feedback must never grow the PR past its stated purpose.
+  Out-of-scope work becomes a follow-up PR, and only after the user confirms.
 - For commit-by-commit hygiene (staging, diff review, message format), defer
   to the `git-workflow` skill.
 - For `gh` mechanics (auth, JSON output, inline vs review comments), defer to
