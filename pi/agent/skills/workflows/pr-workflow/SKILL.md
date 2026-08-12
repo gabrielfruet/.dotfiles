@@ -11,7 +11,14 @@ description: Use when opening a PR and driving it to green CI — push the branc
 2. Push: `git push -u origin <branch>` (or `git push` if already tracking).
 3. Check for an existing PR on this branch:
    `gh pr view <branch> --json number,url,body,state`
-   - None open → create one (see Description below).
+   - None open → spawn a subagent to draft the body. It loads
+     `write-pr-description` and `human-voice` itself, and works from
+     `git diff` and `git log` alone. Required, not a suggestion. Then create
+     the PR with what it returns (see Description below).
+   - Draft it yourself only when no subagent is available. Your context holds
+     the whole implementation — every rejected approach, every measurement you
+     took to get here — and a description written from it inherits all of that.
+     The subagent's ignorance is the feature.
    - Already open → reuse it, don't create a duplicate.
 4. Watch CI: `gh pr checks <number-or-branch> --watch`
    - This blocks until every check reaches a final state, polling on its own —
@@ -24,20 +31,43 @@ description: Use when opening a PR and driving it to green CI — push the branc
    - If backgrounding is available, run this in the background instead of
      blocking the session — keep working (or wait idle) and pick back up
      when it reports back.
-5. If a check is red:
+5. If a check is red, diagnose before fixing — don't guess at a code change:
    - Find the real failure: `gh run view <run-id> --log-failed`
-   - Fix the root cause in the code — don't skip/disable the check.
-   - Commit, push.
+   - Reproduce locally with a targeted test command for just the failing
+     suite/file (whatever the project's runner is — vitest, pytest, etc.),
+     not the full suite.
+     - Fails locally too → real issue. Confirm scope with
+       `git diff <base>...HEAD -- <path>` before touching anything, then fix
+       the root cause in the code — don't skip/disable the check. Commit,
+       push, go back to step 4.
+     - Passes locally, fails only on CI → a CI-environment difference (stale
+       cache, missing env var, dependency drift), not a code bug.
+       Investigate the CI config/environment, not the source.
+   - If the failure looks disconnected from the diff, rerun once instead of
+     pushing a no-op: `gh run rerun <run-id> --failed`. If the parent
+     workflow run is still in progress, wait for it to finish first (via
+     `--watch`, not a manual sleep) — a run can't be rerun while active.
+     - Passes on rerun → it was flaky. Don't just move on: consider opening
+       a GitHub issue documenting it (repro steps, run link, recurrence) so
+       it's tracked — draft it with `human-voice`, `gh-issue` channel. Ask the user
+       first if the flake isn't clearly this PR's to report.
+     - Still red after both checks (fails locally and fails again on rerun,
+       diff doesn't touch it) → propose a minimal, separately-committed fix
+       and wait for explicit user approval before applying it. Keep it as
+       its own commit, not folded into the PR's main change, so it stays
+       easy to drop or revert.
    - If the fix changed the PR's actual goal/approach (not just a bugfix),
      update the title and description (see below).
-   - Go back to step 4.
-   - If failure looks like pure infra flake (not caused by the diff), rerun
-     instead of pushing a no-op: `gh run rerun <run-id> --failed`. If the
-     parent workflow run is still in progress, wait for it to finish first
-     (via `--watch`, not a manual sleep) — a run can't be rerun while active.
 6. All checks green → done. Report the PR URL.
+7. Asked to shorten, redo or re-scope the description → new subagent, same
+   brief, current diff. Don't edit the prose in place. Trimming by hand keeps
+   the altitude of the draft it came from, and by that point your context is
+   dirtier than when you started.
 
 ## Title & Description
+- Draft the body by running the `write-pr-description` skill in a subagent — it
+  reads the diff and commits and produces a goal-first structured description.
+  The rules below still govern the result.
 - Write a high-level summary of *what the PR is trying to accomplish* — the
   goal/approach, not a changelog of every commit or CI fix. The diff already
   shows what changed.
@@ -45,16 +75,21 @@ description: Use when opening a PR and driving it to green CI — push the branc
   line — if the description names the approach (e.g. "sort coords" vs "skip
   degenerate boxes"), the title must match it. A stale title that names the
   old approach is misleading even if the body is accurate.
-- Apply the `human-voice` skill: sound human, concise and decisive, and
+- Apply `human-voice`, `pr-description` channel: sound human, concise and decisive, and
   scope-honest (call out anything that belongs in a follow-up rather than
   smuggling it in).
-- Never include internal/private links in a PR description — Notion docs,
-  Linear ticket links or bare ticket IDs (`TRN-1234`), Slack thread/message
-  links, or any other tool only teammates can open. This applies regardless
-  of whether the repo is public or private — internal tools get reorganized,
-  renamed, or lose access over time, so these links rot even for the team.
-  Describe the "why" in plain prose instead, or link a public GitHub issue if
-  one exists.
+- Never include internal/private links or references anywhere in the PR —
+  not just the description body, but the title, and any commit messages you
+  write for it too. This covers Notion docs, Linear ticket links or bare
+  ticket IDs (`TRN-1234`), Slack thread/message links, or any other tool only
+  teammates can open. This applies regardless of whether the repo is public
+  or private — internal tools get reorganized, renamed, or lose access over
+  time, so these links rot even for the team. Describe the "why" in plain
+  prose instead, or link a public GitHub issue if one exists. If a ticket ID
+  slips into a title or commit message anyway, fix it before calling the PR
+  done: `gh pr edit <number> --title "..."` for the title; for commits already
+  pushed, amend/reword and force-push the branch (safe pre-review, on your own
+  feature branch).
 - Check for `.github/pull_request_template.md` and use it if present.
 - Create with `gh pr create --title "..." --body-file <file>` (avoids
   literal `\n` issues with inline `--body`).
@@ -93,7 +128,11 @@ is not evidence that line is yours.
   to the `git-workflow` skill.
 - For `gh` mechanics (auth, JSON output, inline vs review comments), defer to
   the `gh-cli` skill.
-- For PR description tone/detail/scope, defer to the `human-voice` skill.
+- For drafting the description body from the diff/commits, always run the
+  `write-pr-description` skill, in a subagent.
+- For PR description tone/detail/scope, defer to `human-voice`:
+  `references/channels/pr-description.md`. For review comments you write and
+  replies you post, `pr-review-comment.md` and `pr-review-reply.md`.
 - Treat "watch CI" as blocking on the *result*: never report done before
   `gh pr checks` shows every check green — but the watch itself can run in
   the background if the tool supports it, rather than tying up the session.
