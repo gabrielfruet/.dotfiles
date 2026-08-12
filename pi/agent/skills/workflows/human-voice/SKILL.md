@@ -1,147 +1,84 @@
 ---
 name: human-voice
-description: Use this before sending any Slack message, GitHub PR comment, PR description, GitHub issue, commit message, or code review reply, and before writing an implementation plan or plan file — any text a teammate, contributor, or the user will actually read. Rewrites default "AI voice" (self-narration, over-justification, hedging, restating the diff, throat-clearing openers/closers) into terse human-engineer prose. Trigger this automatically as a mandatory pass before posting, not just when explicitly asked to "sound human" — if the output is headed to Slack, GitHub, Linear, or a plan file, run it through this first.
+description: >-
+  Mandatory before writing any text that leaves the session: Slack, GitHub (PR
+  titles and bodies, issues, review comments and replies), Linear, commit
+  messages, plan files. Strips AI voice — self-narration, restating the diff,
+  over-justification, hedging, throat-clearing openers and closers — and routes
+  by channel. Also use for "make this sound human", "de-AI this", or a draft
+  that reads generic. Not conditional on being asked.
 ---
 
-# Human Voice
+# Human voice
 
-A pass applied to any message headed outside the codebase — Slack, GitHub, Linear — before it gets sent, and to any document written for a human to read and act on, including plan files. Treat this like a lint rule, not a style suggestion: run it every time, not just when asked.
+Route to a channel, read that file, then draft. Not a pass applied afterwards.
 
-## The core failure mode
+## Core failure mode
 
-Default model output narrates itself. It explains what it did, why it did it, and what the reader should think about that — even though the reader can already see the diff, the commit, or the thread above. That narration is the single biggest tell. Cutting it gets you 80% of the way to sounding human.
+Output narrates itself: what it did, why, and what the reader should think about
+that — when the reader can already see the diff, the commit, or the thread above.
 
-Compare:
+> I added your suggestion on commit X. This change improves readability and
+> maintainability, thanks for pointing it out!
 
-> I added your suggestion on commit X. This change improves readability and maintainability, thanks for pointing it out!
+versus `Applied, thanks!` — same information. The diff shows what changed; the
+message carries only what the diff can't.
 
-vs.
+## Route first
 
-> Applied, thanks!
+Files live in `references/channels/`.
 
-Same information content. The diff already shows what changed — the message only needs to carry what the diff *can't* show (that it's done, that you agreed, that something's still open).
+| Channel | File | max_lines | max_words | Rewrite |
+|---|---|---|---|---|
+| PR description | `pr-description.md` | 20 | 200 | flagger + rewriter |
+| GitHub issue | `gh-issue.md` | 40 | 300 | flagger + rewriter |
+| Linear issue | `linear-issue.md` | 25 | 200 | flagger + rewriter |
+| PR review comment (as reviewer) | `pr-review-comment.md` | 6 | 60 | rewriter |
+| PR review reply (as author) | `pr-review-reply.md` | 2 | 25 | inline |
+| Slack | `slack.md` | 6 | 40 | inline |
+| Commit message | `commit-message.md` | 5 | 50 | inline |
+| Plan file, subagent brief | `ai-facing.md` | none | none | rewriter |
 
-## Banned patterns
+No matching row: pick the nearest and say which. Docs and README go to
+`simple-english`. For a PR body, `write-pr-description` gathers; this shapes.
 
-Strip these on sight:
+## Universal rules
 
-- **Self-narration**: "I've added...", "This commit does...", "I updated X to fix Y" — if the diff/commit shows it, don't also say it.
-- **Restating the diff**: describing the code change in prose. GitHub already renders the diff.
-- **Over-justification**: explaining *why* a one-line fix is correct in a paragraph. If the reasoning is genuinely non-obvious, one clause. Otherwise, nothing.
-- **Hedging**: "might", "could potentially", "it's possible that", "I think perhaps" — say the thing or ask the question, don't wrap it in cotton wool.
-- **Throat-clearing openers**: "Great question!", "Thanks for reaching out!", "Sure, happy to help with that!"
-- **Throat-clearing closers**: "Let me know if you have any questions!", "Happy to help further!", "Hope this helps!"
-- **Adjective/adverb inflation**: "robust", "comprehensive", "seamless", "powerful", "cutting-edge", "significantly" — these carry no technical content, cut them.
-- **Uniform sentence rhythm**: every LLM default reads like a string of medium-length, grammatically identical sentences. Real engineers write fragments. "Fixed." "Yeah, same bug." "Not quite — see below." is normal.
-- **Over-structuring short messages**: headers, bold, and bullet lists for a two-line Slack message or a one-line PR comment. Structure is for docs and long issues, not for "lgtm, one nit."
-- **Numbered self-recaps**: "Here's what I did: 1) ... 2) ... 3) ..." for anything the commit history already encodes.
-- **Em dashes as a tic**: fine occasionally, overused as connective tissue in every sentence is a known model tell.
-- **Dramatic reveal framing**: "found the actual lever," "that inverts the original hypothesis," "turns out," "the real finding" — narrating your own analysis as a discovery arc. State the result, skip the plot twist.
-- **Sales-pitch-style takeaway closers**: a final sentence that steps back to frame "what this all means" or oversells the outcome ("not just a marginal bump, but..."). End on the last concrete fact or the next action instead.
-- **Overstated certainty from small samples**: presenting a pattern from 2-3 runs/data points as a settled conclusion. Use "seems to," "suggests," "so far" when the sample is small — and say the sample size if it's load-bearing (e.g. "3 runs so far").
+True everywhere. Fragments, em dashes, headers, bold and first-person opinion are
+**not** here — each channel decides those.
 
-## Confirmed facts vs. interpretation
+- No self-narration, no restating the diff, no throat-clearing openers or closers.
+- No paragraph justifying an uncontroversial fix. Commit to a position and cut
+  hedges on claims you actually hold.
+- Hedge the inference, never the measurement. Give the sample size when it matters.
+- Vary sentence length. Uniform mid-length rhythm is the loudest tell.
+- Break the pattern of three. No closing summary that restates the body.
+- No adjective inflation: `robust`, `comprehensive`, `seamless`, `significantly`.
+- Long paths, conditions and signatures go in fenced blocks, not inline backticks.
+- Never invent a fact. Every figure, filename and flag traces back to a source.
 
-Separate what was directly measured (a number, a log line, a run result) from what you're inferring from it (a pattern, a cause, a recommendation). Don't let interpretation ride on the same sentence as the fact, and don't present an inference with the same confidence as a measurement.
+## Process
 
-When listing run results, state each result plainly first; put the "what this suggests" read as a separate, hedged sentence afterward — not folded into the same clause.
+1. **Draft** against the channel file. Aim for unremarkable, not clever.
+2. **Cut** to `max_words`. State the before and after count; an unstated count
+   means the pass did not run. Whole sections go before sentences do.
+3. **Rewrite** per the table's last column:
+   - `inline` — check the draft against `references/blocklist.md` (phrases) and
+     `references/patterns.md` (constructions, and what *not* to flag), ship.
+   - `rewriter` — one subagent. Give it the channel file, the ceiling and the
+     source of truth. Withhold your reasoning; escaping it is why you spawned it.
+   - `flagger + rewriter` — a cold reader diagnoses first
+     (`references/cold-read.md`), then a **second** subagent rewrites, never
+     seeing the flagger's context.
 
-**Report-voice** (fact and inference tangled, dramatic arc, sales-pitch close):
+Then check the facts survived: every figure and filename in the source appears in
+the rewrite or was cut on purpose. Only you saw the original evidence.
 
-> Ran three comparisons and found the actual lever: it's the learning rate, not the schedule we suspected. Run 1 peaked early then declined. Run 2 did the same. Run 3, with a lower rate, held steady with no decline at all — that inverts our original hypothesis. This isn't just a small win, it fixes the core problem.
+## Feedback
 
-**Quick update** (result first, facts plain, uncertainty and next step stated, no moral at the end):
+When the user corrects the voice, length or shape of something you wrote, append
+an entry to `feedback/` (format in `feedback/README.md`). Record it, change
+nothing else. Never read `feedback/` while drafting — entries are inert until an
+approval-gated consolidation pass folds them into the channel files.
 
-> Lower learning rate seems to fix the decline we've been seeing. Run 1 and run 2 (higher rate) both peaked early then dropped off. Run 3 (lower rate) held steady, no drop, best result so far. Only one run at the lower rate though, so still checking if that holds. Next: rerun at the lower rate to confirm, then try extending it a bit further.
-
-## Channel-specific rules
-
-### PR comments (review replies)
-
-Cap at one sentence unless there's a genuine open question. No restating the diff, no explaining the fix, no thanking-with-justification. Default shape:
-
-- Applying a suggestion: `"Applied, thanks!"` or `"Good catch, fixed."`
-- Disagreeing: `"Kept it as-is — X breaks under Y."` (one clause of reasoning, not a paragraph)
-- Pushing back / asking: `"Why not just Z here?"`
-
-### PR descriptions
-
-Short. Say what changed and why, once, in plain sentences — not a template with "## Summary / ## Changes / ## Testing" unless the repo convention requires those headers. If it fits in 2-3 sentences, it shouldn't be 15 lines.
-
-### GitHub issues (proposing new work)
-
-Longer is fine here since it's documentation people will reference later, but the padding to cut is different: skip the paragraph justifying *why the feature would be valuable* unless it's genuinely not obvious. Lead with the proposed API/interface itself, not a narrative building up to it. Fewer adjectives describing how great the feature will be — let the proposal speak for itself. Implementation details go in the PR, not the issue, unless the issue is specifically asking for design input on them.
-
-### Slack messages
-
-Shortest of all. No salutations, no sign-offs, contractions are normal, sentence fragments are normal, periods on one-liners are optional. Match the thread's existing register rather than imposing formality on it — if the channel is casual, be casual; if it's a status-update channel, be terser still. A Slack message almost never needs a bulleted list; if you're reaching for one, the message is probably too long for Slack.
-
-For a longer technical update (test results, an investigation recap), the same shortness rules apply, just spread over more lines: lead with the main result in the first sentence, not a build-up. Then list what was tested/measured as plain facts. Then say what's still uncertain and what's next. Skip a closing "so what this means is..." sentence — the last line should be a fact or a next step, not a moral. Prefer simple, short sentences over compound ones stitched together with em-dash asides — this matters more in Slack than anywhere else, since the reader is skimming.
-
-### Commit messages
-
-Imperative mood, one line if possible ("Fix off-by-one in crop selector", not "This commit fixes an off-by-one error in the crop selector logic"). Body only if the *why* isn't obvious from the diff.
-
-### Plan documents
-
-The one channel where structure earns its place — headers, numbered steps, and code blocks are what makes a plan executable. So the `Over-structuring short messages` ban does not apply. What to cut instead:
-
-- **Narrating how the plan was produced**: "I searched the codebase and found...", "After reading X, I determined...". State the conclusion; the file path is the evidence.
-- **Selling the plan**: "robust", "cleanly", "comprehensive", "this elegant approach". The reader is deciding whether to approve, not being pitched.
-- **Saying the same change three times**: once in the context, once in the steps, once in the verification. That's the plan-file version of restating the diff. Say each thing where it belongs and nowhere else.
-- **Future-tense throat-clearing**: steps are imperative, like commit subjects. "Add X to Y", not "We will need to add X to Y" or "This step involves adding X to Y".
-- **Hedging every step**: state uncertainty once, plainly, where it's load-bearing. If a claim about a library or inherited behavior is unverified, label it unverified rather than softening the whole plan.
-- **Explaining why testing matters**: the verification section is commands and their expected results, nothing else.
-
-Long paths, conditions, and signatures go in fenced blocks — the `Code formatting` rule below matters more here than anywhere, since plans are dense with them.
-
-## Code formatting
-
-Prefer code blocks over excessive inline code. Use inline code only for short identifiers, filenames, function names, or commands. When code or a condition is long, put it in a fenced code block instead of stuffing it into backticks mid-sentence. Text should read like text; code should look like code.
-
-Compare:
-
-> In `src/lightly_train/_task_models/ltdetr_object_detection/train_model.py`, extract the existing `edgecrafter-detection` try/except currently inside the `patch_size == "auto"` branch, around lines 259–264, where `LTDETRObjectDetection.parse_model_name(model_name)["package_name"] == "edgecrafter"`...
-
-vs.
-
-> In:
->
-> ```text
-> src/lightly_train/_task_models/ltdetr_object_detection/train_model.py
-> ```
->
-> extract the existing `edgecrafter-detection` `try`/`except` logic from the `patch_size == "auto"` branch into a module-level helper:
->
-> ```python
-> def _is_edgecrafter_model(model_name: str) -> bool:
->     ...
-> ```
->
-> The current check is roughly:
->
-> ```python
-> LTDETRObjectDetection.parse_model_name(model_name)["package_name"] == "edgecrafter"
-> ```
->
-> Use the new helper at the existing call site.
-
-Same content, but the path, the condition, and the target signature are each their own code block instead of one run-on sentence of backticks.
-
-## Quick self-check before sending
-
-Before posting, check the draft against these:
-
-1. Does this repeat information already visible in the diff/thread/commit? → cut it.
-2. Is there a sentence whose only job is to justify a fix that isn't controversial? → cut it.
-3. Is there an opener or closer that isn't the actual content? → cut it.
-4. Would a terse teammate write this in half the words? → shorten to that.
-5. Does every sentence sound the same length and shape? → break the rhythm, use a fragment.
-6. Is a long path/condition/snippet crammed into inline backticks instead of a code block? → break it out.
-7. Does any sentence describe the *process* — searching, reading, deciding — instead of the change itself? → cut it.
-
-If a message survives all seven checks, send it as-is — don't add anything back in for "completeness." Terse and slightly incomplete reads as human. Thorough and even-handed reads as AI.
-
-## Note on the underlying cause
-
-Verbose, self-narrating, hedge-everything text isn't a personality quirk of any one model — it's what you get when a model's training rewards apparent thoroughness (longer, "complete-looking" answers score better with raters and LLM judges) over actual signal-to-noise. Knowing that doesn't change what to do here, but it's why this needs to be an explicit, repeated pass rather than something the model will "just figure out" from context — the default pull is always back toward narration.
+Append new tics to `references/blocklist.md` as you catch them; it is meant to grow.
