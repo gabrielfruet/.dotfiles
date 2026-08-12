@@ -54,6 +54,7 @@ human-voice feedback".
 Entries are archived rather than deleted. The archive is how you later tell
 whether a rule came from real friction or from someone's theory about writing.
 
-Nothing under `feedback/` is committed except this file — the `.gitignore` here
-drops every `.md` below it, so entries and their archive stay local. What ships
-is the rules the corrections produced, not the corrections.
+No entry is committed, pending or applied — the `.gitignore` here drops every
+`.md` below it, and the archive stays local to the machine that made it. What
+ships is this file, that `.gitignore`, and an empty `applied/` held open by
+`.gitkeep` so step 5's move works after a clone.
