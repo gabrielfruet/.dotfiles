@@ -1,9 +1,10 @@
 # Writing
 
-Loading `human-voice` is mandatory before writing any text that leaves the
-session: Slack, GitHub (PR titles and bodies, issues, review comments, review
-replies), Linear, commit messages, and plan files. Read its routing table, load
-the matching channel file, then write. Not conditional on being asked.
+Loading `human-voice` is mandatory before writing any prose: Slack, GitHub (PR
+titles and bodies, issues, review comments, review replies), Linear, commit
+messages, plan files, and every response handed back in chat. Read its routing
+table, load the matching channel file, then write. Not conditional on being
+asked, and staying in chat is not an exemption.
 
 # Plan Mode
 

@@ -124,3 +124,12 @@ report is high quality`).
 
 Append below with a date. Keep the reason short; future-you needs to know why it
 was flagged.
+
+### 2026-08-12
+
+- "Here's the review", "Here's the plan", "Here's what I found" — announcing the
+  deliverable instead of delivering it. The next line already is the thing.
+- Verification preambles: "Verified against the PR head (`94690f81`), which
+  matches this worktree." Establishing your own credibility ahead of the
+  content. If the check changes what the reader should believe it is a fact in
+  the body; if not, cut it.
