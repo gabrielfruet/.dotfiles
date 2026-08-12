@@ -49,8 +49,11 @@ human-voice feedback".
    underlying habit become one rule, not three.
 4. Wait for approval. `APPEND_SYSTEM.md` already requires approval before any
    skill edit, and this is no exception.
-5. On approval, apply the diffs, then `git mv` each applied entry into
-   `applied/`.
+5. On approval, apply the diffs, then `mv` each applied entry into `applied/`.
 
 Entries are archived rather than deleted. The archive is how you later tell
 whether a rule came from real friction or from someone's theory about writing.
+
+Nothing under `feedback/` is committed except this file — the `.gitignore` here
+drops every `.md` below it, so entries and their archive stay local. What ships
+is the rules the corrections produced, not the corrections.
