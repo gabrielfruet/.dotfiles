@@ -35,6 +35,18 @@ After completing any task, you MUST do a skill fitness check before considering 
 
 ---
 
+## User Corrections (capture, don't propose)
+
+Everything below covers friction **you** discovered. A correction from the user is
+the other source, and it takes the opposite discipline: load `skill-feedback`,
+append an entry, stop there. No diff, no proposal, no skill edit until the user
+asks for a consolidation pass.
+
+Split by source and the two rules never fire on the same event — "Do not wait to
+be asked" governs what you found, never what you were told.
+
+---
+
 ## Skill Fitness Check (Required)
 
 After using a skill (or trying to), ask yourself:

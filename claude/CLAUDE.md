@@ -13,3 +13,10 @@ always load both the `plan-mode` and `human-voice` skills at the start, in addit
 to any other skills the task needs. Apply `plan-mode`'s rules throughout the
 planning phases, and apply `human-voice`'s `ai-facing` channel to the final plan
 text before writing it to the plan file.
+
+# Skill feedback
+
+When the user corrects how a skill behaved — its output, its process, a step it
+skipped — load `skill-feedback` and append an entry before carrying on. Capture
+only: propose no fix and edit no skill file until they ask for a consolidation
+pass.
