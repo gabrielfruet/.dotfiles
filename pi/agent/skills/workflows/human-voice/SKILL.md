@@ -100,9 +100,10 @@ the rewrite or was cut on purpose. Only you saw the original evidence.
 
 ## Feedback
 
-When the user corrects the voice, length or shape of something you wrote, append
-an entry to `feedback/` (format in `feedback/README.md`). Record it, change
-nothing else. Never read `feedback/` while drafting — entries are inert until an
-approval-gated consolidation pass folds them into the channel files.
+When the user corrects the voice, length or shape of something you wrote, the
+`skill-feedback` skill captures it: one entry under `entries/human-voice/`, the
+channel name in `scope:`. Record it, change nothing else. Never read those
+entries while drafting — they are inert until an approval-gated consolidation
+pass folds them into the channel files.
 
 Append new tics to `references/blocklist.md` as you catch them; it is meant to grow.
