@@ -133,3 +133,8 @@ was flagged.
   matches this worktree." Establishing your own credibility ahead of the
   content. If the check changes what the reader should believe it is a fact in
   the body; if not, cut it.
+
+### 2026-08-14
+
+- Three or more inline-backtick spans in one sentence, or one span carrying a
+  path, a signature or a `→` transformation. Reads as a wall of ticks.

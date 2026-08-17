@@ -40,6 +40,7 @@ Files live in `references/channels/`.
 | Commit message | `commit-message.md` | 5 | 50 | inline |
 | Plan file, subagent brief | `ai-facing.md` | none | none | rewriter |
 | Chat response to the user | `ai-facing.md` | none | none | inline |
+| Explanation, walkthrough | `explanation.md` | none | none | rewriter |
 
 No matching row: pick the nearest and say which. Docs and README go to
 `simple-english`. For a PR body, `write-pr-description` gathers; this shapes.
@@ -47,6 +48,11 @@ No matching row: pick the nearest and say which. Docs and README go to
 Every response to the user is routed. Staying in chat is not an exemption — a
 review, an analysis or a summary you hand back in chat reads against
 `ai-facing.md` like anything else on the table.
+
+An explanation takes `explanation.md` even though it lands in chat. The test is
+the question being answered: *how does this work*, *why does this happen* — the
+answer walks a case. A review, an analysis or a summary stays on `ai-facing.md`.
+It is the one chat channel with a rewriter, and `explanation.md` says why.
 
 Text bound for another channel keeps that channel. A review comment drafted
 inside a chat response takes `pr-review-comment.md`, its 60-word ceiling and its

@@ -13,7 +13,7 @@ it — an agent that acts on the text, or a person deciding whether to approve i
 A plan file has both, so explain in prose and *show* in code blocks.
 
 Chat is `inline` because a rewriter subagent cannot see the thread it is
-answering into.
+answering into. `explanation.md` is the exception, and says why.
 
 ## Plan files
 
@@ -56,6 +56,11 @@ for a reader who will skip between them; without that, they are decoration.
 Long paths, conditions and signatures each get their own fenced block. Inline
 backticks are for short identifiers, filenames and commands. Text should read
 like text; code should look like code.
+
+Countable, because the prose version of this rule has been read and skipped: a
+sentence carrying three or more backtick spans, or one span longer than about
+thirty characters, or any span holding a `/`, a `(` or a `→`, becomes a fenced
+block. Count them.
 
 Bad:
 
