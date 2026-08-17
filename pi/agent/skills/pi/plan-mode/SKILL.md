@@ -47,6 +47,21 @@ Each step must have:
 - **Verification check** (how to confirm it worked)
 - **Test style**: prefer behavior/integration tests over mocks. If proposing mocks, justify why real behavior cannot be tested cheaply.
 
+### Drafts, not descriptions
+
+Any step that will send prose to a person carries the finished draft in the plan
+file: PR titles and descriptions, review comments and replies, issue bodies,
+Slack and Linear messages. "Body drafted through `human-voice`" is not a draft.
+Neither is a list of the threads you intend to answer.
+
+Each draft routes on its own. A review reply sitting in a plan file takes
+`pr-review-reply.md` and its 25-word ceiling, not the plan file's register —
+`human-voice`'s routing table decides, and the plan file is only the wrapper.
+
+Commit messages are the exception: the subject line inside the step is enough.
+
+Nothing reaches `ExitPlanMode` while a step still says the wording comes later.
+
 ### Phase 4: Present
 - State assumptions and tradeoffs
 - Show the full plan
