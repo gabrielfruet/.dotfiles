@@ -1,6 +1,6 @@
 ---
 name: pr-workflow
-description: Use when opening a PR and driving it to green CI — push the branch, write a high-level PR description, watch checks, fix failures, and keep looping until green; also use when an already-open PR gets new commits, or when addressing review comments from humans or bots (CodeRabbit, Codex, Copilot).
+description: Use when opening a PR and driving it to green CI — push the branch, write a high-level PR description, watch checks, fix failures, and keep looping until green; also use when an already-open PR gets new commits, or when addressing review comments from humans or bots (CodeRabbit, Codex, Copilot), and when reviewing someone else's PR or branch.
 ---
 
 # PR Workflow
@@ -98,6 +98,29 @@ description: Use when opening a PR and driving it to green CI — push the branc
   changes (new goal, dropped goal, different implementation) — not for
   routine CI fixes, typos, or review nitpicks. When it does change, update
   both together — a title that still names the old approach is a common miss.
+
+## Reviewing a PR or branch
+Before reading a line of the diff, get current. A review against a stale base
+reports code the author never touched and misses what they did.
+
+1. `git fetch --all --prune`. Always, not conditional on the working tree
+   looking clean.
+2. Given a PR number, read the PR: `gh pr view <n>`, `gh pr diff <n>`. A number
+   is not an invitation to guess at local refs.
+3. Working from local refs instead, name the base and check it is not behind:
+
+   ```bash
+   git rev-list --count HEAD..origin/<base>
+   ```
+
+   Non-zero means your local base is stale. Range against `origin/<base>`.
+4. State the resolved base commit in the review itself —
+   `origin/master@a1b2c3d...HEAD`, not `master...HEAD`. A range without a commit
+   is not a scope statement.
+
+`git rev-parse --abbrev-ref @{upstream}` failing means the branch has no tracking
+ref. That is a reason to fetch and name the base by hand, not a reason to fall
+back to whatever the local copy happens to be.
 
 ## Review comments
 Bot reviewers read the whole file, not your diff. A comment landing on a line
