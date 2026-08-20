@@ -1,6 +1,7 @@
 #!/bin/bash
 # Simple FZF-based SSH keychain selector
 # Usage: keychain          # interactive select
+#        keychain -l       # load last used, no prompt
 #        keychain -s       # show current
 #        keychain -c       # clear/disable
 
@@ -9,6 +10,29 @@ CURRENT_FILE="${HOME}/.ssh/.current_keychain"
 
 # Ensure keychains directory exists
 mkdir -p "$KEYCHAINS_DIR"
+
+# Load every key listed in a keychain file, then record it as current.
+activate() {
+    local selected="$1"
+
+    # Clear existing keys
+    ssh-add -D 2>/dev/null
+
+    while IFS= read -r key; do
+        # Skip empty lines and comments
+        [ -z "$key" ] || [[ "$key" =~ ^# ]] && continue
+        # Expand ~ to $HOME
+        key="${key/#\~/$HOME}"
+        if [ -f "$key" ]; then
+            ssh-add "$key" 2>/dev/null || echo "Failed to add: $key"
+        else
+            echo "Key not found: $key"
+        fi
+    done < "${KEYCHAINS_DIR}/${selected}.txt"
+
+    echo "$selected" > "$CURRENT_FILE"
+    echo "Activated: $selected"
+}
 
 case "${1:-}" in
     -s|--show)
@@ -22,6 +46,26 @@ case "${1:-}" in
         ssh-add -D 2>/dev/null
         rm -f "$CURRENT_FILE"
         echo "Keychain cleared"
+        ;;
+    -l|--last)
+        selected=""
+        [ -f "$CURRENT_FILE" ] && selected=$(cat "$CURRENT_FILE")
+
+        # Empty or stale record: fall back only when there is exactly one keychain.
+        if [ ! -f "${KEYCHAINS_DIR}/${selected}.txt" ]; then
+            shopt -s nullglob
+            available=("$KEYCHAINS_DIR"/*.txt)
+            shopt -u nullglob
+
+            if [ ${#available[@]} -eq 1 ]; then
+                selected=$(basename "${available[0]}" .txt)
+            else
+                echo "No keychain recorded. Run 'keychain' to pick one."
+                exit 1
+            fi
+        fi
+
+        activate "$selected"
         ;;
     *)
         # Get list of keychains
@@ -43,26 +87,7 @@ case "${1:-}" in
             --preview-window="right:50%:wrap")
 
         if [ -n "$selected" ]; then
-            # Clear existing keys
-            ssh-add -D 2>/dev/null
-
-            # Load keys from selected keychain
-            keys_file="${KEYCHAINS_DIR}/${selected}.txt"
-            while IFS= read -r key; do
-                # Skip empty lines and comments
-                [ -z "$key" ] || [[ "$key" =~ ^# ]] && continue
-                # Expand ~ to $HOME
-                key="${key/#\~/$HOME}"
-                if [ -f "$key" ]; then
-                    ssh-add "$key" 2>/dev/null || echo "Failed to add: $key"
-                else
-                    echo "Key not found: $key"
-                fi
-            done < "$keys_file"
-
-            # Save current keychain
-            echo "$selected" > "$CURRENT_FILE"
-            echo "Activated: $selected"
+            activate "$selected"
         fi
         ;;
 esac
