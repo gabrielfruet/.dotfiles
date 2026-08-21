@@ -47,6 +47,12 @@ Side effects are numbered stories with real names (`truck` exists only in
 - Plain words. Prefer more words over cleverer ones. "two other things that make
   it feel random" over "second-order effects", "nobody has filled this list in"
   over "unseeded", "the places that read it" over "consumers".
+- Match the scaffolding to the question. A conceptual "why does this differ"
+  answer leads with the mechanism in the reader's terms — what the code is
+  *deciding* and why. Headers, tables, file:line and runtime-internal names
+  (`PyType_Ready`, `tp_setattro`) are opt-in for a value-by-value trace that
+  needs them, not the default. Reaching for them first is what makes the
+  plain-language version arrive two tries late.
 - Four file:line references strung through one paragraph is the failure this
   channel exists to stop. That paragraph is a table or a fenced block.
 - One concrete case beats the general rule. State the general rule after the
@@ -63,3 +69,26 @@ em dashes:       sparing
 headers & bold:  optional
 tables:          encouraged — one value per step is the point
 ```
+
+## Example
+
+Same bug: why `SimpleNamespace` graph-breaks under torch Dynamo on 3.10–3.12 but
+not 3.13.
+
+Bad (flagged as unclear):
+
+> `PyObject_GenericSetAttr` is the function `object` itself uses. Naming it
+> explicitly changes what `PyType_Ready` does: before 3.13, a slot the struct
+> names gets a wrapper descriptor published on the type. 3.13 stopped publishing
+> those.
+
+Good (landed):
+
+> When your code does `ns.total = x`, Dynamo asks one question: does setting an
+> attribute here do anything unusual? It looks up `__setattr__` and compares it
+> to the plain one every object gets by default. On 3.13 there is no entry, so it
+> finds the plain one, nothing unusual. On 3.10–3.12 there is one, but it is a
+> duplicate that does exactly what the plain one does: a copy, not a replacement.
+> Dynamo saw a different object, concluded "custom", went looking for Python to
+> trace, and found none, because this is written in C. No branch left, so it
+> reported a graph break.
