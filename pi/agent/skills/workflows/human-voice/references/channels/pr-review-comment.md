@@ -21,8 +21,8 @@ Three parts, in order, and nothing else:
 
 - No impact paragraph. No contrast example showing the correct case. No "why this
   matters" close.
-- Anchor inline to the offending line rather than posting top-level. Check the
-  line number against the actual PR head commit; it shifts between pushes.
+- Anchor inline to the offending line, not top-level. Line numbers shift between
+  pushes — verifying against the PR head is `pr-workflow`'s job, not a voice one.
 - Draft in chat and wait for approval before posting.
 - Assume the first draft is 2-3x too long. Write the short version instead of
   trimming a long one.

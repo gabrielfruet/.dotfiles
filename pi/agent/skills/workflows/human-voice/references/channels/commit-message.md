@@ -27,8 +27,8 @@ the augmentation path.
 - The subject says what changed, not that a change happened.
 - No internal links or ticket IDs (`TRN-1234`, Notion, Slack). Same rule as the
   PR title, for the same reason: those links rot and the commit is permanent.
-- If a ticket ID slips into a pushed commit, reword and force-push the feature
-  branch before the PR is reviewed.
+- A ticket ID in a pushed commit gets reworded out before review; `git-workflow`
+  owns the force-push recovery.
 
 ## Allowed here
 

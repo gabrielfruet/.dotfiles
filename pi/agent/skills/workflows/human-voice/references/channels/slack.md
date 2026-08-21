@@ -26,8 +26,6 @@ then the facts, then what is still uncertain and what is next.
   last line is a fact or a next step, never a moral.
 - Prefer short simple sentences over compound ones stitched together with
   em-dash asides. This matters more here than anywhere; the reader is skimming.
-- Hedge the inference, not the measurement, and say the sample size when it
-  carries weight.
 
 ## Allowed here
 

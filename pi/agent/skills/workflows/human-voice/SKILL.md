@@ -43,7 +43,8 @@ Files live in `references/channels/`.
 | Explanation, walkthrough | `explanation.md` | none | none | rewriter |
 
 No matching row: pick the nearest and say which. Docs and README go to
-`simple-english`. For a PR body, `write-pr-description` gathers; this shapes.
+`simple-english`. A PR body — gathering and shaping — lives here in
+`pr-description.md`; `write-pr-description` routes to it.
 
 Every response to the user is routed. Staying in chat is not an exemption — a
 review, an analysis or a summary you hand back in chat reads against
@@ -76,9 +77,8 @@ True everywhere. Fragments, em dashes, headers, bold and first-person opinion ar
 
 ## Process
 
-Every step runs, every time. None of them is a judgment call. "It stayed in
-chat" and "the channel file was already read" are not exemptions — reading the
-file is step zero, not the process.
+Run every step, every time. Reading the channel file is step zero, not the
+process — "the channel file was already read" is not an exemption.
 
 1. **Draft** against the channel file. Aim for unremarkable, not clever.
 2. **Cut** to `max_words`. State the before and after count; an unstated count

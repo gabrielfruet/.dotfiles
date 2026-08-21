@@ -71,6 +71,11 @@ arguably, quite possibly, it's worth noting that, it's important to remember tha
   reach out", "Would you like...", "Want me to...?", "Should I continue?"
 - "Let's break this down", "Let's explore", "Let's dive in", "Here's what you
   need to know", "Now let's look at", "Without further ado"
+- "Here's the review", "Here's the plan", "Here's what I found" — announcing the
+  deliverable instead of delivering it. The next line already is the thing.
+- Verification preambles that vouch for you before the content: "Verified against
+  the PR head (`94690f81`), which matches this worktree." If the check changes
+  what the reader should believe it is a fact for the body; if not, cut it.
 - "Honestly?", "Look,", "Here's the thing", "The thing is", "Let's be honest",
   "Real talk" — as standalone theatrical hooks. Mid-sentence they are ordinary.
 - "In conclusion", "To sum up", "Ultimately", "At the end of the day", "The
@@ -111,6 +116,8 @@ report is high quality`).
 - Header on a section shorter than two paragraphs
 - Numbered list where the numbers don't mean sequence
 - Title Case In Headings
+- Three or more inline-backtick spans in one sentence, or one span carrying a
+  path, a signature or a `→`. Reads as a wall of ticks.
 
 ## Softeners to delete outright
 
@@ -122,19 +129,5 @@ report is high quality`).
 
 ## Additions
 
-Append below with a date. Keep the reason short; future-you needs to know why it
-was flagged.
-
-### 2026-08-12
-
-- "Here's the review", "Here's the plan", "Here's what I found" — announcing the
-  deliverable instead of delivering it. The next line already is the thing.
-- Verification preambles: "Verified against the PR head (`94690f81`), which
-  matches this worktree." Establishing your own credibility ahead of the
-  content. If the check changes what the reader should believe it is a fact in
-  the body; if not, cut it.
-
-### 2026-08-14
-
-- Three or more inline-backtick spans in one sentence, or one span carrying a
-  path, a signature or a `→` transformation. Reads as a wall of ticks.
+Append new tics below with a date. Consolidation folds them into the lists above
+and clears the dated entries.
