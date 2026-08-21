@@ -30,23 +30,12 @@ Output: list with name, confidence, pattern, count.
 
 ## Create Mode
 
-1. Run `skill(name="skill-writter")` to load the template
-2. Ask the user: name, description, trigger conditions, key instructions
-3. Write the SKILL.md with frontmatter
-4. Verify frontmatter name matches directory name
-5. Test by asking agent to use the skill
+Load the `skill-writter` skill and follow it — it owns naming, description,
+trigger, placement and the verify step. Run the interview it describes (name,
+description, trigger, key instructions), write the `SKILL.md`, and verify the
+frontmatter name matches the directory.
 
-### Questions to Ask
-
-- **Name**: lowercase-hyphens format
-- **Description**: 1 sentence, when to load this skill
-- **Trigger**: What user words/phrases should load it?
-- **Key instructions**: What rules/patterns should it follow?
-
-### Placement
-
-- Global: `~/.pi/agent/skills/<name>/SKILL.md`
-- Local: `.pi/skills/<name>/SKILL.md`
+Placement: `~/.pi/agent/skills/<name>/SKILL.md`.
 
 ## Tips
 

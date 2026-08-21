@@ -14,14 +14,17 @@ description: What it does/ When to load
 ```
 
 Tips:
-- Keep under 50 lines
+- Budget the always-loaded `SKILL.md` body to ~60 lines of prose and rules. Move
+  lookup tables, rule catalogs and rare-case troubleshooting to `references/*.md`,
+  loaded on demand. Consolidation checks this ceiling (see `skill-feedback`).
 - Use code examples sparingly
 - Prefer simple list of rules
 - Do not repeat yourself.
 - Description helps agent decide when to use
-- Frontmatter must match directory name; quote any values containing `:` or other YAML-sensitive characters
-- Can reference other skills - agent can load them with `skill(name="other-skill")`
-- In `.pi/agent/skills/` — e.g., `~/.pi/agent/skills/skill-name/SKILL.md`
+- Quote frontmatter values containing `:` or other YAML-sensitive characters
+- Can reference other skills by name — the runtime loads them (e.g. "load the
+  `skill-writter` skill")
+- Lives at `~/.pi/agent/skills/<name>/SKILL.md`
 
 ## Trigger (Most Important)
 
@@ -48,7 +51,7 @@ The description is the trigger - it tells the agent WHEN to use this skill.
 ## Testing
 
 After writing a skill, verify it loads correctly:
-1. Read the file to check frontmatter matches directory name
+1. Frontmatter `name` matches the directory (see Naming)
 2. Check syntax (valid YAML frontmatter, no obvious markdown errors)
 3. Test in context: ask the agent to use the skill
 4. Check that description triggers loading correctly

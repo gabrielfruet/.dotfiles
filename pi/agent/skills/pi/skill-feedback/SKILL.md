@@ -43,6 +43,10 @@ On request only, e.g. "consolidate human-voice feedback".
 
 1. Read `entries/<skill>/`.
 2. Propose one diff per affected file. Entries on one habit become one rule.
+   Before adding a rule, check whether it supersedes or duplicates an existing
+   one — replace the old text rather than adding beside it. If the target
+   SKILL.md is over its line budget (see `skill-writter`), the diff must remove
+   at least as many words as it adds.
 3. Wait for approval; `APPEND_SYSTEM.md` requires it before any skill edit.
 4. Apply, `mv` each entry to `applied/<skill>/`, remove the emptied directory.
 

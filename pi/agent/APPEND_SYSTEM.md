@@ -126,6 +126,9 @@ Should I apply this change?
 - Always get user approval before modifying skills
 - Be specific—vague suggestions ("skill could be better") are not useful
 - Prioritize improvements that have broad applicability
+- Don't grow a skill net unless the change covers a genuinely new case. Prefer
+  replacing an existing rule over adding beside it, and move overflow to
+  `references/`.
 - If unsure whether to improve, ask: "Is this worth adding to the skill?"
 
 ---
