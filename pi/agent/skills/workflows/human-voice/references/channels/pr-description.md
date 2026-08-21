@@ -6,12 +6,26 @@ max_words: 200
 rewrite: flagger + rewriter
 ```
 
-`write-pr-description` gathers the diff and commits. This file shapes the result.
+The single home for PR-body guidance: gather the diff and commits, then shape
+them. The draft hands off to `pr-workflow`, which owns `gh pr create/edit`.
+
+## Gather
+
+Run in a subagent when one is available — if you already know why the change was
+made without reading `git log`, you are the wrong context to write the
+description, and it shows up as detail no reviewer asked for.
+
+1. Base: `git merge-base HEAD origin/main` (or the PR's actual base branch).
+2. Changes: `git diff <base>...HEAD`
+3. Intent: `git log <base>..HEAD` — full bodies, not `--oneline`; commit messages
+   carry the "why" the diff can't show.
+4. If `.github/pull_request_template.md` exists, fill *that* structure instead of
+   the shape below.
 
 ## Shape
 
 Skip any section that adds no signal. A short PR is one summary line, not an
-empty template. If `.github/pull_request_template.md` exists, fill that instead.
+empty template.
 
 1. **Summary** — 1-3 sentences: what the PR accomplishes and the approach taken.
    Not a commit-by-commit changelog; the diff is the changelog.
@@ -32,6 +46,10 @@ empty template. If `.github/pull_request_template.md` exists, fill that instead.
   commit messages: Notion, Linear IDs like `TRN-1234`, Slack threads. Applies
   whether or not the repo is public; internal tools get renamed and the links rot.
   Say the "why" in prose, or link a public GitHub issue.
+- Don't quantify a change you didn't make. `235 lines across 16 files` for a diff
+  you split away is a projection, not a measurement: the reader can't verify it
+  and doesn't need it. For a stacked PR, say the split isolates the behavior
+  change, and drop the would-be size.
 
 ## Allowed here
 

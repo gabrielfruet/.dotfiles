@@ -5,6 +5,26 @@ description: Use when opening a PR and driving it to green CI — push the branc
 
 # PR Workflow
 
+## Scope and size
+
+Keep each PR small enough to review in one sitting. Target ~200 lines of diff
+total — added plus removed, not counting generated files, lockfiles or snapshots.
+Past that, split before you push.
+
+- One PR, one kind of change. Don't mix a refactor with a logic change: the
+  mechanical edits bury the behavior change and the reviewer can't tell which
+  lines carry the intent. Land one as a stacked PR on top of the other, each half
+  small and readable on its own.
+- A big mechanical prep step (rename, move, extract) is its own PR. The follow-up
+  is then a few lines against a clean base.
+- Can't get under ~200 lines? Say why in the description, and keep commits
+  cleanly separated so the reviewer can go commit by commit.
+
+This is for day-to-day work in repos you control, where stacking is cheap.
+Contributing to an external OSS repo, stacking is impractical — keep the
+~200-line target and the refactor/logic split, but ship them as separate
+sequential PRs (or cleanly separated commits), not a stack.
+
 ## Loop
 1. Ensure the work is committed on a feature branch (never push directly to
    main/master). Use the `git-workflow` skill for commit hygiene.
@@ -21,16 +41,16 @@ description: Use when opening a PR and driving it to green CI — push the branc
      The subagent's ignorance is the feature.
    - Already open → reuse it, don't create a duplicate.
 4. Watch CI: `gh pr checks <number-or-branch> --watch`
-   - This blocks until every check reaches a final state, polling on its own —
-     never wrap it in a manual `sleep`/poll loop, that's what `--watch` is for.
-   - Avoid `--fail-fast` here: it returns the instant *any single* check goes
-     red, even while others are still pending/running, which tempts you into
-     acting (e.g. deciding to rerun) before the full picture is in. Let
-     `--watch` run to completion so you see the final state of every check at
-     once.
-   - If backgrounding is available, run this in the background instead of
-     blocking the session — keep working (or wait idle) and pick back up
-     when it reports back.
+   - Default to non-blocking. Dispatch the watch in the background and report the
+     PR up right then (step 6). Don't hold the turn for green — `--watch` polls to
+     a final state on its own, and you pick it back up when it reports. Block the
+     session on it only when the user explicitly asks to wait for CI.
+   - `--watch` polls on its own until every check reaches a final state — never
+     wrap it in a manual `sleep`/poll loop, that's what `--watch` is for.
+   - Avoid `--fail-fast`: it returns the instant *any single* check goes red,
+     even while others are still pending. Let the background watch run to
+     completion so you see every check's final state at once, then react to red
+     per step 5.
 5. If a check is red, diagnose before fixing — don't guess at a code change:
    - Find the real failure: `gh run view <run-id> --log-failed`
    - Reproduce locally with a targeted test command for just the failing
@@ -58,46 +78,30 @@ description: Use when opening a PR and driving it to green CI — push the branc
        easy to drop or revert.
    - If the fix changed the PR's actual goal/approach (not just a bugfix),
      update the title and description (see below).
-6. All checks green → done. Report the PR URL.
+6. Report the PR URL as soon as it's up and the background watch is dispatched —
+   that's "done" for a non-blocking run. Re-engage only if the watch surfaces red
+   (step 5); all-green needs no further report. When the user asked to wait for
+   CI, "done" instead means every check green.
 7. Asked to shorten, redo or re-scope the description → new subagent, same
    brief, current diff. Don't edit the prose in place. Trimming by hand keeps
    the altitude of the draft it came from, and by that point your context is
    dirtier than when you started.
 
-## Title & Description
-- Draft the body by running the `write-pr-description` skill in a subagent — it
-  reads the diff and commits and produces a goal-first structured description.
-  The rules below still govern the result.
-- Write a high-level summary of *what the PR is trying to accomplish* — the
-  goal/approach, not a changelog of every commit or CI fix. The diff already
-  shows what changed.
-- The title makes the same claim as the description, just compressed to one
-  line — if the description names the approach (e.g. "sort coords" vs "skip
-  degenerate boxes"), the title must match it. A stale title that names the
-  old approach is misleading even if the body is accurate.
-- Apply `human-voice`, `pr-description` channel: sound human, concise and decisive, and
-  scope-honest (call out anything that belongs in a follow-up rather than
-  smuggling it in).
-- Never include internal/private links or references anywhere in the PR —
-  not just the description body, but the title, and any commit messages you
-  write for it too. This covers Notion docs, Linear ticket links or bare
-  ticket IDs (`TRN-1234`), Slack thread/message links, or any other tool only
-  teammates can open. This applies regardless of whether the repo is public
-  or private — internal tools get reorganized, renamed, or lose access over
-  time, so these links rot even for the team. Describe the "why" in plain
-  prose instead, or link a public GitHub issue if one exists. If a ticket ID
-  slips into a title or commit message anyway, fix it before calling the PR
-  done: `gh pr edit <number> --title "..."` for the title; for commits already
-  pushed, amend/reword and force-push the branch (safe pre-review, on your own
-  feature branch).
-- Check for `.github/pull_request_template.md` and use it if present.
-- Create with `gh pr create --title "..." --body-file <file>` (avoids
-  literal `\n` issues with inline `--body`).
-- Update an existing PR with `gh pr edit <number> --title "..." --body-file <file>`.
-- Only rewrite the title/description when the PR's *purpose or approach*
-  changes (new goal, dropped goal, different implementation) — not for
-  routine CI fixes, typos, or review nitpicks. When it does change, update
-  both together — a title that still names the old approach is a common miss.
+## Creating & updating the PR
+The body is drafted in the Loop (step 3) via `write-pr-description` + `human-voice`.
+This section is the `gh` mechanics and the update policy.
+
+- Create with `gh pr create --title "..." --body-file <file>` (avoids literal
+  `\n` issues with inline `--body`); update with
+  `gh pr edit <number> --title "..." --body-file <file>`.
+- If an internal link or ticket ID (`TRN-1234`, Notion, Slack) reaches a pushed
+  title or commit, fix it before calling the PR done:
+  `gh pr edit <number> --title "..."` for the title; reword and force-push for a
+  commit (safe pre-review, on your own feature branch).
+- Rewrite the title/description only when the PR's *purpose or approach* changes
+  (new goal, dropped goal, different implementation) — not for routine CI fixes,
+  typos or review nitpicks. Update both together; a title still naming the old
+  approach is a common miss.
 
 ## Reviewing a PR or branch
 Before reading a line of the diff, get current. A review against a stale base
@@ -151,14 +155,13 @@ is not evidence that line is yours.
   to the `git-workflow` skill.
 - For `gh` mechanics (auth, JSON output, inline vs review comments), defer to
   the `gh-cli` skill.
-- For drafting the description body from the diff/commits, always run the
-  `write-pr-description` skill, in a subagent.
-- For PR description tone/detail/scope, defer to `human-voice`:
-  `references/channels/pr-description.md`. For review comments you write and
-  replies you post, `pr-review-comment.md` and `pr-review-reply.md`.
-- Treat "watch CI" as blocking on the *result*: never report done before
-  `gh pr checks` shows every check green — but the watch itself can run in
-  the background if the tool supports it, rather than tying up the session.
+- For review comments you write and replies you post, defer to `human-voice`:
+  `pr-review-comment.md` and `pr-review-reply.md`.
+- Non-blocking by default: report the PR up once the branch is pushed and the
+  background CI watch is dispatched; don't wait for green. Re-engage only when a
+  check goes red (step 5) — all-green needs no report. Block on the result (no
+  "done" before `gh pr checks` shows every check green) only when the user
+  explicitly asks to wait for CI.
 - If new commits land on an already-open PR (yours or requested by the user),
   re-enter the loop at step 4 (watch CI) — and only touch the title/description
   if the PR's intent actually shifted.
