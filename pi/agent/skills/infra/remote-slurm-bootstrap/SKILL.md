@@ -27,6 +27,15 @@ Cluster-first workflow for benchmark jobs.
     - An immediate `InvalidAccount` or other quick failure warrants one short re-check, not continuous polling.
 11. If the job fails quickly, inspect stderr first for missing tools, auth issues, or repo/commit mismatch.
 
+## MLflow tracking
+
+- Current tracking URI: `http://mlflow.tail9085c9.ts.net/` (Tailscale MagicDNS,
+  reachable from the cluster hosts).
+- Prefer the MagicDNS name over a raw Tailscale IP:port like `100.93.201.7:5000`
+  copied from an existing script — those addresses go stale.
+- If the configured endpoint is unreachable, surface it and confirm the right URI
+  before falling back to TensorBoard-only. Don't downgrade silently.
+
 ## Common checks
 
 - `ssh <host> 'squeue -u <user>'`
@@ -34,6 +43,7 @@ Cluster-first workflow for benchmark jobs.
 - `ssh <host> 'git -C <repo> rev-parse HEAD'`
 - `ssh <host> 'command -v uv || command -v python3.13'`
 - One combined poll (preferred for long jobs): `sleep <planned> && ssh <host> 'squeue -j <id> -o "%i %t %M %N %R"; scontrol show job <id> | grep -E "JobState|Reason|NodeList|ExitCode"; tail -n 80 <logfile>; find <out_dir> -type f'`
+- MLflow reachable (expect 200): `ssh <host> 'curl -sS -o /dev/null -w "%{http_code}\n" http://mlflow.tail9085c9.ts.net/'`
 
 ## Polling cadence cheat sheet
 
