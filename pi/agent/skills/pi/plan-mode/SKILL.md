@@ -5,6 +5,9 @@ description: Enforce planning before acting. Load when user says "plan", "create
 
 ## Plan Mode Rules
 
+Load `human-voice` and `i-have-adhd` at plan-mode start — the final plan (Phase 4)
+is shaped by both.
+
 You are in **PLAN MODE**. Strictly forbidden:
 - Any file edits, modifications, or system changes
 - Running commands except read-only inspection
@@ -46,6 +49,7 @@ Each step must have:
 - **Specific action** (not vague)
 - **Verification check** (how to confirm it worked)
 - **Test style**: prefer behavior/integration tests over mocks. If proposing mocks, justify why real behavior cannot be tested cheaply.
+- **Diffs when small**: show a code change as a before/after diff when it is small and central to the step. Describe large or incidental changes in prose.
 
 ### Drafts, not descriptions
 
@@ -63,6 +67,7 @@ Commit messages are the exception: the subject line inside the step is enough.
 Nothing reaches `ExitPlanMode` while a step still says the wording comes later.
 
 ### Phase 4: Present
+- **Shape for an ADHD reader** (`i-have-adhd`, applied via `human-voice`'s `ai-facing` channel): lead with the action, numbered steps, state and wins visible.
 - State assumptions and tradeoffs
 - Show the full plan
 - Wait for **explicit approval** ("yes", "do it", "go ahead")
