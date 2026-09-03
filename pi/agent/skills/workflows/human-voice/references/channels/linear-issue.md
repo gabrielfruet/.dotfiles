@@ -13,6 +13,11 @@ this in two years with no context. Use `linear-cli` for mechanics.
 
 What needs to happen, then why, then scope. Skip background the team already has.
 
+For a change to code, lead with one framing sentence, then a fenced block of the
+actual definitions (before/after or target state), not prose paragraphs describing
+them. The block is the content and stays under the 200-word ceiling. Stacked
+prose sections are how a ticket balloons into a design memo.
+
 ## Rules
 
 - Assume shared context. No project introduction, no re-explaining the system.

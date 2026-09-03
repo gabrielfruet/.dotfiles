@@ -33,7 +33,7 @@ Files live in `references/channels/`.
 |---|---|---|---|---|
 | PR description | `pr-description.md` | 20 | 200 | flagger + rewriter |
 | GitHub issue | `gh-issue.md` | 40 | 300 | flagger + rewriter |
-| Linear issue | `linear-issue.md` | 25 | 200 | flagger + rewriter |
+| Linear issue | `linear-issue.md` | 25 | 200 | rewriter |
 | PR review comment (as reviewer) | `pr-review-comment.md` | 6 | 60 | rewriter |
 | PR review reply (as author) | `pr-review-reply.md` | 2 | 25 | inline |
 | Slack | `slack.md` | 6 | 40 | inline |
@@ -88,7 +88,10 @@ process — "the channel file was already read" is not an exemption.
      `references/patterns.md` (constructions, and what *not* to flag), ship.
    - `rewriter` — one subagent. Give it the channel file, the ceiling and the
      source of truth. Withhold your reasoning; escaping it is why you spawned it.
-   - `flagger + rewriter` — a cold reader diagnoses first
+   - `flagger + rewriter` — reserved for the public, high-stakes channels (PR
+     description, GitHub issue); its two sequential subagents cost minutes, so
+     an internal short-ceiling channel like a Linear issue takes a plain
+     `rewriter` instead. A cold reader diagnoses first
      (`references/cold-read.md`), then a **second** subagent rewrites, never
      seeing the flagger's context.
 
