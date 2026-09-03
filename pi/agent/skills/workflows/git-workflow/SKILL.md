@@ -1,6 +1,6 @@
 ---
 name: git-workflow
-description: Git commit workflow. Load when finishing any code-change task (after verification) to commit and push, or when explicitly staging/committing.
+description: Git workflow. Load as soon as any git work begins — inspecting status/diff/log, staging, committing, pushing, or rebasing — and when finishing a code-change task, to commit and push.
 ---
 
 # Git Workflow
@@ -19,7 +19,14 @@ description: Git commit workflow. Load when finishing any code-change task (afte
   (prefer repo-local config: `git config user.name "..."` / `user.email "..."`)
   before committing. Never use placeholder identities like `pi <pi@local>`,
   `<agent> <agent@local>`, etc. — those end up in `git log` and on the PR.
-- Commit automatically after review, then push the branch unless the user says not to.
+- Commit automatically after review, then push — "commit" means commit **and**
+  push. Never ask whether to push (no AskUserQuestion offering "commit only" vs
+  "commit and push"); skip the push only when the user explicitly says so
+  ("commit only" / "don't push").
+- Don't fuss over commit count or history shape. When new changes land on an
+  open PR, just add a commit — don't AskUserQuestion whether to amend and
+  force-push vs. add a follow-up, and don't cite a branch's existing "one commit
+  per PR" shape as a reason to preserve it.
 - If a commit hook rewrites files, re-run `git add` on the touched files before retrying the commit.
 - Before switching branches or popping a stash, check for untracked files that may conflict with tracked paths on the target branch; back them up first if needed.
 - If the task includes a PR description or plan, inspect `.github/pull_request_template.md` and any relevant files in `.github/`
