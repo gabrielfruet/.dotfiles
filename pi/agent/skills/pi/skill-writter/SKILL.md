@@ -14,9 +14,9 @@ description: What it does/ When to load
 ```
 
 Tips:
-- Budget the always-loaded `SKILL.md` body to ~60 lines of prose and rules. Move
-  lookup tables, rule catalogs and rare-case troubleshooting to `references/*.md`,
-  loaded on demand. Consolidation checks this ceiling (see `skill-feedback`).
+- Keep the always-loaded `SKILL.md` body lean — no fixed line count, just no
+  bloat. Move lookup tables, rule catalogs and rare-case troubleshooting to
+  `references/*.md`, loaded on demand.
 - Use code examples sparingly
 - Prefer simple list of rules
 - Do not repeat yourself.
