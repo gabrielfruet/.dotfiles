@@ -27,6 +27,20 @@ Cluster-first workflow for benchmark jobs.
     - An immediate `InvalidAccount` or other quick failure warrants one short re-check, not continuous polling.
 11. If the job fails quickly, inspect stderr first for missing tools, auth issues, or repo/commit mismatch.
 
+## Clusters
+
+Train on `compute-02-ubuntu-4x4090` or `compute-03-ubuntu-4x4090`. Check both,
+take the idle one:
+
+```bash
+ssh compute-02-ubuntu-4x4090 'squeue'
+ssh compute-03-ubuntu-4x4090 'squeue'
+```
+
+compute-02 runs at most 2 GPUs at a time even though it has four. compute-03 has
+no cap. Name the chosen host in the plan before submitting — never leave it as
+"on remote Slurm".
+
 ## MLflow tracking
 
 - Current tracking URI: `http://mlflow.tail9085c9.ts.net/` (Tailscale MagicDNS,

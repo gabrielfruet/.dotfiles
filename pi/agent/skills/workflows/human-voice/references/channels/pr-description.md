@@ -29,6 +29,9 @@ empty template.
 
 1. **Summary** — 1-3 sentences: what the PR accomplishes and the approach taken.
    Not a commit-by-commit changelog; the diff is the changelog.
+   State the motivation for anything the diff cannot show on its own: why a new
+   file exists, why code lands inert. One sentence, then stop. In a stack that is
+   the whole job — say what this PR buys and which part comes later.
 2. **Changes** — bullets grouped by area (`api/`, `tests/`, config), not per
    commit. One line each, intent rather than mechanics.
 3. **Breaking changes** — only when a public API, config key or CLI flag changed.
@@ -42,10 +45,13 @@ empty template.
 - Altitude over completeness. A reviewer reads the summary, not every bullet.
 - The title makes the same claim as the Summary, compressed to one line. Name the
   approach, not the ticket ID. If the approach shifts, title and summary shift together.
-- No internal or private links anywhere in the PR, including the title and any
-  commit messages: Notion, Linear IDs like `TRN-1234`, Slack threads. Applies
-  whether or not the repo is public; internal tools get renamed and the links rot.
-  Say the "why" in prose, or link a public GitHub issue.
+- Nothing internal in the title, the body or any commit message: customer and
+  company names, Linear IDs like `TRN-1234`, Notion and Slack links. Applies
+  whether or not the repo is public. Say the "why" in prose — "a customer hit
+  this", never who — or link a public GitHub issue.
+- The branch name is the exception, and where the ticket belongs. Work from the
+  Linear-generated branch (`linear issue start <id>`) and leave its ID in place;
+  that is what links the PR back without putting the ID on the PR itself.
 - Don't quantify a change you didn't make. `235 lines across 16 files` for a diff
   you split away is a projection, not a measurement: the reader can't verify it
   and doesn't need it. For a stacked PR, say the split isolates the behavior

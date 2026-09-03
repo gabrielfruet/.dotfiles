@@ -6,8 +6,9 @@ max_words: 40
 rewrite: inline
 ```
 
-Shortest channel there is. One variant, for a technical update or investigation
-recap: `max_lines: 15`, `max_words: 120`. Nothing else gets the longer budget.
+Shortest channel there is. Write 40 words unless the reader asked for a technical
+update or an investigation recap; only those get `max_lines: 15`, `max_words: 120`.
+"Concise", "quick" and "a short message" mean 40, not 120.
 
 ## Shape
 
@@ -26,6 +27,9 @@ then the facts, then what is still uncertain and what is next.
   last line is a fact or a next step, never a moral.
 - Prefer short simple sentences over compound ones stitched together with
   em-dash asides. This matters more here than anywhere; the reader is skimming.
+- Name the effect, not the mechanism. Cut file names, function names and API
+  terms unless the reader needs them to act. "Reads the installed version so the
+  footer isn't hardcoded" beats naming the hook file and the config key.
 
 ## Allowed here
 

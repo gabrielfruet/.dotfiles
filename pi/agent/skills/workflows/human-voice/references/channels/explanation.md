@@ -3,25 +3,16 @@
 ```text
 max_lines: none
 max_words: none
-rewrite: rewriter
+rewrite: inline
 ```
 
 Explaining how something works, why a bug happens, what a piece of code does.
 Reviews, analyses, summaries and ordinary answers stay on `ai-facing.md`. Text
 bound for GitHub or Slack keeps its own channel.
 
-`rewriter`, unlike the rest of chat. `ai-facing.md` uses `inline` because a
-subagent cannot see the thread it is answering into — an explanation does not
-need the thread. Its source of truth is the case and the code, both of which fit
-in a brief. And the sweep this channel exists to prevent comes from your own
-accumulated context of every call site you read getting into the prose. A cold
-rewriter has no such context and cannot write one.
-
-## The brief
-
-Send: the channel file, the concrete case with its values, the tables, and the
-code you quoted. Withhold everything you learned tracing the other paths. That
-is not background for the rewriter, it is the failure mode.
+Ship inline. The reader is waiting through an answer, and a rewriter subagent
+costs minutes. Cut the sweep yourself: what you learned tracing the other call
+sites stays out of the prose.
 
 ## Shape
 

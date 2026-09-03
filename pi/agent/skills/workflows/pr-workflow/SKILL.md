@@ -101,8 +101,8 @@ This section is the `gh` mechanics and the update policy.
 - Create with `gh pr create --title "..." --body-file <file>` (avoids literal
   `\n` issues with inline `--body`); update with
   `gh pr edit <number> --title "..." --body-file <file>`.
-- If an internal link or ticket ID (`TRN-1234`, Notion, Slack) reaches a pushed
-  title or commit, fix it before calling the PR done:
+- If anything internal (`TRN-1234`, Notion, Slack, a customer name) reaches a
+  pushed title or commit, fix it before calling the PR done:
   `gh pr edit <number> --title "..."` for the title; reword and force-push for a
   commit (safe pre-review, on your own feature branch).
 - Rewrite the title/description only when the PR's *purpose or approach* changes
@@ -128,6 +128,10 @@ reports code the author never touched and misses what they did.
 4. State the resolved base commit in the review itself —
    `origin/master@a1b2c3d...HEAD`, not `master...HEAD`. A range without a commit
    is not a scope statement.
+5. Reviewing one PR in a stack, check the downstream branches before reporting
+   anything: `git log <this-branch>..<downstream> -- <path>`, or read the later
+   PRs' diffs. A finding the stack already fixes does not get reported. Note it
+   only to say which branch fixes it.
 
 `git rev-parse --abbrev-ref @{upstream}` failing means the branch has no tracking
 ref. That is a reason to fetch and name the base by hand, not a reason to fall
@@ -154,6 +158,9 @@ is not evidence that line is yours.
 - Replies to review comments are drafts for the user, not posts. Don't post a
   reply or resolve a thread by default — hand the user the drafted answers and
   let them decide. Post only when they explicitly ask.
+- When they do ask you to post, post one review covering every thread:
+  `gh pr review <n> --comment --body-file <file>`, threads answered in order.
+  Use an inline reply only where the answer needs the line it sits on.
 - To undo a whole commit a reviewer rejected: `git revert --no-commit <sha>`,
   then commit with the review as the stated reason. Cleaner than unwinding the
   diff by hand.

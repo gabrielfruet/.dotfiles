@@ -46,6 +46,8 @@ On request only, e.g. "consolidate human-voice feedback".
    Before adding a rule, check whether it supersedes or duplicates an existing
    one — replace the old text rather than adding beside it. Don't bloat: keep the
    diff no longer than the correction needs — there's no line count to hit.
+   Write every rule as an imperative: "Do X", "Never Y". "Prefer X" and
+   "consider Y" read as optional and get skipped.
 3. Wait for approval; `APPEND_SYSTEM.md` requires it before any skill edit.
 4. Apply, `mv` each entry to `applied/<skill>/`, remove the emptied directory.
 

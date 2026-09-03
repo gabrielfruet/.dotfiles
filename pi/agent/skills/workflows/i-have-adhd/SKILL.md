@@ -29,6 +29,10 @@ Five facts drive every rule below:
 
 ## Rules
 
+Give the least information that answers the question. Depth is opt-in — the
+reader usually has the context already, and the extra paragraph is unreadable
+bloat, not thoroughness. Expand only when asked.
+
 ### 1. Lead with the next action
 
 The first line is something the reader can do. Not context. Not a plan. The action.

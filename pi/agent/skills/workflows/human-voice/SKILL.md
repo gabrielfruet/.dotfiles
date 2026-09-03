@@ -40,7 +40,7 @@ Files live in `references/channels/`.
 | Commit message | `commit-message.md` | 5 | 50 | inline |
 | Plan file, subagent brief | `ai-facing.md` | none | none | rewriter |
 | Chat response to the user | `ai-facing.md` | none | none | inline |
-| Explanation, walkthrough | `explanation.md` | none | none | rewriter |
+| Explanation, walkthrough | `explanation.md` | none | none | inline |
 
 No matching row: pick the nearest and say which. Docs and README go to
 `simple-english`. A PR body — gathering and shaping — lives here in
@@ -53,7 +53,6 @@ review, an analysis or a summary you hand back in chat reads against
 An explanation takes `explanation.md` even though it lands in chat. The test is
 the question being answered: *how does this work*, *why does this happen* — the
 answer walks a case. A review, an analysis or a summary stays on `ai-facing.md`.
-It is the one chat channel with a rewriter, and `explanation.md` says why.
 
 Text bound for another channel keeps that channel. A review comment drafted
 inside a chat response takes `pr-review-comment.md`, its 60-word ceiling and its
@@ -110,8 +109,9 @@ the rewrite or was cut on purpose. Only you saw the original evidence.
 ## Feedback
 
 When the user corrects the voice, length or shape of something you wrote, the
-`skill-feedback` skill captures it: one entry under `entries/human-voice/`, the
-channel name in `scope:`. Record it, change nothing else. Never read those
+`skill-feedback` skill captures it: one entry under that skill's
+`entries/human-voice/`, never a directory inside this one, with the channel name
+in `scope:`. Record it, change nothing else. Never read those
 entries while drafting — they are inert until an approval-gated consolidation
 pass folds them into the channel files.
 
