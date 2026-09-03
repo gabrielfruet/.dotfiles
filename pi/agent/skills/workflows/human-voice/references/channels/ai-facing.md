@@ -15,6 +15,17 @@ A plan file has both, so explain in prose and *show* in code blocks.
 Chat is `inline` because a rewriter subagent cannot see the thread it is
 answering into. `explanation.md` is the exception, and says why.
 
+## ADHD shaping
+
+`i-have-adhd` applies to chat responses and plan files by default; the standing
+rule lives in the global instructions, opt-out via "stop adhd mode". It is
+additive to the cut-lists below and mostly reinforces them — "announcing the
+deliverable" is already banned here, and plan files already want numbered,
+imperative steps. What it adds: the first line is something the reader can *do*,
+the last names one concrete next action.
+
+Subagent briefs, the third register here, stay exempt — an agent does not need it.
+
 ## Plan files
 
 Headers, numbered steps and code blocks are what make a plan executable, so the
@@ -56,6 +67,20 @@ for a reader who will skip between them; without that, they are decoration.
 Long paths, conditions and signatures each get their own fenced block. Inline
 backticks are for short identifiers, filenames and commands. Text should read
 like text; code should look like code.
+
+Separate the two at the paragraph level, not only the span. The default rhythm
+is a prose paragraph, then a fenced block (bash or python, commented if it
+helps), then prose again — each block is either English or code, never a weave.
+The prose alone should carry the point. This holds wherever prose runs long — a
+plan's Context or Risks, an explanation's walkthrough: the paragraph stays prose,
+with the code underneath it, not threaded through it. Backticks are not the
+problem; a sentence whose meaning you recover only by reading the code inside it
+is.
+
+Code illustrates the prose; it does not replace it. Show the one line that
+carries the point, not every line that changed. A response that is mostly fenced
+blocks with a caption between each is a pasted diff, not an explanation — and the
+reader already has the diff.
 
 Countable, because the prose version of this rule has been read and skipped: a
 sentence carrying three or more backtick spans, or one span longer than about
