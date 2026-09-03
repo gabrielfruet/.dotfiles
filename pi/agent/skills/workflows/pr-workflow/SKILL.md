@@ -7,23 +7,30 @@ description: Use when opening a PR and driving it to green CI — push the branc
 
 ## Scope and size
 
-Keep each PR small enough to review in one sitting. Target ~200 lines of diff
-total — added plus removed, not counting generated files, lockfiles or snapshots.
-Past that, split before you push.
+Keep each PR reviewable in one sitting, and gate its size on whether the diff
+touches existing logic — not on a flat line count.
 
-- One PR, one kind of change. Don't mix a refactor with a logic change: the
-  mechanical edits bury the behavior change and the reviewer can't tell which
-  lines carry the intent. Land one as a stacked PR on top of the other, each half
-  small and readable on its own.
-- A big mechanical prep step (rename, move, extract) is its own PR. The follow-up
-  is then a few lines against a clean base.
-- Can't get under ~200 lines? Say why in the description, and keep commits
-  cleanly separated so the reviewer can go commit by commit.
+- Modification-heavy diffs (lots of `-` and `+` in the same file) stay small.
+  ~200 lines of *changed logic* is already a lot: the reviewer has to diff the
+  old and new behavior in their head, so the cost is worse than linear.
+- Purely additive diffs — a new file, a new function, a new command nothing
+  calls yet — can run larger. Fresh lines read roughly linearly; there's no old
+  behavior to reconcile.
+- The test for "additive" is whether a reviewer must hold the old behavior in
+  their head to approve it. A PR that adds a lot but rewires call sites is
+  modificatory, not additive — keep it small.
+- One PR, one kind of change. Don't fold modifications into an additive PR: the
+  interleaved `-`/`+` edits bury the behavior change and the reviewer can't tell
+  which lines carry the intent. Land one as a stacked PR on top of the other.
+- A big mechanical prep step (rename, move, extract) is its own PR. The
+  follow-up is then a few lines against a clean base.
+- Can't keep a modification-heavy PR small? Say why in the description, and keep
+  commits cleanly separated so the reviewer can go commit by commit.
 
 This is for day-to-day work in repos you control, where stacking is cheap.
-Contributing to an external OSS repo, stacking is impractical — keep the
-~200-line target and the refactor/logic split, but ship them as separate
-sequential PRs (or cleanly separated commits), not a stack.
+Contributing to an external OSS repo, stacking is impractical — keep the same
+additive-vs-modificatory sizing and the one-kind-of-change split, but ship them
+as separate sequential PRs (or cleanly separated commits), not a stack.
 
 ## Loop
 1. Ensure the work is committed on a feature branch (never push directly to
@@ -144,6 +151,9 @@ is not evidence that line is yours.
   leave a TODO or drop it.
 - Human comments outrank bot ones. When a human says a change is unnecessary,
   drop it — don't defend it.
+- Replies to review comments are drafts for the user, not posts. Don't post a
+  reply or resolve a thread by default — hand the user the drafted answers and
+  let them decide. Post only when they explicitly ask.
 - To undo a whole commit a reviewer rejected: `git revert --no-commit <sha>`,
   then commit with the review as the stated reason. Cleaner than unwinding the
   diff by hand.
