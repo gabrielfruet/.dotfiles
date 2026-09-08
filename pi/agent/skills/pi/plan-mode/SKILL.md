@@ -68,6 +68,15 @@ Nothing reaches `ExitPlanMode` while a step still says the wording comes later.
 
 ### Phase 4: Present
 - **Shape for an ADHD reader** (`i-have-adhd`, applied via `human-voice`'s `ai-facing` channel): lead with the action, numbered steps, state and wins visible.
+- **Keep the plan minimal** — the shortest text that lets the user approve and
+  you execute. The harness plan template lists what each section must cover,
+  never how long it must be: cover the list in a sentence where a sentence does.
+  Never split a step so each half carries its own `→ verify:`, and never grow a
+  section because the user asked whether you followed a rule — answer the
+  question, leave the text alone.
+- **Context is one paragraph** — the problem and the intended outcome. History,
+  a defect inventory or a restatement of the user's constraints go in only when
+  the user asks for them.
 - State assumptions and tradeoffs
 - Show the full plan
 - Wait for **explicit approval** ("yes", "do it", "go ahead")
