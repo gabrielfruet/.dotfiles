@@ -43,6 +43,10 @@ On request only, e.g. "consolidate human-voice feedback".
 
 1. Read `entries/<skill>/`.
 2. Propose one diff per affected file. Entries on one habit become one rule.
+   When the entries show a rule that was already written and still got skipped,
+   more words will not fix it — propose the structural change instead: a hook, a
+   verification subagent, a command that produces the number, or deleting the
+   framing that made the rule read as optional. Say which entries show the repeat.
    Before adding a rule, check whether it supersedes or duplicates an existing
    one — replace the old text rather than adding beside it. Don't bloat: keep the
    diff no longer than the correction needs — there's no line count to hit.

@@ -31,8 +31,8 @@ Files live in `references/channels/`.
 
 | Channel | File | max_lines | max_words | Rewrite |
 |---|---|---|---|---|
-| PR description | `pr-description.md` | 20 | 200 | flagger + rewriter |
-| GitHub issue | `gh-issue.md` | 40 | 300 | flagger + rewriter |
+| PR description | `pr-description.md` | 20 | 200 | rewriter |
+| GitHub issue | `gh-issue.md` | 40 | 300 | rewriter |
 | Linear issue | `linear-issue.md` | 25 | 200 | rewriter |
 | PR review comment (as reviewer) | `pr-review-comment.md` | 6 | 60 | rewriter |
 | PR review reply (as author) | `pr-review-reply.md` | 2 | 25 | inline |
@@ -70,7 +70,8 @@ True everywhere. Fragments, em dashes, headers, bold and first-person opinion ar
 - Hedge the inference, never the measurement. Give the sample size when it matters.
 - Vary sentence length. Uniform mid-length rhythm is the loudest tell.
 - Break the pattern of three. No closing summary that restates the body.
-- No adjective inflation: `robust`, `comprehensive`, `seamless`, `significantly`.
+- Cut adjectives, intensifiers and editorial connectives that carry no fact:
+  `robust`, `straight`, `already`, `a handful of`, `holds up`, `where it runs out`.
 - Long paths, conditions and signatures go in fenced blocks, not inline backticks.
 - Never invent a fact. Every figure, filename and flag traces back to a source.
 
@@ -81,16 +82,22 @@ process — "the channel file was already read" is not an exemption.
 
 1. **Draft** against the channel file. Aim for unremarkable, not clever.
 2. **Cut** to `max_words`. State the before and after count; an unstated count
-   means the pass did not run. Whole sections go before sentences do.
+   means the pass did not run. Count with `wc -w`, never by eye — an estimated
+   number in the receipt is a false receipt. Whole sections go before sentences do.
+   When the user says trim or shorten, cut information, not words: keep the
+   core point and drop the cases, figures and caveats the reader doesn't need.
 3. **Rewrite** per the table's last column:
    - `inline` — check the draft against `references/blocklist.md` (phrases) and
      `references/patterns.md` (constructions, and what *not* to flag), ship.
    - `rewriter` — one subagent. Give it the channel file, the ceiling and the
      source of truth. Withhold your reasoning; escaping it is why you spawned it.
-   - `flagger + rewriter` — reserved for the public, high-stakes channels (PR
-     description, GitHub issue); its two sequential subagents cost minutes, so
-     an internal short-ceiling channel like a Linear issue takes a plain
-     `rewriter` instead. A cold reader diagnoses first
+     Skip it when the draft is already cold: a subagent that wrote the body from
+     `git diff` and `git log` alone never had your reasoning to escape, so the
+     step is done — check it inline and ship.
+   - `flagger + rewriter` — not a default. Escalate only for an external or
+     public-facing repo, or when the user asks. Its two sequential subagents cost
+     minutes — 16 on a 170-word body — and on an internal PR the cold reader
+     returns "human" before it starts. A cold reader diagnoses first
      (`references/cold-read.md`), then a **second** subagent rewrites, never
      seeing the flagger's context.
 

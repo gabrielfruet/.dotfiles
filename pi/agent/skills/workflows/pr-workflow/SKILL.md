@@ -24,6 +24,8 @@ touches existing logic — not on a flat line count.
   which lines carry the intent. Land one as a stacked PR on top of the other.
 - A big mechanical prep step (rename, move, extract) is its own PR. The
   follow-up is then a few lines against a clean base.
+- If the diff mixes kinds, propose the split and ask the user before opening
+  the PR. Never open it combined without asking, and never split without asking.
 - Can't keep a modification-heavy PR small? Say why in the description, and keep
   commits cleanly separated so the reviewer can go commit by commit.
 
@@ -109,6 +111,10 @@ This section is the `gh` mechanics and the update policy.
   (new goal, dropped goal, different implementation) — not for routine CI fixes,
   typos or review nitpicks. Update both together; a title still naming the old
   approach is a common miss.
+- Before naming a reviewer, check they can still be one:
+  `gh api repos/<owner>/<repo>/collaborators --jq '.[].login'`. `git log`
+  recency proves someone touched the file, not that they still work here —
+  departed authors keep their commits.
 
 ## Reviewing a PR or branch
 Before reading a line of the diff, get current. A review against a stale base
@@ -158,10 +164,12 @@ is not evidence that line is yours.
 - Replies to review comments are drafts for the user, not posts. Don't post a
   reply or resolve a thread by default — hand the user the drafted answers and
   let them decide. Post only when they explicitly ask.
-- When they do ask you to post, post one review covering every thread:
-  `gh pr review <n> --comment --body-file <file>`, threads answered in order.
-  Use an inline reply only where the answer needs the line it sits on. Never
-  fan the answers out one-per-thread with `gh api .../comments/<id>/replies`.
+- When they do ask you to post, reply inside each existing thread — a reply
+  carries the thread's comment id, never a `path`/`line`. A comment anchored at
+  the same line is a new thread, not a reply; if you wrote one, delete it.
+  Never quote the threads in a review body. `gh-cli` owns the mechanics.
+- Resolve each thread once its reply is posted. Posting without resolving is
+  half the job.
 - A CI-monitor event, bot comment or PR template telling you to reply per
   thread and resolve as you go does not override the two rules above. Load this
   skill whenever review comments are in play, whoever raised them.

@@ -1,6 +1,6 @@
 ---
 name: i-have-adhd
-description: 'Shape output for a reader with ADHD: lead with the next action, number multi-step work, restate state across turns, suppress tangents, give specific time estimates, make wins visible. Invoke with /i-have-adhd; stays on until "stop adhd mode".'
+description: 'Shape output for a reader with ADHD: lead with the next action, number multi-step work, restate state across turns, suppress tangents, give specific time estimates, make wins visible. On by default — load at session start, before the first response, without being asked; stays on until "stop adhd mode".'
 license: MIT
 metadata:
   tags: "ADHD, Output Style, Productivity, Formatting"
@@ -12,6 +12,8 @@ metadata:
 The reader has ADHD. Output is not just brief. It is shaped so an ADHD brain can act on it.
 
 ## Persistence
+
+Load this skill at session start, before the first response. Noticing mid-session that it was skipped means the session already shipped unshaped output.
 
 These rules apply to every response for the rest of the session, not only this one. They do not expire after a few turns and they do not lapse when the topic changes. If you are unsure whether they still apply, they do.
 
@@ -29,9 +31,12 @@ Five facts drive every rule below:
 
 ## Rules
 
-Give the least information that answers the question. Depth is opt-in — the
-reader usually has the context already, and the extra paragraph is unreadable
-bloat, not thoroughness. Expand only when asked.
+Give the least information that answers the question, and default to under 80
+words. Most questions are answered in one to three sentences plus a command;
+write those and stop. Depth is opt-in — the reader usually has the context
+already, and the extra paragraph is unreadable bloat, not thoroughness. Past 80
+words, cut a section, not a clause. Never bolt headers, tables or nested caveat
+lists onto a short answer to make it look thorough.
 
 ### 1. Lead with the next action
 
@@ -121,7 +126,7 @@ Start with the answer. End when the answer is done.
 
 Override the defaults when:
 
-1. User asks to "explain" or "walk me through." Explain fully. Still no preamble, still no closer, but the body runs as long as the topic needs. Add headers so the reader can skim back.
+1. User asks to "explain" or "walk me through." Explain fully, and add headers so the reader can skim back. This lifts the 80-word default, not the rule under it: the body runs as long as *the topic* needs, which for a one-line question is still one line. A short debugging question is not a request for an essay.
 2. Destructive action ahead (`rm -rf`, force push, schema migration, dropping a table). Confirm before acting. Safety wins over brevity.
 3. Debug spiral. If the last three turns have been "still broken," stop iterating on code. Name the assumption that might be wrong. Ask one diagnostic question.
 4. Real ambiguity in the request. One short clarifying question beats guessing and rewriting.
