@@ -38,7 +38,8 @@ Files live in `references/channels/`.
 | PR review reply (as author) | `pr-review-reply.md` | 2 | 25 | inline |
 | Slack | `slack.md` | 6 | 40 | inline |
 | Commit message | `commit-message.md` | 5 | 50 | inline |
-| Plan file, subagent brief | `ai-facing.md` | none | none | rewriter |
+| Plan file | `ai-facing.md` | none | none | inline |
+| Subagent brief | `ai-facing.md` | none | none | rewriter |
 | Chat response to the user | `ai-facing.md` | none | none | inline |
 | Explanation, walkthrough | `explanation.md` | none | none | inline |
 
@@ -50,9 +51,11 @@ Every response to the user is routed. Staying in chat is not an exemption — a
 review, an analysis or a summary you hand back in chat reads against
 `ai-facing.md` like anything else on the table.
 
-An explanation takes `explanation.md` even though it lands in chat. The test is
-the question being answered: *how does this work*, *why does this happen* — the
-answer walks a case. A review, an analysis or a summary stays on `ai-facing.md`.
+Route on what the answer does, not on how the question was phrased. A draft that
+walks one case step by step — values changing, a mechanism unfolding — is an
+explanation and takes `explanation.md`, even when the question was "so you think
+X?". Re-route the moment the draft starts walking; never finish it on the wrong
+channel. A review, an analysis or a summary stays on `ai-facing.md`.
 
 Text bound for another channel keeps that channel. A review comment drafted
 inside a chat response takes `pr-review-comment.md`, its 60-word ceiling and its
@@ -84,8 +87,11 @@ process — "the channel file was already read" is not an exemption.
 2. **Cut** to `max_words`. State the before and after count; an unstated count
    means the pass did not run. Count with `wc -w`, never by eye — an estimated
    number in the receipt is a false receipt. Whole sections go before sentences do.
-   When the user says trim or shorten, cut information, not words: keep the
-   core point and drop the cases, figures and caveats the reader doesn't need.
+   When the user says trim, shorten or "make it concise", cut claims, not words.
+   Count the claims before and after and put both in the receipt. A version
+   carrying the same claims in fewer words was not trimmed, and one whose
+   sentences lost their subjects and verbs is worse than the original, not
+   shorter.
 3. **Rewrite** per the table's last column:
    - `inline` — check the draft against `references/blocklist.md` (phrases) and
      `references/patterns.md` (constructions, and what *not* to flag), ship.
@@ -101,14 +107,19 @@ process — "the channel file was already read" is not an exemption.
      (`references/cold-read.md`), then a **second** subagent rewrites, never
      seeing the flagger's context.
 
-Where the channel carries a numeric `max_words`, one line ships with the draft:
+One receipt line ships with every draft, on every channel. No line means the
+process did not run.
 
 ```text
 channel: pr-review-comment | 142 → 54 words | rewriter
+channel: ai-facing | mixed sentences 0 | inline
+channel: linear-issue | 190 → 88 words | claims 7 → 3 | rewriter
 ```
 
-No line means the process did not run. `ai-facing` has no ceiling, so ordinary
-chat carries none; the three steps still run, there is just nothing to count.
+`ai-facing` and `explanation` have no word ceiling, so they count mixed sentences
+instead — the countable rule in `ai-facing.md` under Code formatting. A nonzero
+count means the draft is not finished. Add the `claims` field whenever the user
+asked to trim.
 
 Then check the facts survived: every figure and filename in the source appears in
 the rewrite or was cut on purpose. Only you saw the original evidence.

@@ -49,8 +49,9 @@ Side effects are numbered stories with real names (`truck` exists only in
 - One concrete case beats the general rule. State the general rule after the
   case, once, and only if it is still needed.
 - Code formatting follows `ai-facing.md`, including the count.
-- No ceiling, but a walkthrough that has stopped walking and started cataloguing
-  is over.
+- `none` is not a license to run long. Answer at the size of the question — a
+  one-line question gets a one-line answer — and stop the walkthrough when it
+  stops walking and starts cataloguing.
 
 ## Allowed here
 

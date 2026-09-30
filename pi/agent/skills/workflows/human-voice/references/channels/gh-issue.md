@@ -3,7 +3,7 @@
 ```text
 max_lines: 40
 max_words: 300
-rewrite: flagger + rewriter
+rewrite: rewriter
 ```
 
 Longer is fine here: this is documentation people reference later. The padding to

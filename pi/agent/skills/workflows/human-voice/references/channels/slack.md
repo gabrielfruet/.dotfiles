@@ -30,6 +30,16 @@ then the facts, then what is still uncertain and what is next.
 - Name the effect, not the mechanism. Cut file names, function names and API
   terms unless the reader needs them to act. "Reads the installed version so the
   footer isn't hardcoded" beats naming the hook file and the config key.
+- Asking permission for routine work: ask, and stop. Say what you want to do,
+  not how you found it — "Fine if I update the nginx config on the proxy host?"
+  The diagnosis, the PR link and the caveat wait until someone asks. Hand the
+  draft over on its own, with no commentary paragraphs trailing it.
+- Answer every question the thread asked, and end with the next step you offer
+  to take ("happy to create issues for this"). Never close by offering another
+  version of the message.
+- State a deadline as your plan, never as a condition on the reader. "I'll shut
+  these down Wed, Oct 7, so flag anything before then" — not "if I don't hear
+  back by Wed, I'll shut these down."
 
 ## Allowed here
 

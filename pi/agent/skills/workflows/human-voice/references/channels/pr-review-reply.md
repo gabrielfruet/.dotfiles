@@ -27,6 +27,8 @@ pushing back or asking  Why not just Z here?
 - Disagreement gets one clause of reasoning, not a paragraph.
 - A human reviewer outranks a bot. When a human says a change is unnecessary,
   drop it rather than defending it.
+- Link the commit, never paste a bare hash. "Good catch, fixed in [this
+  commit](url)", not "Good catch, fixed in 314f81c."
 
 ## Allowed here
 

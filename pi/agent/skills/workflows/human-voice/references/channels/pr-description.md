@@ -3,7 +3,7 @@
 ```text
 max_lines: 20
 max_words: 200
-rewrite: flagger + rewriter
+rewrite: rewriter
 ```
 
 The single home for PR-body guidance: gather the diff and commits, then shape

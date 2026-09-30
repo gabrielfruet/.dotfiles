@@ -22,10 +22,14 @@ touches existing logic — not on a flat line count.
 - One PR, one kind of change. Don't fold modifications into an additive PR: the
   interleaved `-`/`+` edits bury the behavior change and the reviewer can't tell
   which lines carry the intent. Land one as a stacked PR on top of the other.
-- A big mechanical prep step (rename, move, extract) is its own PR. The
-  follow-up is then a few lines against a clean base.
-- If the diff mixes kinds, propose the split and ask the user before opening
-  the PR. Never open it combined without asking, and never split without asking.
+- A prep refactor (rename, move, extract) is its own PR, and the decision lands
+  before the first commit on the branch, not at PR-open time. Commit it on its
+  own branch, push, and stack the feature on top. The follow-up is then a few
+  lines against a clean base. Announcing the prep commit is not asking: once both
+  sit on one branch, splitting costs a rebase.
+- If the diff already mixes kinds, propose the split and ask the user before
+  opening the PR. Never open it combined without asking, and never split without
+  asking.
 - Can't keep a modification-heavy PR small? Say why in the description, and keep
   commits cleanly separated so the reviewer can go commit by commit.
 
@@ -138,6 +142,16 @@ reports code the author never touched and misses what they did.
    anything: `git log <this-branch>..<downstream> -- <path>`, or read the later
    PRs' diffs. A finding the stack already fixes does not get reported. Note it
    only to say which branch fixes it.
+6. Post every comment you raise inside one review, never as a standalone inline
+   comment. Batch them and submit the review in a single call:
+
+   ```bash
+   gh api repos/<owner>/<repo>/pulls/<n>/reviews --input review.json
+   ```
+
+   where `review.json` carries a `comments` array. "Comment" in the user's
+   request names the content, not the mechanism — it is never a request for the
+   standalone comments endpoint. `gh-cli` owns the mechanics.
 
 `git rev-parse --abbrev-ref @{upstream}` failing means the branch has no tracking
 ref. That is a reason to fetch and name the base by hand, not a reason to fall

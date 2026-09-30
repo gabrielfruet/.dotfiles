@@ -67,6 +67,12 @@ Commit messages are the exception: the subject line inside the step is enough.
 Nothing reaches `ExitPlanMode` while a step still says the wording comes later.
 
 ### Phase 4: Present
+- **Run `human-voice`'s Process on the plan file before `ExitPlanMode`**, inline:
+  draft against `ai-facing.md`, cut, check against `blocklist.md` and
+  `patterns.md`, then the ADHD pass. Never write a plan straight from your
+  analysis notes, and never spawn a rewriter subagent over the plan file — the
+  user is waiting to approve something. First line: the next action and a time
+  estimate. Last line: one next action. Ship the receipt line with the plan.
 - **Shape for an ADHD reader** (`i-have-adhd`, applied via `human-voice`'s `ai-facing` channel): lead with the action, numbered steps, state and wins visible.
 - **Keep the plan minimal** — the shortest text that lets the user approve and
   you execute. The harness plan template lists what each section must cover,

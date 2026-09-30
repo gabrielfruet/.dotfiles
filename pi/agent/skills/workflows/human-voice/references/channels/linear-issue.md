@@ -3,7 +3,7 @@
 ```text
 max_lines: 25
 max_words: 200
-rewrite: flagger + rewriter
+rewrite: rewriter
 ```
 
 Terser than a GitHub issue. The reader is on your team, today. Nobody is finding
@@ -12,6 +12,9 @@ this in two years with no context. Use `linear-cli` for mechanics.
 ## Shape
 
 What needs to happen, then why, then scope. Skip background the team already has.
+
+Most issues are two or three sentences. 200 words is a ceiling, not a target: if
+the work is "make the slides, fix the code, 1 SP", write that and stop.
 
 For a change to code, lead with one framing sentence, then a fenced block of the
 actual definitions (before/after or target state), not prose paragraphs describing

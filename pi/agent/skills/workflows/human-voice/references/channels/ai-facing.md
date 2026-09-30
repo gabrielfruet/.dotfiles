@@ -2,7 +2,7 @@
 
 ```text
                 max_lines  max_words  rewrite
-plan file       none       none       rewriter
+plan file       none       none       inline
 subagent brief  none       none       rewriter
 chat response   none       none       inline
 ```
@@ -12,8 +12,10 @@ than banned, and there is no ceiling. What changes across the three is who reads
 it — an agent that acts on the text, or a person deciding whether to approve it.
 A plan file has both, so explain in prose and *show* in code blocks.
 
-Chat is `inline` because a rewriter subagent cannot see the thread it is
-answering into. `explanation.md` is the exception, and says why.
+Chat and plan files are `inline`. A rewriter subagent cannot see the thread chat
+answers into, and on a plan file it costs minutes while the user waits for
+something to approve. Run the three steps yourself. Spawn a rewriter over a plan
+file only when the user asks for one.
 
 ## ADHD shaping
 
@@ -82,10 +84,14 @@ carries the point, not every line that changed. A response that is mostly fenced
 blocks with a caption between each is a pasted diff, not an explanation — and the
 reader already has the diff.
 
-Countable, because the prose version of this rule has been read and skipped: a
-sentence carrying three or more backtick spans, or one span longer than about
-thirty characters, or any span holding a `/`, a `(` or a `→`, becomes a fenced
-block. Count them.
+Write the paragraph with no backticks at all, then add back only the spans the
+sentence cannot lose. Drafting the weave and pruning it afterwards is what has
+failed four times; this order cannot produce it.
+
+Countable, for the draft you ship: a sentence carrying three or more backtick
+spans, or one span longer than about thirty characters, or any span holding a
+`/`, a `(` or a `→`, is a mixed sentence. Make it a fenced block. Count them and
+put the number in the receipt.
 
 Bad:
 

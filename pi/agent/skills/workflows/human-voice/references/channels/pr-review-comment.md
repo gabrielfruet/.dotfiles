@@ -14,8 +14,12 @@ Reviewing someone else's code. For replying on your own PR, use
 Three parts, in order, and nothing else:
 
 1. The claim, in the first line.
-2. One sentence of mechanism.
-3. A minimal snippet of the fix.
+2. The mechanism in plain words, with one concrete case ("a rank with 100
+   tokens and a rank with 10 get the same weight").
+3. A minimal snippet of the fix, only when the fix isn't obvious from 2.
+
+Say so when you're not sure the case happens in practice. Never compress the
+claim into jargon to hit the ceiling.
 
 ## Rules
 
