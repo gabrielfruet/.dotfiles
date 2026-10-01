@@ -39,7 +39,7 @@ Files live in `references/channels/`.
 | Slack | `slack.md` | 6 | 40 | inline |
 | Commit message | `commit-message.md` | 5 | 50 | inline |
 | Plan file | `ai-facing.md` | none | none | inline |
-| Subagent brief | `ai-facing.md` | none | none | rewriter |
+| Subagent brief | `ai-facing.md` | none | none | inline |
 | Chat response to the user | `ai-facing.md` | none | none | inline |
 | Explanation, walkthrough | `explanation.md` | none | none | inline |
 
@@ -107,13 +107,19 @@ process — "the channel file was already read" is not an exemption.
      (`references/cold-read.md`), then a **second** subagent rewrites, never
      seeing the flagger's context.
 
-One receipt line ships with every draft, on every channel. No line means the
+One receipt line per channel in the response, not one per response. A chat
+answer carrying a review reply ships two lines. A nested draft with no line of
+its own was never routed — stop and read its channel file. No line means the
 process did not run.
 
 ```text
 channel: pr-review-comment | 142 → 54 words | rewriter
 channel: ai-facing | mixed sentences 0 | inline
 channel: linear-issue | 190 → 88 words | claims 7 → 3 | rewriter
+
+a chat answer carrying two review replies:
+channel: ai-facing | mixed sentences 0 | inline
+channel: pr-review-reply | 44 → 19 words | inline
 ```
 
 `ai-facing` and `explanation` have no word ceiling, so they count mixed sentences

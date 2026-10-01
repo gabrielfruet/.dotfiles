@@ -3,7 +3,7 @@
 ```text
                 max_lines  max_words  rewrite
 plan file       none       none       inline
-subagent brief  none       none       rewriter
+subagent brief  none       none       inline
 chat response   none       none       inline
 ```
 
@@ -12,10 +12,11 @@ than banned, and there is no ceiling. What changes across the three is who reads
 it — an agent that acts on the text, or a person deciding whether to approve it.
 A plan file has both, so explain in prose and *show* in code blocks.
 
-Chat and plan files are `inline`. A rewriter subagent cannot see the thread chat
-answers into, and on a plan file it costs minutes while the user waits for
-something to approve. Run the three steps yourself. Spawn a rewriter over a plan
-file only when the user asks for one.
+All three are `inline`. A rewriter subagent cannot see the thread chat answers
+into, on a plan file it costs minutes while the user waits for something to
+approve, and a brief's reader is an agent that does not care how the prose
+reads. Run the three steps yourself. Spawn a rewriter here only when the user
+asks for one.
 
 ## ADHD shaping
 
