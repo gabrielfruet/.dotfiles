@@ -8,7 +8,7 @@ rewrite: rewriter
 
 Longer is fine here: this is documentation people reference later. The padding to
 cut is different from a PR's. Assumes investigation is done and `gh` mechanics
-are handled elsewhere (`codebase-exploration`, `gh-cli`).
+are handled elsewhere (`gh-cli`).
 
 ## Shape
 
