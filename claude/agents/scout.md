@@ -1,0 +1,1 @@
+../../pi/agent/skills/workflows/brainstorm/agents/scout.md
