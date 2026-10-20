@@ -16,7 +16,17 @@ sites stays out of the prose.
 
 ## Shape
 
-Walk one case. Do not cover every case.
+Answer first, in the reader's terms, in one to three sentences: what the code
+decides and who does what. A conceptual question ("why does this differ", "who
+saves the file") stops there.
+
+When the user is editing a function, the case is that function with its own
+variables, never a parallel toy problem. This overrides `learn`'s
+parallel-problem move.
+
+### Value-by-value trace
+
+Only when the question asks how values change. Walk one case, not every case.
 
 1. **Set the scene once, concretely.** Named values in a fenced block — three
    annotation sources, one image, three boxes labelled A, B and C. Not "a
@@ -38,12 +48,6 @@ Side effects are numbered stories with real names (`truck` exists only in
 - Plain words. Prefer more words over cleverer ones. "two other things that make
   it feel random" over "second-order effects", "nobody has filled this list in"
   over "unseeded", "the places that read it" over "consumers".
-- Match the scaffolding to the question. A conceptual "why does this differ"
-  answer leads with the mechanism in the reader's terms — what the code is
-  *deciding* and why. Headers, tables, file:line and runtime-internal names
-  (`PyType_Ready`, `tp_setattro`) are opt-in for a value-by-value trace that
-  needs them, not the default. Reaching for them first is what makes the
-  plain-language version arrive two tries late.
 - Four file:line references strung through one paragraph is the failure this
   channel exists to stop. That paragraph is a table or a fenced block.
 - One concrete case beats the general rule. State the general rule after the

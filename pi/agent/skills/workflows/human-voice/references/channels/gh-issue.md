@@ -25,7 +25,10 @@ deferred named and linked.
 - Match detail to purpose. A chore wants a checklist. A discussion or spike wants
   findings. Don't dump investigation output into a task that wants a handoff, and
   don't force a checklist onto an open question.
-- State the audience before writing; it sets tone, assumed context and labels.
+- Pick the audience from the repo and tell the user before drafting; it sets
+  tone, assumed context and labels. An issue in a public OSS repo is Contributor
+  pickup unless the user says otherwise. Internal context never goes in:
+  first-person QA notes, Slack links, questions only the team can answer.
 
 | Audience | Tone | Detail | Labels |
 |---|---|---|---|

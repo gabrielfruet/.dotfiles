@@ -34,6 +34,9 @@ then the facts, then what is still uncertain and what is next.
   not how you found it — "Fine if I update the nginx config on the proxy host?"
   The diagnosis, the PR link and the caveat wait until someone asks. Hand the
   draft over on its own, with no commentary paragraphs trailing it.
+- Read who holds the answer. When nobody in the thread does, open a discussion:
+  the open question, what it depends on, what you lean toward, then ask what
+  people think. "Works for you?" is only for someone who can decide.
 - Answer every question the thread asked, and end with the next step you offer
   to take ("happy to create issues for this"). Never close by offering another
   version of the message.

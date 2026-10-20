@@ -32,3 +32,9 @@ When the user corrects how a skill behaved — its output, its process, a step i
 skipped — load `skill-feedback` and append an entry before carrying on. Capture
 only: propose no fix and edit no skill file until they ask for a consolidation
 pass.
+
+# Questions
+
+Ask clarifying questions as plain numbered text in rounds: every question whose
+prerequisites are settled, each with a recommended answer. Never use
+AskUserQuestion boxes.

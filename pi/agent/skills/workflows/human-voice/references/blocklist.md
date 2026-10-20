@@ -63,6 +63,10 @@ Intensifier-hedges that add nothing:
 truly, incredibly, remarkably, notably, significantly, fundamentally, essentially,
 arguably, quite possibly, it's worth noting that, it's important to remember that
 
+Idioms where a literal word exists. Use the word:
+
+for good (→ permanently)
+
 ## Openers and closers
 
 - "Great question!", "Absolutely!", "Certainly!", "Of course!", "You're

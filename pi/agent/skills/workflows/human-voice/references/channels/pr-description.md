@@ -56,6 +56,9 @@ empty template.
   you split away is a projection, not a measurement: the reader can't verify it
   and doesn't need it. For a stacked PR, say the split isolates the behavior
   change, and drop the would-be size.
+- Before/after numbers compare against the PR base, never an earlier commit on
+  the branch. When folding one PR into another, re-measure against the base or
+  drop the figure.
 
 ## Allowed here
 

@@ -36,16 +36,17 @@ Files live in `references/channels/`.
 | Linear issue | `linear-issue.md` | 25 | 200 | rewriter |
 | PR review comment (as reviewer) | `pr-review-comment.md` | 6 | 60 | rewriter |
 | PR review reply (as author) | `pr-review-reply.md` | 2 | 25 | inline |
-| Slack | `slack.md` | 6 | 40 | inline |
+| Slack, WhatsApp, team chat | `slack.md` | 6 | 40 | inline |
 | Commit message | `commit-message.md` | 5 | 50 | inline |
 | Plan file | `ai-facing.md` | none | none | inline |
 | Subagent brief | `ai-facing.md` | none | none | inline |
 | Chat response to the user | `ai-facing.md` | none | none | inline |
 | Explanation, walkthrough | `explanation.md` | none | none | inline |
+| Social post (LinkedIn) | `social-post.md` | none | none | inline |
+| Docs, README | `simple-english` skill | — | — | — |
 
-No matching row: pick the nearest and say which. Docs and README go to
-`simple-english`. A PR body — gathering and shaping — lives here in
-`pr-description.md`; `write-pr-description` routes to it.
+No matching row: pick the nearest and say which. A PR body — gathering and
+shaping — lives here in `pr-description.md`; `write-pr-description` routes to it.
 
 Every response to the user is routed. Staying in chat is not an exemption — a
 review, an analysis or a summary you hand back in chat reads against
@@ -85,8 +86,16 @@ process — "the channel file was already read" is not an exemption.
 
 1. **Draft** against the channel file. Aim for unremarkable, not clever.
 2. **Cut** to `max_words`. State the before and after count; an unstated count
-   means the pass did not run. Count with `wc -w`, never by eye — an estimated
-   number in the receipt is a false receipt. Whole sections go before sentences do.
+   means the pass did not run. Run the receipt script on every draft, for every
+   channel, and never write a count by hand:
+
+   ```bash
+   scripts/receipt.py <channel> < draft.md
+   ```
+
+   It prints the receipt line with the word and mixed-sentence counts, then the
+   channel's rules. Check the draft against those rules before shipping. Whole
+   sections go before sentences do.
    When the user says trim, shorten or "make it concise", cut claims, not words.
    Count the claims before and after and put both in the receipt. A version
    carrying the same claims in fewer words was not trimmed, and one whose
@@ -113,18 +122,17 @@ its own was never routed — stop and read its channel file. No line means the
 process did not run.
 
 ```text
-channel: pr-review-comment | 142 → 54 words | rewriter
-channel: ai-facing | mixed sentences 0 | inline
-channel: linear-issue | 190 → 88 words | claims 7 → 3 | rewriter
+channel: pr-review-comment | 142 → 54/60 words | mixed 0 | rewriter
+channel: ai-facing | 180/none words | mixed 0 | inline
+channel: linear-issue | 190 → 88/200 words | mixed 0 | claims 7 → 3 | rewriter
 
 a chat answer carrying two review replies:
-channel: ai-facing | mixed sentences 0 | inline
-channel: pr-review-reply | 44 → 19 words | inline
+channel: ai-facing | 120/none words | mixed 0 | inline
+channel: pr-review-reply | 44 → 19/25 words | mixed 0 | inline
 ```
 
-`ai-facing` and `explanation` have no word ceiling, so they count mixed sentences
-instead — the countable rule in `ai-facing.md` under Code formatting. A nonzero
-count means the draft is not finished. Add the `claims` field whenever the user
+The mixed count follows the countable rule in `ai-facing.md` under Code
+formatting, on every channel. A nonzero count means the draft is not finished. Add the `claims` field whenever the user
 asked to trim.
 
 Then check the facts survived: every figure and filename in the source appears in

@@ -50,6 +50,7 @@ Each step must have:
 - **Verification check** (how to confirm it worked)
 - **Test style**: prefer behavior/integration tests over mocks. If proposing mocks, justify why real behavior cannot be tested cheaply.
 - **Diffs when small**: show a code change as a before/after diff when it is small and central to the step. Describe large or incidental changes in prose.
+- **The case before the rule**: a step that adds or changes a rule shows the case it fixes (the bad output, then the good one) before the rule text.
 
 ### Drafts, not descriptions
 

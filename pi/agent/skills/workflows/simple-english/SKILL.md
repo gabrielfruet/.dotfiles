@@ -42,6 +42,9 @@ When asked to CHECK text instead of writing it, report each violation as: rule n
 | **Pragmatic** (default) | Docs, READMEs, error messages — the user wants clear text | All structural rules. Domain words stay ("idempotent", "webhook"). |
 | **Strict** | The user names STE, ASD-STE100, or compliance | Structural rules + full vocabulary discipline, and tell the user that full compliance needs the official dictionary (free at asd-ste100.org). |
 
+Editing existing docs: match the length and pace of the items around the change.
+Add the fewest words that carry it.
+
 ## Step 1: Classify the Text
 
 | | Procedural (instructions) | Descriptive (explanations) |

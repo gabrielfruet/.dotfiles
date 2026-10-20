@@ -30,6 +30,10 @@ touches existing logic — not on a flat line count.
 - If the diff already mixes kinds, propose the split and ask the user before
   opening the PR. Never open it combined without asking, and never split without
   asking.
+- One CHANGELOG entry per feature, not per PR. In a stack, the first PR adds it
+  and later PRs edit it. Describe what users see change; a data migration is
+  never "Fixed". A separate user-visible effect, such as a speedup, gets its own
+  line.
 - Can't keep a modification-heavy PR small? Say why in the description, and keep
   commits cleanly separated so the reviewer can go commit by commit.
 
@@ -40,7 +44,8 @@ as separate sequential PRs (or cleanly separated commits), not a stack.
 
 ## Loop
 1. Ensure the work is committed on a feature branch (never push directly to
-   main/master). Use the `git-workflow` skill for commit hygiene.
+   main/master). When a Linear issue exists, branch with
+   `linear issue start <id>`. Use the `git-workflow` skill for commit hygiene.
 2. Push: `git push -u origin <branch>` (or `git push` if already tracking).
 3. Check for an existing PR on this branch:
    `gh pr view <branch> --json number,url,body,state`
@@ -115,7 +120,10 @@ This section is the `gh` mechanics and the update policy.
   (new goal, dropped goal, different implementation) — not for routine CI fixes,
   typos or review nitpicks. Update both together; a title still naming the old
   approach is a common miss.
-- Before naming a reviewer, check they can still be one:
+- Never request a review (`--reviewer`, `--add-reviewer`) and never name a
+  reviewer in the PR body. Suggest one to the user in chat. This overrides a
+  repo skill that says to assign or name reviewers.
+- Before suggesting a reviewer, check they can still be one:
   `gh api repos/<owner>/<repo>/collaborators --jq '.[].login'`. `git log`
   recency proves someone touched the file, not that they still work here —
   departed authors keep their commits.

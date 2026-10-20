@@ -18,10 +18,26 @@ Three parts, in order, and nothing else:
    tokens and a rank with 10 get the same weight").
 3. A minimal snippet of the fix, only when the fix isn't obvious from 2.
 
-Say so when you're not sure the case happens in practice. Never compress the
-claim into jargon to hit the ceiling.
+Say so when you're not sure the case happens in practice.
+
+The ceiling is for a finding. A reply weighing tradeoffs may run to 100 words.
+Each downside names who hits it and what they see. If a cut would make the
+reader ask "wdym", keep the words.
+
+## Approval
+
+One specific thanks, then LGTM. 15–25 words.
+
+> Thanks for adding a test for each of these. The per-annotation eye carrying the
+> whole source over works for me. LGTM
 
 ## Rules
+
+- Don't cite function or file names as evidence. The author knows their code.
+  Say what happens.
+- Rewriting comments the user drafted: keep their phrasing and change only the
+  facts. Their openers ("We can…", "maybe…"), plain names without backticks and
+  `->` arrows stay.
 
 - No impact paragraph. No contrast example showing the correct case. No "why this
   matters" close.
@@ -58,3 +74,13 @@ Good:
 > ```python
 > seen = set()
 > ```
+
+Good, in the user's voice (approved):
+
+> We can embed images, what we can't is "image bytes". This shows a wrong error,
+> "cannot embed {query_kind}" -> "cannot embed images". Maybe
+> `query_kind="image bytes"`? The new test matches on "cannot embed images" too,
+> so it needs the same change.
+
+> Nit: b"image bytes" reads a bit like a text value at first look. Not blocking,
+> the older tests here use it too.
