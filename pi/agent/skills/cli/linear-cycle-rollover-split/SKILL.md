@@ -63,13 +63,14 @@ prefix every command with `npx @schpet/linear-cli` instead of `linear`.
    override the pair in the same reply.
 5. Echo the plan back per issue (`#1: 3 done in D, 2 carry to C`,
    `#2: not split`) and get a confirm before touching anything.
-6. For each issue not marked `-`, with `R = E - X`, run the split:
+6. For each issue not marked `-`, with `R = E - X`, run all three commands.
+   Always create both halves, even when `X` or `R` is 0:
    ```bash
-   # done half — only if X > 0
+   # done half
    linear issue create --team <KEY> --parent <ID> --project "<PROJECT>" \
      --assignee self --cycle <D> --estimate <X> --state Done \
      --title "<TITLE> (Cycle <D>)"
-   # carry half — only if R > 0
+   # carry half
    linear issue create --team <KEY> --parent <ID> --project "<PROJECT>" \
      --assignee self --cycle <C> --estimate <R> --state Todo \
      --title "<TITLE> (Cycle <C>)"
@@ -82,9 +83,9 @@ prefix every command with `npx @schpet/linear-cli` instead of `linear`.
 ## Rules
 - `E = 0` → skip in step 3 (already split, or unestimated).
 - `-` → no split; the issue rolls over whole with its estimate.
-- `X = 0` → still split: create only the carry half with `R = E`, and zero
-  the parent.
-- `X = E` → `R = 0`: create only the done half, no carry.
+- Every split parent gets exactly two sub-issues: a Done half in `D` with `X`
+  points and a Todo half in `C` with `R` points. Create the half with 0 points
+  too; never skip it.
 - Both sub-issues inherit the parent's team, project and assignee.
 - Parent has no project → drop `--project` from both `create` calls.
 - The parent keeps its state and cycle; only its estimate drops to 0.
