@@ -33,6 +33,12 @@ skipped — load `skill-feedback` and append an entry before carrying on. Captur
 only: propose no fix and edit no skill file until they ask for a consolidation
 pass.
 
+# PRs
+
+Load `pr-workflow` before any PR work: opening, pushing to, updating,
+reviewing, or answering comments on a PR. Load it before `gh pr create`, not
+after the PR is open.
+
 # Questions
 
 Ask clarifying questions as plain numbered text in rounds: every question whose
