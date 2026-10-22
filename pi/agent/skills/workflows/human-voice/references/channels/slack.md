@@ -15,12 +15,17 @@ update or an investigation recap; only those get `max_lines: 15`, `max_words: 12
 One idea per message. For the longer variant: main result in the first sentence,
 then the facts, then what is still uncertain and what is next.
 
+## Before drafting
+
+Read 2–3 of the user's own messages in that channel or thread. Fetch them if
+they are not in context. Copy their opener, hedges and length. Put one quoted
+line in the receipt as `voice: "<quote>"`; no voice field means the step did
+not run. No messages to sample: draft 2–3 tone variants and let the user pick.
+
 ## Rules
 
 - No salutations, no sign-offs. Contractions are normal, so are fragments.
   Periods on one-liners are optional.
-- Match the thread's existing register rather than imposing formality on it. If
-  the channel is casual, be casual; if it is a status channel, be terser still.
 - Almost never needs a bulleted list. Reaching for one means the message is too
   long for Slack.
 - No build-up before the result, and no closing "so what this means is" line. The
@@ -36,10 +41,12 @@ then the facts, then what is still uncertain and what is next.
   draft over on its own, with no commentary paragraphs trailing it.
 - Read who holds the answer. When nobody in the thread does, open a discussion:
   the open question, what it depends on, what you lean toward, then ask what
-  people think. "Works for you?" is only for someone who can decide.
-- Answer every question the thread asked, and end with the next step you offer
-  to take ("happy to create issues for this"). Never close by offering another
-  version of the message.
+  people think. Never open with "Proposal". State the lean as "I think", not as
+  fact, and keep those hedges through the word cut. End on the question, never
+  on a commitment. "Works for you?" is only for someone who can decide.
+- Replying in a thread: answer every question it asked, and end with the next
+  step you offer to take ("happy to create issues for this"). Never close by
+  offering another version of the message.
 - State a deadline as your plan, never as a condition on the reader. "I'll shut
   these down Wed, Oct 7, so flag anything before then" — not "if I don't hear
   back by Wed, I'll shut these down."

@@ -17,6 +17,7 @@ One sentence, unless there is a genuine open question. Pick the matching default
 applying a suggestion   Applied, thanks!  /  Good catch, fixed.
 disagreeing             Kept it as-is: X breaks under Y.
 pushing back or asking  Why not just Z here?
+asking for an action    @alice could you merge? Windows failure is unrelated.
 ```
 
 ## Rules
@@ -27,6 +28,8 @@ pushing back or asking  Why not just Z here?
 - Disagreement gets one clause of reasoning, not a paragraph.
 - A human reviewer outranks a bot. When a human says a change is unnecessary,
   drop it rather than defending it.
+- Asking someone to act: one ask, the reason in one clause. Never offer
+  alternatives ("merge or rerun").
 - Link the commit, never paste a bare hash. "Good catch, fixed in [this
   commit](url)", not "Good catch, fixed in 314f81c."
 

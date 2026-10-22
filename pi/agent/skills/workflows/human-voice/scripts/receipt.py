@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Print the human-voice receipt for a draft, then the channel's rules.
 
-Usage: receipt.py <channel> < draft.md
+Usage: receipt.py <channel> [--before old.md] < draft.md
 """
 
 import re
@@ -40,9 +40,13 @@ def rule_sections(channel_text: str) -> str:
 
 
 def main() -> None:
-    if len(sys.argv) != 2:
+    args = sys.argv[1:]
+    before = None
+    if len(args) == 3 and args[1] == "--before":
+        before = Path(args[2]).read_text()
+    elif len(args) != 1:
         sys.exit(__doc__)
-    channel = sys.argv[1]
+    channel = args[0]
     path = CHANNELS / f"{channel}.md"
     if not path.exists():
         names = ", ".join(sorted(p.stem for p in CHANNELS.glob("*.md")))
@@ -50,7 +54,9 @@ def main() -> None:
 
     draft = sys.stdin.read()
     channel_text = path.read_text()
-    words = len(draft.split())
+    words = str(len(draft.split()))
+    if before is not None:
+        words = f"{len(before.split())} → {words}"
     mixed = sum(is_mixed(s) for s in sentences(draft))
 
     print(f"channel: {channel} | {words}/{max_words(channel_text)} words | mixed {mixed}")

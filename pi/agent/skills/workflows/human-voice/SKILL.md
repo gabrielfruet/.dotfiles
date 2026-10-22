@@ -96,11 +96,14 @@ process — "the channel file was already read" is not an exemption.
    It prints the receipt line with the word and mixed-sentence counts, then the
    channel's rules. Check the draft against those rules before shipping. Whole
    sections go before sentences do.
-   When the user says trim, shorten or "make it concise", cut claims, not words.
+   When the user says trim, shorten, simplify or "make it concise", cut claims,
+   not words.
    Count the claims before and after and put both in the receipt. A version
    carrying the same claims in fewer words was not trimmed, and one whose
    sentences lost their subjects and verbs is worse than the original, not
    shorter.
+   Pass the previous draft with `--before old.md` to get the arrow. Never write a
+   before → after count by hand.
 3. **Rewrite** per the table's last column:
    - `inline` — check the draft against `references/blocklist.md` (phrases) and
      `references/patterns.md` (constructions, and what *not* to flag), ship.

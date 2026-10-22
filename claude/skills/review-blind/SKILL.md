@@ -1,6 +1,6 @@
 ---
 name: review-blind
-description: "Use when the user wants to actually understand a branch, PR or diff instead of skimming it — reviewing AI-written code, \"I don't feel connected to this code\", \"help me really review this\", \"walk me into this branch\". Runs a three-step loop: predict before reading, compare, then break one line and run the test."
+description: "Use when the user wants to actually understand a branch, PR or diff instead of skimming it — reviewing AI-written code, \"I don't feel connected to this code\", \"help me really review this\", \"walk me into this branch\". Runs a four-step loop: calibrate what the user knows, predict before reading, compare, then break one line and run the test."
 ---
 
 # Predict, read, break
@@ -8,7 +8,15 @@ description: "Use when the user wants to actually understand a branch, PR or dif
 Reading a diff exercises recognition. "Looks right" is not understanding. This
 skill forces recall and effort instead, which is what makes reviewed code stick.
 
-Run the three steps in order, one per turn. Wait for the user between steps.
+Run the four steps in order, one per turn. Wait for the user between steps.
+
+## Step 0 — Calibrate
+
+Before any prediction, list the concepts the change depends on, one per line,
+plus "this codebase" and "the area this change touches". Take them from the
+module the change plugs into, never from the diff's approach. Ask the user to
+mark each known, vague or new. Wait. Skip it when the user already told you
+this session.
 
 ## Step 1 — Predict
 
@@ -23,7 +31,9 @@ Give the user only:
   or its approach.
 
 Then ask one question per decision the change makes, as many as the user needs
-to build their own model of it, one line each. For example:
+to build their own model of it, one line each. Shape them from step 0: for each
+concept the user marked vague or new, explain it in one line before the question
+that needs it. Never explain the diff's approach. For example:
 - Where does the central state live?
 - What drives the main behaviour, and what turns it off?
 - Which edge case breaks first?
