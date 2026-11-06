@@ -44,3 +44,13 @@ after the PR is open.
 Ask clarifying questions as plain numbered text in rounds: every question whose
 prerequisites are settled, each with a recommended answer. Never use
 AskUserQuestion boxes.
+
+# Slack
+
+Post to Slack with `slackcli messages send`, never the Slack MCP send tools;
+they add a "Sent using Claude" label. Reading and searching through the MCP is
+fine. Thread reply:
+
+```bash
+slackcli messages send --recipient-id <channel-id> --thread-ts <ts> --message "..."
+```

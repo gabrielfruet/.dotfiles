@@ -4,7 +4,12 @@
     "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"
   },
   "permissions": {
-    "defaultMode": "bypassPermissions"
+    "defaultMode": "bypassPermissions",
+    "deny": [
+      "mcp__2bd774d4-ae5c-457f-8050-8ab0fd823aac__slack_send_message",
+      "mcp__2bd774d4-ae5c-457f-8050-8ab0fd823aac__slack_send_message_draft",
+      "mcp__2bd774d4-ae5c-457f-8050-8ab0fd823aac__slack_schedule_message"
+    ]
   },
   "model": "sonnet",
   "enabledPlugins": {
