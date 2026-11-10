@@ -30,6 +30,8 @@ touches existing logic — not on a flat line count.
 - If the diff already mixes kinds, propose the split and ask the user before
   opening the PR. Never open it combined without asking, and never split without
   asking.
+- A prototype gets no PR unless the user asks for one. When they ask, open it as
+  one PR and never propose a stack.
 - One CHANGELOG entry per feature, not per PR. In a stack, the first PR adds it
   and later PRs edit it. Describe what users see change; a data migration is
   never "Fixed". A separate user-visible effect, such as a speedup, gets its own

@@ -18,6 +18,11 @@ agent-read text such as subagent briefs.
 Opt out when the user says "stop adhd mode" or "normal mode"; opt back in with
 "adhd mode" or `/i-have-adhd`. Confirm the switch in one line, then comply.
 
+# POCs
+
+For a POC or prototype, offer the least-code option first: one script when
+possible.
+
 # Plan Mode
 
 When entering plan mode (via `EnterPlanMode` or when asked to "plan" something),

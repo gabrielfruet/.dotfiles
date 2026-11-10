@@ -26,6 +26,8 @@ prose sections are how a ticket balloons into a design memo.
 - Assume shared context. No project introduction, no re-explaining the system.
 - Internal links are fine here: Notion docs, Slack threads, other Linear issues.
   The ban on those lives in `pr-description.md` and applies to GitHub, not Linear.
+- Name nothing the team hasn't seen: no session artifacts such as run names,
+  log row numbers or "the driver". Link the doc or drop the reference.
 - Match detail to purpose. A chore wants a checklist. A spike wants findings and
   open questions.
 - No "contributor pickup" register. There are no drive-by contributors on Linear,

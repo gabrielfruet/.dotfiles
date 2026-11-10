@@ -1,13 +1,13 @@
 ---
 name: review-quiz
-description: "Use when the user wants to actually understand a branch, PR or diff instead of skimming it — reviewing AI-written code, \"I don't feel connected to this code\", \"help me really review this\", \"walk me into this branch\". Runs a five-step loop: calibrate what the user knows, orient them with a product view and a diagram, ask before they read the implementation, compare, then break one line and run the test."
+description: "Use when the user wants to actually understand a branch, PR or diff instead of skimming it — reviewing AI-written code, \"I don't feel connected to this code\", \"help me really review this\", \"walk me into this branch\". Runs a five-step loop: calibrate what the user knows, orient them with a product view and a diagram, ask before you explain the implementation, compare, then break one line and run the test."
 ---
 
 # Orient, ask, compare, break
 
 Reading a diff exercises recognition. "Looks right" is not understanding. Show
-the user the shape of the change, then make them answer before they read the
-implementation. That recall is what makes reviewed code stick.
+the user the shape of the change, then make them answer before you explain the
+implementation. They may read the code while answering. That recall is what makes reviewed code stick.
 
 Run the five steps in order, one per turn. Wait for the user between steps.
 
@@ -48,7 +48,8 @@ Ask 3 to 5 high-level questions in one turn. Cover these, adapted to the change:
 - what data leaves the machine, where it goes, and where the UI says so
 
 For a concept marked new in step 0, add one line before the question that needs
-it, and nothing else. Stop and wait for the answers.
+it, and nothing else. Never ask them to answer from memory or without the code.
+Stop and wait for the answers.
 
 ## Step 3 — Compare
 

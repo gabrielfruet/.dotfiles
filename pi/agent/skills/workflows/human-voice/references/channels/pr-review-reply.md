@@ -30,6 +30,7 @@ asking for an action    @alice could you merge? Windows failure is unrelated.
   drop it rather than defending it.
 - Asking someone to act: one ask, the reason in one clause. Never offer
   alternatives ("merge or rerun").
+- No AI footer or signature. The reply posts as the user.
 - Link the commit, never paste a bare hash. "Good catch, fixed in [this
   commit](url)", not "Good catch, fixed in 314f81c."
 

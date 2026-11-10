@@ -4,10 +4,18 @@
 max_lines: none
 max_words: none
 rewrite: inline
+voice: required
 ```
 
 A post read by people outside the team. It reads as one person thinking out loud,
 so the sentences connect.
+
+## Before drafting
+
+Read 2–3 of the user's own posts and pass them to the receipt with `--voice`.
+Ask for them if they are not in context. Rewrite until the opener and closer
+could be theirs. A milestone opener ("the first release where...") and an
+engagement-ask closer ("I'd like to hear what you...") are the generic arc.
 
 ## Rules
 

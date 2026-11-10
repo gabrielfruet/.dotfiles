@@ -34,14 +34,14 @@ Files live in `references/channels/`.
 | PR description | `pr-description.md` | 20 | 200 | rewriter |
 | GitHub issue | `gh-issue.md` | 40 | 300 | rewriter |
 | Linear issue | `linear-issue.md` | 25 | 200 | rewriter |
-| PR review comment (as reviewer) | `pr-review-comment.md` | 6 | 60 | rewriter |
+| PR review comment (as reviewer) | `pr-review-comment.md` | 6 | 40 | inline |
 | PR review reply (as author) | `pr-review-reply.md` | 2 | 25 | inline |
 | Slack, WhatsApp, team chat | `slack.md` | 6 | 40 | inline |
 | Commit message | `commit-message.md` | 5 | 50 | inline |
 | Plan file | `ai-facing.md` | none | none | inline |
 | Subagent brief | `ai-facing.md` | none | none | inline |
 | Chat response to the user | `ai-facing.md` | none | none | inline |
-| Explanation, walkthrough | `explanation.md` | none | none | inline |
+| Explanation, walkthrough | `explanation.md` | none | 100 | inline |
 | Social post (LinkedIn) | `social-post.md` | none | none | inline |
 | Docs, README | `simple-english` skill | — | — | — |
 
@@ -99,13 +99,14 @@ process — "the channel file was already read" is not an exemption.
    It prints the receipt line with the word and mixed-sentence counts, then the
    channel's rules. Check the draft against those rules before shipping. Whole
    sections go before sentences do.
-   When the user says trim, shorten, simplify or "make it concise", cut claims,
-   not words.
-   Count the claims before and after and put both in the receipt. A version
-   carrying the same claims in fewer words was not trimmed, and one whose
-   sentences lost their subjects and verbs is worse than the original, not
-   shorter.
-   Pass the previous draft with `--before old.md` to get the arrow. Never write a
+   Reach the ceiling by cutting claims, never words. A sentence that lost its
+   subject or verb, or a number without what it measures, is worse than the
+   long one.
+   When the user says trim, count the claims before and after and put both in
+   the receipt. A version carrying the same claims in fewer words was not
+   trimmed.
+   Pass the previous draft with `--before old.md` to get the arrow, and the
+   user's own messages with `--voice samples.md` where the channel requires it. Never write a
    before → after count by hand.
 3. **Rewrite** per the table's last column:
    - `inline` — check the draft against `references/blocklist.md` (phrases) and
@@ -114,9 +115,9 @@ process — "the channel file was already read" is not an exemption.
      source of truth. Withhold your reasoning; escaping it is why you spawned it.
      Never tell it to keep every fact. Tell it the ceiling and that facts go to
      reach it.
-     Skip it when the draft is already cold: a subagent that wrote the body from
-     `git diff` and `git log` alone never had your reasoning to escape, so the
-     step is done — check it inline and ship.
+     Skip it only when a subagent wrote the body from `git diff` and `git log`
+     alone: it never had your reasoning to escape. A draft you wrote is never
+     cold, and "skipped rewriter" in a receipt means the step did not run.
    - `flagger + rewriter` — not a default. Escalate only for an external or
      public-facing repo, or when the user asks. Its two sequential subagents cost
      minutes — 16 on a 170-word body — and on an internal PR the cold reader
@@ -130,7 +131,7 @@ its own was never routed — stop and read its channel file. No line means the
 process did not run.
 
 ```text
-channel: pr-review-comment | 142 → 54/60 words | mixed 0 | rewriter
+channel: slack | 52 → 38/40 words | mixed 0 | voice: "I've asked my agent to prototype this"
 channel: ai-facing | 180/none words | mixed 0 | inline
 channel: linear-issue | 190 → 88/200 words | mixed 0 | claims 7 → 3 | rewriter
 

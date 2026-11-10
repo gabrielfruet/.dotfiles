@@ -3,7 +3,8 @@
 ```text
 max_lines: 6
 max_words: 40
-rewrite: rewriter
+rewrite: inline
+voice: required
 ```
 
 Reviewing someone else's code. For replying on your own PR, use
@@ -27,7 +28,8 @@ reader ask "wdym", keep the words.
 
 ## Approval
 
-One specific thanks, then LGTM. 15–25 words.
+Thank them for one thing, the way you'd say it out loud, then LGTM. Never list
+several fixes in one thanks. 15–25 words.
 
 > Thanks for adding a test for each of these. The per-annotation eye carrying the
 > whole source over works for me. LGTM
@@ -48,7 +50,7 @@ One specific thanks, then LGTM. 15–25 words.
 - One claim per comment. A second claim is a second comment, or gets cut.
 - One softener per comment at most: "Nit", "Not blocking", "maybe" or "your
   call", never two.
-- Give the rewriter the user's own review comments as voice samples: their
+- Pass the user's own review comments to the receipt with `--voice`: their
   pending ones on this PR, else their last few in the repo.
 - Scope is a separate question from voice: confirm the PR introduced the code
   before commenting on it. `pr-workflow` owns that check.
@@ -90,3 +92,7 @@ Good, in the user's voice (approved):
 > the older tests here use it too.
 
 > Maybe we should use the MAX_INSTANCES constant here.
+
+> I don't think we need this check. With an unknown id nothing gets deleted and
+> delete() returns False anyway, so we could raise NotFoundError there instead of
+> the HTTPException:

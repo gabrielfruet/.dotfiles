@@ -14,15 +14,22 @@ argument-hint: "[target] [effort]"
    ```
 
    Where the runtime has no `code-review` skill, review the diff yourself.
-2. Report findings under these headings, in this order, and skip empty ones:
+2. When the diff changes UI, reproduce each Urgent, Major and Minor finding in
+   the running app before reporting: the built-in browser against the dev
+   server, or the `run` skill. Mark each one you could not reproduce
+   `unverified` in its summary.
+3. Report findings under these headings, in this order, and skip empty ones:
    - **Urgent**: breaks production, loses data or opens a security hole.
    - **Major**: a real bug this change introduces.
    - **Minor**: a bug in a rare case, or a small correctness gap.
    - **Pre-existing**: a defect on the base branch that this change didn't
      cause. Report it, never fix it here.
    - **Code style**: naming, reuse, simplification. Never mixed in with bugs.
-3. Set each finding's category to its bucket name when the findings go through
+4. Write each summary in `human-voice`'s `pr-review-comment.md` shape: the
+   claim, then one concrete case with values (what the user does, what they
+   see). A finding without a case is not finished.
+5. Set each finding's category to its bucket name when the findings go through
    a reporting tool.
-4. Number findings 1 to N across all buckets, in report order, and start each
+6. Number findings 1 to N across all buckets, in report order, and start each
    summary with its number ("#3 ..."). Refer to findings by that number for the
    rest of the session.

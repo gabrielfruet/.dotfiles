@@ -53,6 +53,8 @@ If the work takes more than one step, write a numbered list. Each step is one bo
 
 Use the fewest steps that still work. Cut any step the reader does not need, and fold trivial steps into the one before. A short path finished beats a complete path abandoned.
 
+When a plan asks the reader for more than an hour of their own time, cut it to the one-hour version and offer the rest as "later".
+
 Bad: "First open the file, find the function, swap it out, then run the tests."
 
 Good:
