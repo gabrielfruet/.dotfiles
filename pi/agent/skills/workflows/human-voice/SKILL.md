@@ -59,7 +59,7 @@ X?". Re-route the moment the draft starts walking; never finish it on the wrong
 channel. A review, an analysis or a summary stays on `ai-facing.md`.
 
 Text bound for another channel keeps that channel. A review comment drafted
-inside a chat response takes `pr-review-comment.md`, its 60-word ceiling and its
+inside a chat response takes `pr-review-comment.md`, its 40-word ceiling and its
 receipt, whether you post it this turn or hold it for approval. Routing the
 wrapper does not route what it contains.
 
@@ -78,6 +78,9 @@ True everywhere. Fragments, em dashes, headers, bold and first-person opinion ar
   `robust`, `straight`, `already`, `a handful of`, `holds up`, `where it runs out`.
 - Long paths, conditions and signatures go in fenced blocks, not inline backticks.
 - Never invent a fact. Every figure, filename and flag traces back to a source.
+- In shared text, never publish status about a named colleague ("no answer
+  yet", "we lost X"). Ask them the open question instead: "Matthias, what
+  stopped LEGO from closing?"
 
 ## Process
 
@@ -109,6 +112,8 @@ process — "the channel file was already read" is not an exemption.
      `references/patterns.md` (constructions, and what *not* to flag), ship.
    - `rewriter` — one subagent. Give it the channel file, the ceiling and the
      source of truth. Withhold your reasoning; escaping it is why you spawned it.
+     Never tell it to keep every fact. Tell it the ceiling and that facts go to
+     reach it.
      Skip it when the draft is already cold: a subagent that wrote the body from
      `git diff` and `git log` alone never had your reasoning to escape, so the
      step is done — check it inline and ship.

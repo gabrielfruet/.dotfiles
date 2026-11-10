@@ -82,6 +82,8 @@ for good (→ permanently)
   what the reader should believe it is a fact for the body; if not, cut it.
 - "Honestly?", "Look,", "Here's the thing", "The thing is", "Let's be honest",
   "Real talk" — as standalone theatrical hooks. Mid-sentence they are ordinary.
+- "Here's why:" after a verdict, and one-line beats after a paragraph: "That's
+  on purpose.", "That's the point."
 - "In conclusion", "To sum up", "Ultimately", "At the end of the day", "The
   bottom line is..."
 - Any final paragraph beginning "Overall," or "In summary,"

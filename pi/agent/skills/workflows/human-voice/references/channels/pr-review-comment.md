@@ -2,7 +2,7 @@
 
 ```text
 max_lines: 6
-max_words: 60
+max_words: 40
 rewrite: rewriter
 ```
 
@@ -20,7 +20,8 @@ Three parts, in order, and nothing else:
 
 Say so when you're not sure the case happens in practice.
 
-The ceiling is for a finding. A reply weighing tradeoffs may run to 100 words.
+The ceiling is for a finding, refactor suggestions included. Only a reply in a
+design discussion the author started may run to 100 words.
 Each downside names who hits it and what they see. If a cut would make the
 reader ask "wdym", keep the words.
 
@@ -44,8 +45,11 @@ One specific thanks, then LGTM. 15–25 words.
 - Anchor inline to the offending line, not top-level. Line numbers shift between
   pushes — verifying against the PR head is `pr-workflow`'s job, not a voice one.
 - Draft in chat and wait for approval before posting.
-- Assume the first draft is 2-3x too long. Write the short version instead of
-  trimming a long one.
+- One claim per comment. A second claim is a second comment, or gets cut.
+- One softener per comment at most: "Nit", "Not blocking", "maybe" or "your
+  call", never two.
+- Give the rewriter the user's own review comments as voice samples: their
+  pending ones on this PR, else their last few in the repo.
 - Scope is a separate question from voice: confirm the PR introduced the code
   before commenting on it. `pr-workflow` owns that check.
 
@@ -84,3 +88,5 @@ Good, in the user's voice (approved):
 
 > Nit: b"image bytes" reads a bit like a text value at first look. Not blocking,
 > the older tests here use it too.
+
+> Maybe we should use the MAX_INSTANCES constant here.

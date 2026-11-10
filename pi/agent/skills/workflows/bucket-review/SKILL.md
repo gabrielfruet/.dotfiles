@@ -23,3 +23,6 @@ argument-hint: "[target] [effort]"
    - **Code style**: naming, reuse, simplification. Never mixed in with bugs.
 3. Set each finding's category to its bucket name when the findings go through
    a reporting tool.
+4. Number findings 1 to N across all buckets, in report order, and start each
+   summary with its number ("#3 ..."). Refer to findings by that number for the
+   rest of the session.

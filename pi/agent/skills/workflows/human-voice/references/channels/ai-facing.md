@@ -7,8 +7,9 @@ subagent brief  none       none       inline
 chat response   none       none       inline
 ```
 
-The register inverts here: precision beats brevity, structure is required rather
-than banned, and there is no ceiling. What changes across the three is who reads
+The register inverts here for plan files and briefs: precision beats brevity,
+structure is required rather than banned, and there is no ceiling. A chat answer
+follows the question instead. What changes across the three is who reads
 it — an agent that acts on the text, or a person deciding whether to approve it.
 A plan file has both, so explain in prose and *show* in code blocks.
 
@@ -52,7 +53,7 @@ usual ban on over-structuring does not apply. Cut these instead:
 ## Chat responses
 
 Anything handed back to the user: a code review, an analysis, an answer, a
-summary. The cut list above transfers whole. Two more, both caught in reviews:
+summary. The cut list above transfers whole. Three more:
 
 - **Announcing the deliverable.** "Here's the review", "Here's what I found",
   "Here's the plan". The next line already is the review.
@@ -60,6 +61,9 @@ summary. The cut list above transfers whole. Two more, both caught in reviews:
   which matches this worktree." If the check changes what the reader should
   believe, it belongs in the body as a fact. Otherwise it is throat-clearing
   with a commit hash attached.
+- **Answering a casual question with a report.** A one-line question gets two
+  or three plain sentences. No verdict then "Here's why:", no bold-led bullets,
+  no one-line beat after a paragraph ("That's on purpose.").
 
 No ceiling, but length still has to be earned. A review running 800 words across
 five headed sections is usually answering questions nobody asked. Headers are
