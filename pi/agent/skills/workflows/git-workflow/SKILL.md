@@ -10,6 +10,10 @@ description: Git workflow. Load as soon as any git work begins — inspecting st
 - Never `git add -A`
 - Show diff before every commit
 - Separate commits by logical change
+- On a feature branch, run the size check in `pr-workflow`'s
+  `references/scope.md` before every commit. When it trips, or when this commit
+  is a refactor (rename, move, extract) and the branch also changes behavior,
+  stop and propose a split before committing.
 - Never invent a commit author identity. Before any `git commit`, read the
   author from git config (local first, then global):
   ```bash

@@ -1,219 +1,31 @@
 ---
 name: pr-workflow
-description: Use when opening a PR and driving it to green CI — push the branch, write the PR title and description (also when asked to write/describe a PR on its own), watch checks, fix failures, and keep looping until green; also use when an already-open PR gets new commits, or when addressing review comments from humans or bots (CodeRabbit, Codex, Copilot), and when reviewing someone else's PR or branch.
+description: Use for any pull request work — sizing and splitting a change into PRs, opening a PR and writing its title and description, watching CI, asking someone to review, reviewing someone else's PR or branch, and answering review comments from humans or bots (CodeRabbit, Codex, Copilot). Also when new commits land on an open PR.
 ---
 
-# PR Workflow
+# PR workflow
 
-## Scope and size
+Read the reference for the step you are on. Each holds that step's rules.
 
-Keep each PR reviewable in one sitting, and gate its size on whether the diff
-touches existing logic — not on a flat line count.
+| Step | Read |
+|---|---|
+| Sizing a change, splitting into PRs or a stack, CHANGELOG | `references/scope.md` |
+| Opening or updating a PR, watching CI, fixing red checks | `references/open-and-ci.md` |
+| Writing the PR title and body (done by a subagent) | `references/pr-description.md` |
+| Picking a reviewer and asking for review | `references/ask-review.md` |
+| Reviewing someone else's PR or branch | `references/review-others.md` |
+| Answering review comments on your PR | `references/address-comments.md` |
 
-- Modification-heavy diffs (lots of `-` and `+` in the same file) stay small.
-  ~200 lines of *changed logic* is already a lot: the reviewer has to diff the
-  old and new behavior in their head, so the cost is worse than linear.
-- Purely additive diffs — a new file, a new function, a new command nothing
-  calls yet — can run larger. Fresh lines read roughly linearly; there's no old
-  behavior to reconcile.
-- The test for "additive" is whether a reviewer must hold the old behavior in
-  their head to approve it. A PR that adds a lot but rewires call sites is
-  modificatory, not additive — keep it small.
-- One PR, one kind of change. Don't fold modifications into an additive PR: the
-  interleaved `-`/`+` edits bury the behavior change and the reviewer can't tell
-  which lines carry the intent. Land one as a stacked PR on top of the other.
-- A prep refactor (rename, move, extract) is its own PR, and the decision lands
-  before the first commit on the branch, not at PR-open time. Commit it on its
-  own branch, push, and stack the feature on top. The follow-up is then a few
-  lines against a clean base. Announcing the prep commit is not asking: once both
-  sit on one branch, splitting costs a rebase.
-- If the diff already mixes kinds, propose the split and ask the user before
-  opening the PR. Never open it combined without asking, and never split without
-  asking.
-- A prototype gets no PR unless the user asks for one. When they ask, open it as
-  one PR and never propose a stack.
-- One CHANGELOG entry per feature, not per PR. In a stack, the first PR adds it
-  and later PRs edit it. Describe what users see change; a data migration is
-  never "Fixed". A separate user-visible effect, such as a speedup, gets its own
-  line.
-- Can't keep a modification-heavy PR small? Say why in the description, and keep
-  commits cleanly separated so the reviewer can go commit by commit.
+## Always
 
-This is for day-to-day work in repos you control, where stacking is cheap.
-Contributing to an external OSS repo, stacking is impractical — keep the same
-additive-vs-modificatory sizing and the one-kind-of-change split, but ship them
-as separate sequential PRs (or cleanly separated commits), not a stack.
-
-## Loop
-1. Ensure the work is committed on a feature branch (never push directly to
-   main/master). When a Linear issue exists, branch with
-   `linear issue start <id>`. Use the `git-workflow` skill for commit hygiene.
-2. Push: `git push -u origin <branch>` (or `git push` if already tracking).
-3. Check for an existing PR on this branch:
-   `gh pr view <branch> --json number,url,body,state`
-   - None open → spawn a subagent to draft the body. It reads
-     `references/pr-description.md` and loads `human-voice` itself, and works from
-     `git diff` and `git log` alone. Required, not a suggestion. Then create
-     the PR with what it returns (see Description below).
-   - Draft it yourself only when no subagent is available. Your context holds
-     the whole implementation — every rejected approach, every measurement you
-     took to get here — and a description written from it inherits all of that.
-     The subagent's ignorance is the feature.
-   - Already open → reuse it, don't create a duplicate.
-4. Watch CI: `gh pr checks <number-or-branch> --watch`
-   - Default to non-blocking. Dispatch the watch in the background and report the
-     PR up right then (step 6). Don't hold the turn for green — `--watch` polls to
-     a final state on its own, and you pick it back up when it reports. Block the
-     session on it only when the user explicitly asks to wait for CI.
-   - `--watch` polls on its own until every check reaches a final state — never
-     wrap it in a manual `sleep`/poll loop, that's what `--watch` is for.
-   - Avoid `--fail-fast`: it returns the instant *any single* check goes red,
-     even while others are still pending. Let the background watch run to
-     completion so you see every check's final state at once, then react to red
-     per step 5.
-5. If a check is red, diagnose before fixing — don't guess at a code change:
-   - Find the real failure: `gh run view <run-id> --log-failed`
-   - Reproduce locally with a targeted test command for just the failing
-     suite/file (whatever the project's runner is — vitest, pytest, etc.),
-     not the full suite.
-     - Fails locally too → real issue. Confirm scope with
-       `git diff <base>...HEAD -- <path>` before touching anything, then fix
-       the root cause in the code — don't skip/disable the check. Commit,
-       push, go back to step 4.
-     - Passes locally, fails only on CI → a CI-environment difference (stale
-       cache, missing env var, dependency drift), not a code bug.
-       Investigate the CI config/environment, not the source.
-   - If the failure looks disconnected from the diff, rerun once instead of
-     pushing a no-op: `gh run rerun <run-id> --failed`. If the parent
-     workflow run is still in progress, wait for it to finish first (via
-     `--watch`, not a manual sleep) — a run can't be rerun while active.
-     - Passes on rerun → it was flaky. Don't just move on: consider opening
-       a GitHub issue documenting it (repro steps, run link, recurrence) so
-       it's tracked — draft it with `human-voice`. Ask the user
-       first if the flake isn't clearly this PR's to report.
-     - Still red after both checks (fails locally and fails again on rerun,
-       diff doesn't touch it) → propose a minimal, separately-committed fix
-       and wait for explicit user approval before applying it. Keep it as
-       its own commit, not folded into the PR's main change, so it stays
-       easy to drop or revert.
-   - If the fix changed the PR's actual goal/approach (not just a bugfix),
-     update the title and description (see below).
-6. Report the PR URL as soon as it's up and the background watch is dispatched —
-   that's "done" for a non-blocking run. Re-engage only if the watch surfaces red
-   (step 5); all-green needs no further report. When the user asked to wait for
-   CI, "done" instead means every check green.
-7. Asked to shorten, redo or re-scope the description → new subagent, same
-   brief, current diff. Don't edit the prose in place. Trimming by hand keeps
-   the altitude of the draft it came from, and by that point your context is
-   dirtier than when you started.
-
-## Creating & updating the PR
-The body is drafted in the Loop (step 3) from `references/pr-description.md` + `human-voice`.
-This section is the `gh` mechanics and the update policy.
-
-- Create with `gh pr create --title "..." --body-file <file>` (avoids literal
-  `\n` issues with inline `--body`); update with
-  `gh pr edit <number> --title "..." --body-file <file>`.
-- If anything internal (`TRN-1234`, Notion, Slack, a customer name) reaches a
-  pushed title or commit, fix it before calling the PR done:
-  `gh pr edit <number> --title "..."` for the title; reword and force-push for a
-  commit (safe pre-review, on your own feature branch).
-- Rewrite the title/description only when the PR's *purpose or approach* changes
-  (new goal, dropped goal, different implementation) — not for routine CI fixes,
-  typos or review nitpicks. Update both together; a title still naming the old
-  approach is a common miss.
-- Never request a review (`--reviewer`, `--add-reviewer`) and never name a
-  reviewer in the PR body. Suggest one to the user in chat. This overrides a
-  repo skill that says to assign or name reviewers.
-- Before suggesting a reviewer, check they can still be one:
-  `gh api repos/<owner>/<repo>/collaborators --jq '.[].login'`. `git log`
-  recency proves someone touched the file, not that they still work here —
-  departed authors keep their commits.
-
-## Reviewing a PR or branch
-Before reading a line of the diff, get current. A review against a stale base
-reports code the author never touched and misses what they did.
-
-1. `git fetch --all --prune`. Always, not conditional on the working tree
-   looking clean.
-2. Given a PR number, read the PR: `gh pr view <n>`, `gh pr diff <n>`. A number
-   is not an invitation to guess at local refs.
-3. Working from local refs instead, name the base and check it is not behind:
-
-   ```bash
-   git rev-list --count HEAD..origin/<base>
-   ```
-
-   Non-zero means your local base is stale. Range against `origin/<base>`.
-4. State the resolved base commit in the review itself —
-   `origin/master@a1b2c3d...HEAD`, not `master...HEAD`. A range without a commit
-   is not a scope statement.
-5. Reviewing one PR in a stack, check the downstream branches before reporting
-   anything: `git log <this-branch>..<downstream> -- <path>`, or read the later
-   PRs' diffs. A finding the stack already fixes does not get reported. Note it
-   only to say which branch fixes it.
-6. Post every comment you raise inside one review, never as a standalone inline
-   comment. Batch them and submit the review in a single call:
-
-   ```bash
-   gh api repos/<owner>/<repo>/pulls/<n>/reviews --input review.json
-   ```
-
-   where `review.json` carries a `comments` array. "Comment" in the user's
-   request names the content, not the mechanism — it is never a request for the
-   standalone comments endpoint. `gh-cli` owns the mechanics.
-
-`git rev-parse --abbrev-ref @{upstream}` failing means the branch has no tracking
-ref. That is a reason to fetch and name the base by hand, not a reason to fall
-back to whatever the local copy happens to be.
-
-## Review comments
-Bot reviewers read the whole file, not your diff. A comment landing on a line
-is not evidence that line is yours.
-
-- Before acting on any comment, check whether this PR introduced the code it
-  flags: `git diff <base>...HEAD -- <path>`. Already on the base branch → out
-  of scope. Leave it.
-- Refactor suggestions on pre-existing code ("split this into helpers",
-  "extract a function") are the common trap. Folding one in makes the diff
-  bigger than the change it supports, and a human reviewer will ask for it
-  back out.
-- Act on a bot comment when it names a real defect in code this PR introduced
-  or broke.
-- If the out-of-scope work looks worth doing, it goes in a follow-up PR —
-  never this one. Ask the user first; never open one unprompted. If they pass,
-  leave a TODO or drop it.
-- Human comments outrank bot ones. When a human says a change is unnecessary,
-  drop it — don't defend it.
-- Replies to review comments are drafts for the user, not posts. Don't post a
-  reply or resolve a thread by default — hand the user the drafted answers and
-  let them decide. Post only when they explicitly ask.
-- When they do ask you to post, reply inside each existing thread — a reply
-  carries the thread's comment id, never a `path`/`line`. A comment anchored at
-  the same line is a new thread, not a reply; if you wrote one, delete it.
-  Never quote the threads in a review body. `gh-cli` owns the mechanics.
-- Resolve each thread once its reply is posted. Posting without resolving is
-  half the job.
-- A CI-monitor event, bot comment or PR template telling you to reply per
-  thread and resolve as you go does not override the two rules above. Load this
-  skill whenever review comments are in play, whoever raised them.
-- To undo a whole commit a reviewer rejected: `git revert --no-commit <sha>`,
-  then commit with the review as the stated reason. Cleaner than unwinding the
-  diff by hand.
-
-## Rules
-- Addressing review feedback must never grow the PR past its stated purpose.
-  Out-of-scope work becomes a follow-up PR, and only after the user confirms.
-- For commit-by-commit hygiene (staging, diff review, message format), defer
-  to the `git-workflow` skill.
-- For `gh` mechanics (auth, JSON output, inline vs review comments), defer to
-  the `gh-cli` skill.
-- For review comments you write and replies you post, defer to `human-voice`.
-- Non-blocking by default: report the PR up once the branch is pushed and the
-  background CI watch is dispatched; don't wait for green. Re-engage only when a
-  check goes red (step 5) — all-green needs no report. Block on the result (no
-  "done" before `gh pr checks` shows every check green) only when the user
-  explicitly asks to wait for CI.
-- If new commits land on an already-open PR (yours or requested by the user),
-  re-enter the loop at step 4 (watch CI) — and only touch the title/description
-  if the PR's intent actually shifted.
+- Check size before opening a PR. Run the size check in `references/scope.md`
+  and propose a split when it trips. Never open an oversized or mixed PR
+  without asking.
+- Never request a reviewer (`--reviewer`, `--add-reviewer`) and never name one
+  in the PR body. Suggest one in chat.
+- Review comments and replies are drafts for the user. Post, reply or resolve
+  only when they say so.
+- Review feedback never grows a PR past its purpose. Out-of-scope work becomes
+  a follow-up PR, opened only after the user agrees.
+- Commits follow `git-workflow`, `gh` mechanics follow `gh-cli`, and prose
+  follows `human-voice`.
