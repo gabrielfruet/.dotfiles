@@ -14,6 +14,7 @@ license: MIT
 compatibility: claude-code cursor codex gemini-cli opencode
 metadata:
   standard: ASD-STE100 Issue 9 (2025-01-15)
+disable-model-invocation: true
 ---
 
 # Simple English: Write Like an Aerospace Manual

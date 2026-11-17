@@ -1,6 +1,6 @@
 ---
 name: pr-workflow
-description: Use when opening a PR and driving it to green CI — push the branch, write a high-level PR description, watch checks, fix failures, and keep looping until green; also use when an already-open PR gets new commits, or when addressing review comments from humans or bots (CodeRabbit, Codex, Copilot), and when reviewing someone else's PR or branch.
+description: Use when opening a PR and driving it to green CI — push the branch, write the PR title and description (also when asked to write/describe a PR on its own), watch checks, fix failures, and keep looping until green; also use when an already-open PR gets new commits, or when addressing review comments from humans or bots (CodeRabbit, Codex, Copilot), and when reviewing someone else's PR or branch.
 ---
 
 # PR Workflow
@@ -51,8 +51,8 @@ as separate sequential PRs (or cleanly separated commits), not a stack.
 2. Push: `git push -u origin <branch>` (or `git push` if already tracking).
 3. Check for an existing PR on this branch:
    `gh pr view <branch> --json number,url,body,state`
-   - None open → spawn a subagent to draft the body. It loads
-     `write-pr-description` and `human-voice` itself, and works from
+   - None open → spawn a subagent to draft the body. It reads
+     `references/pr-description.md` and loads `human-voice` itself, and works from
      `git diff` and `git log` alone. Required, not a suggestion. Then create
      the PR with what it returns (see Description below).
    - Draft it yourself only when no subagent is available. Your context holds
@@ -89,7 +89,7 @@ as separate sequential PRs (or cleanly separated commits), not a stack.
      `--watch`, not a manual sleep) — a run can't be rerun while active.
      - Passes on rerun → it was flaky. Don't just move on: consider opening
        a GitHub issue documenting it (repro steps, run link, recurrence) so
-       it's tracked — draft it with `human-voice`, `gh-issue` channel. Ask the user
+       it's tracked — draft it with `human-voice`. Ask the user
        first if the flake isn't clearly this PR's to report.
      - Still red after both checks (fails locally and fails again on rerun,
        diff doesn't touch it) → propose a minimal, separately-committed fix
@@ -108,7 +108,7 @@ as separate sequential PRs (or cleanly separated commits), not a stack.
    dirtier than when you started.
 
 ## Creating & updating the PR
-The body is drafted in the Loop (step 3) via `write-pr-description` + `human-voice`.
+The body is drafted in the Loop (step 3) from `references/pr-description.md` + `human-voice`.
 This section is the `gh` mechanics and the update policy.
 
 - Create with `gh pr create --title "..." --body-file <file>` (avoids literal
@@ -208,8 +208,7 @@ is not evidence that line is yours.
   to the `git-workflow` skill.
 - For `gh` mechanics (auth, JSON output, inline vs review comments), defer to
   the `gh-cli` skill.
-- For review comments you write and replies you post, defer to `human-voice`:
-  `pr-review-comment.md` and `pr-review-reply.md`.
+- For review comments you write and replies you post, defer to `human-voice`.
 - Non-blocking by default: report the PR up once the branch is pushed and the
   background CI watch is dispatched; don't wait for green. Re-engage only when a
   check goes red (step 5) — all-green needs no report. Block on the result (no

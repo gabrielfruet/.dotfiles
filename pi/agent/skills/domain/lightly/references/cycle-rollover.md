@@ -1,8 +1,3 @@
----
-name: linear-cycle-rollover-split
-description: Use at Linear cycle rollover to split every unfinished issue assigned to the user across the cycle boundary — credit each issue's completed story points to the closing cycle and carry the remainder into the next. Works both just before the boundary and just after it. Sweeps all the user's in-progress/in-review issues in one pass; the only per-issue input is the completed points.
----
-
 # Linear cycle rollover split
 
 When a cycle ends, split every unfinished issue assigned to the user so velocity

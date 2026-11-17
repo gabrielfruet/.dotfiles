@@ -1,8 +1,3 @@
----
-name: remote-slurm-bootstrap
-description: Use when submitting, monitoring, or fixing Slurm benchmark jobs on a remote cluster; always work on the cluster host via SSH, sync files first, bootstrap the env if needed, and keep benchmark code simple and readable.
----
-
 ## Purpose
 
 Cluster-first workflow for benchmark jobs.

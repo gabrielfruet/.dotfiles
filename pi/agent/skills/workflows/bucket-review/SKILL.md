@@ -2,6 +2,7 @@
 name: bucket-review
 description: Use when the user runs /bucket-review or asks for a code review grouped by severity. Runs the code-review skill and reports its findings under five buckets — urgent, major, minor, pre-existing, code style — instead of one flat list.
 argument-hint: "[target] [effort]"
+disable-model-invocation: true
 ---
 
 # Bucket review
@@ -25,7 +26,7 @@ argument-hint: "[target] [effort]"
    - **Pre-existing**: a defect on the base branch that this change didn't
      cause. Report it, never fix it here.
    - **Code style**: naming, reuse, simplification. Never mixed in with bugs.
-4. Write each summary in `human-voice`'s `pr-review-comment.md` shape: the
+4. Write each summary in `human-voice`'s review-comment shape: the
    claim, then one concrete case with values (what the user does, what they
    see). A finding without a case is not finished.
 5. Set each finding's category to its bucket name when the findings go through

@@ -1,6 +1,7 @@
 ---
 name: review-quiz
 description: "Use when the user wants to actually understand a branch, PR or diff instead of skimming it — reviewing AI-written code, \"I don't feel connected to this code\", \"help me really review this\", \"walk me into this branch\". Runs a five-step loop: calibrate what the user knows, orient them with a product view and a diagram, ask before you explain the implementation, compare, then break one line and run the test."
+disable-model-invocation: true
 ---
 
 # Orient, ask, compare, break

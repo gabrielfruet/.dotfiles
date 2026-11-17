@@ -1,10 +1,8 @@
 # Writing
 
-Loading `human-voice` is mandatory before writing any prose: Slack, GitHub (PR
-titles and bodies, issues, review comments, review replies), Linear, commit
-messages, plan files, and every response handed back in chat. Read its routing
-table, load the matching channel file, then write. Not conditional on being
-asked, and staying in chat is not an exemption.
+Load `human-voice` before writing text another person will read: Slack, GitHub
+(PR titles and bodies, issues, review comments, review replies), Linear, commit
+messages.
 
 # ADHD output
 
@@ -23,13 +21,10 @@ Opt out when the user says "stop adhd mode" or "normal mode"; opt back in with
 For a POC or prototype, offer the least-code option first: one script when
 possible.
 
-# Plan Mode
+# Lightly
 
-When entering plan mode (via `EnterPlanMode` or when asked to "plan" something),
-always load both the `plan-mode` and `human-voice` skills at the start, in addition
-to any other skills the task needs. Apply `plan-mode`'s rules throughout the
-planning phases, and apply `human-voice`'s `ai-facing` channel and `i-have-adhd`
-to the final plan text before writing it to the plan file.
+Load `lightly` when the working directory is under `~/dev/lightly/` or the task
+touches Lightly, LightlyStudio or its Linear team.
 
 # Skill feedback
 

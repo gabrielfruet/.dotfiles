@@ -1,9 +1,4 @@
----
-name: lightly-repos-workflow
-description: Use when modifying or adding a transform, loss, model, method, package, task-model, config, docs page, or example in a Lightly AG repo (lightly-ssl or lightly-train) and you need repo-specific conventions.
----
-
-# Lightly Repos Workflow
+# Lightly repos: lightly-ssl and lightly-train
 
 Conventions shared across Lightly AG repos plus the per-repo specifics that differ.
 First identify which repo you are in, then apply the shared core and the matching repo section.
@@ -42,40 +37,6 @@ Before opening a PR, run local CI equivalents in this order:
 - `test_documentation.yml` -> docs install/build
 - `test_build.yml` -> `make dist`
 
-### CI monitoring: NEVER poll in tight loops (token-waster)
-
-**Hard rule:** when waiting on CI to finish (e.g. `Test Unit`, `Test Unit Minimal Dependencies`), do NOT call `gh pr view --json statusCheckRollup` in a tight loop without sleep. Each call dumps the full rollup JSON into context — 4 jobs × many checks = ~50+ lines of output re-read every iteration. This wastes tokens fast and gives the user nothing useful between calls.
-
-Two universal patterns that work in any harness:
-
-1. **Single-shot + decide.** If you only need a snapshot to decide the next action, call `gh pr view` once, parse, decide. If the job is not done, choose between waiting or moving on (start the docs follow-up, work on something else, or report and stop). Do NOT immediately re-call to "check again".
-
-2. **Bash loop with sleep + exit-on-completion.** If you genuinely need to wait, embed the loop:
-
-   ```bash
-   while true; do
-     STATUS=$(gh pr view 811 --json statusCheckRollup --jq \
-       '.statusCheckRollup[] | select(.workflowName=="Test Unit" and .name=="Test Unit (ubuntu-latest)") | .status + "/" + (.conclusion // "pending")')
-     echo "$(date +%H:%M:%S) ubuntu-latest: $STATUS"
-     [ "$STATUS" != "IN_PROGRESS/pending" ] && { gh pr view 811 --json statusCheckRollup --jq ... ; break; }
-     sleep 60
-   done
-   ```
-
-Use ~60s sleep. CI status polls are slow anyway and 60s keeps token usage sane while still being responsive when a job finishes.
-
-This rule applies to any async job wait (CI, remote Slurm, MLflow polling, etc.), not just `gh`.
-
-### If your harness has a non-blocking watch tool (e.g. pi)
-
-Some harnesses (e.g. pi) provide a `watch` tool that runs the check in the background and resumes the agent once when it fires, instead of tying up the bash tool for the CI duration (~10-30 min) and avoiding abort risk on long-running bash commands. Prefer it when available. The check command should exit 0 when CI is done (`running==0 && total>0`) and print the final `statusCheckRollup` (its stdout becomes the wake-up message body). pi example:
-
-```bash
-watch(mode="poll", interval=60, label="PR #811 CI", \
-      command="ROLLUP=$(gh pr view 811 --json statusCheckRollup); RUNNING=$(echo \"$ROLLUP\" | jq '[.statusCheckRollup[] | select(.status==\"IN_PROGRESS\" or .status==\"QUEUED\" or .status==\"PENDING\")] | length'); [ \"$(echo \"$ROLLUP\" | jq '.statusCheckRollup | length')\" -gt 0 ] && [ "$RUNNING" -eq 0 ] && echo "$ROLLUP" | jq -r '.statusCheckRollup[] | \"\\(.workflowName // \\\"?\\\") | \\(.name): \\(.status)/\\(.conclusion // \\\"pending\\\")\"'", \
-      resumePrompt="CI finished — read wake-up; if ALL GREEN report success, else diagnose via gh run view --log-failed.")
-```
-
 ### License headers for third-party ports (both repos)
 
 - `make format` calls `make add-header`; `add-header` hard-codes which files get which `dev_tools/*_licenseheader.tmpl`.
@@ -104,3 +65,7 @@ watch(mode="poll", interval=60, label="PR #811 CI", \
 - Docs are Sphinx + MyST. API reference is hand-maintained via `{eval-rst}` blocks in `docs/source/python_api/lightly_train.md` (add `.. autoclass::` / `.. automodule::` entries for new public classes/functions). Method/model argument tables are **generated**: `docs/prebuild.py` writes `_auto/` pages under `docs/source/` — rebuild docs (`make` docs target / `docs/build.py`) after changing args so generated pages refresh. New manual method/model pages go under `docs/source/pretrain_distill/{methods,models}/` and must be added to that dir's `index.md` toctree.
 - Notebooks under `examples/notebooks/` are **hand-maintained**, not generated. Pre-commit strips outputs (`nbstripout`) and cleans them (`nbdev-clean --fname=examples`). There is no `generate-example-notebooks` target — do not invent one.
 - Tests live in `tests/` mirroring the source tree (e.g. `tests/_methods/simclr/test_simclr.py`). Add a focused test next to the feature you touched.
+
+## Product copy (LightlyStudio)
+
+In docs, decks and release notes, name the action and the product, never the widget: "Train a new model in LightlyStudio", not "train a new model from a form".

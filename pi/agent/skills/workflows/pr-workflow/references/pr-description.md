@@ -1,13 +1,7 @@
 # PR description
 
-```text
-max_lines: 20
-max_words: 200
-rewrite: rewriter
-```
-
-The single home for PR-body guidance: gather the diff and commits, then shape
-them. The draft hands off to `pr-workflow`, which owns `gh pr create/edit`.
+Drafting the PR title and body: gather the diff and commits, then shape them.
+Write the body to a file; `SKILL.md` owns `gh pr create/edit`.
 
 ## Gather
 

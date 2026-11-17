@@ -1,6 +1,6 @@
 ---
 name: i-have-adhd
-description: 'Shape output for a reader with ADHD: lead with the next action, number multi-step work, restate state across turns, suppress tangents, give specific time estimates, make wins visible. On by default — load at session start, before the first response, without being asked; stays on until "stop adhd mode".'
+description: 'Shape output for a reader with ADHD: lead with the next action, number multi-step work, restate state across turns, suppress tangents, give specific time estimates, make wins visible. On by default from session start; stays on until "stop adhd mode".'
 license: MIT
 metadata:
   tags: "ADHD, Output Style, Productivity, Formatting"
@@ -37,6 +37,11 @@ write those and stop. Depth is opt-in — the reader usually has the context
 already, and the extra paragraph is unreadable bloat, not thoroughness. Past 80
 words, cut a section, not a clause. Never bolt headers, tables or nested caveat
 lists onto a short answer to make it look thorough.
+
+Concise is not telegraphic. Cut information the reader doesn't need, never the
+words that connect what's left: full sentences, plain words, no runs of
+fragments. This skill owns length for every output, including plans and text
+written with `human-voice`, which only adds per-channel ceilings.
 
 ### 1. Lead with the next action
 
