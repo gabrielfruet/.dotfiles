@@ -29,12 +29,12 @@
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
+html { scrollbar-gutter: stable; } /* switching tabs must not shift the page sideways */
 body {
   margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.6 var(--f-body); -webkit-font-smoothing: antialiased;
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
 }
-.wrap { max-width: 680px; margin: 0 auto; padding: 40px 0 80px; }
-body.adv .wrap { max-width: 880px; }
+.wrap { max-width: 760px; margin: 0 auto; padding: 40px 0 80px; } /* one width for both tabs */
 nav { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; color: var(--muted); margin-bottom: 52px; }
 nav button { font: inherit; color: var(--muted); background: none; border: 0; padding: 0 0 4px; margin-left: 20px; cursor: pointer; }
 nav button[aria-selected="true"] { color: var(--ink); border-bottom: 1.5px solid var(--clay); }
@@ -74,12 +74,12 @@ section { margin-top: 48px; }
 .pending { color: var(--muted); font-size: 14px; background: var(--paper); border-radius: 10px; padding: 14px 18px; }
 footer { margin-top: 56px; font-size: 12px; color: var(--faint); }
 
-.controls { display: flex; flex-wrap: wrap; gap: 28px; font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+.controls { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 24px; }
 .controls select { font: 500 13px var(--f-body); color: var(--ink); background: transparent; border: 0; border-bottom: 1px dotted var(--faint); padding: 0 2px; cursor: pointer; }
-.dayhead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; margin: 44px 0 22px; }
-.dayhead h1 { margin: 0; font-size: 30px; }
-.arrows button { font: 20px var(--f-body); color: var(--faint); background: none; border: 0; padding: 0 4px; cursor: pointer; }
-.arrows button:disabled { opacity: .3; cursor: default; }
+.arrows { display: inline-flex; gap: 16px; margin-right: 8px; }
+.arrows button { font: 13px var(--f-body); color: var(--muted); background: none; border: 0; padding: 0; cursor: pointer; }
+.arrows button:hover:not(:disabled) { color: var(--ink); }
+.arrows button:disabled { opacity: .35; cursor: default; }
 .seg button { font: inherit; color: var(--muted); background: none; border: 0; padding: 0 0 3px; margin-left: 14px; cursor: pointer; }
 .seg button[aria-pressed="true"] { color: var(--ink); border-bottom: 1.5px solid var(--clay); }
 .lvrow { display: grid; grid-template-columns: 110px 1fr 120px; gap: 16px; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
@@ -122,21 +122,19 @@ details p { max-width: 620px; }
   <main id="summary"></main>
 
   <main id="advanced" hidden>
-    <div class="controls">
+    <div class="eyebrow controls">
+      <span class="arrows"><button id="prev">‹ Previous day</button><button id="next">Next day ›</button></span>
       <label>Window <select id="win"></select></label>
       <label>Limit <select id="limit"></select></label>
     </div>
-    <section style="margin-top:0">
+    <div class="verdict" id="day-verdict" style="margin-top:20px"></div>
+    <h1 id="day-h"></h1>
+    <div class="kpis" id="day-kpis"></div>
+    <section>
       <h2><span>Last <span id="ndays"></span> days</span><span style="font-weight:400">click a day</span></h2>
       <svg id="strip" role="img" aria-label="Engaged time per day, split by time within and above the limit"></svg>
       <div class="legend"><span style="--c:var(--neutral)">within limit</span><span style="--c:var(--bad)">above limit</span></div>
     </section>
-    <div class="dayhead">
-      <span class="arrows"><button id="prev" aria-label="Previous day">‹</button><button id="next" aria-label="Next day">›</button></span>
-      <h1 id="day-h"></h1>
-      <span class="verdict" id="day-verdict"></span>
-    </div>
-    <div class="kpis" id="day-kpis" style="--n:5"></div>
     <section>
       <h2><span>Time spent with N tasks in flight</span><span style="font-weight:400">share of engaged time</span></h2>
       <div id="levels"></div>
@@ -237,6 +235,11 @@ function verdictOf(d) {
 }
 const levelColor = (n, limit) => n <= limit ? "var(--good)" : n === limit + 1 ? "var(--warn)" : "var(--bad)";
 const levelLabel = i => `${i + 1}${i === 4 ? "+" : ""} at once`;
+// Same four numbers on both tabs, so switching tabs never reshuffles the header.
+const kpiRow = (d, v, limit) => [
+  [dur(d.engagedMin), "with agents"], [d.order.length, "tasks touched"], [d.hops, "hops"],
+  [`${Math.round(v.share * 100)}%`, `above ${limit} at once`],
+].map(([b, l]) => `<div><b>${b}</b>${l}</div>`).join("");
 
 // ---------- tooltip ----------
 const tip = document.getElementById("tip");
@@ -264,7 +267,7 @@ function renderSummary() {
   let h = `<div class="eyebrow">${esc(fmtDay(key))}${fresh && S.checkin ? ` · ${esc(S.checkin)}` : ""}</div>
     <div class="verdict" style="margin-top:20px"><i style="background:${v.color}"></i>${v.text}</div>
     <h1>${fresh && S.headline ? esc(S.headline) : `${Math.round(v.share * 100)}% of your time with agents ran above ${DEF.limit} tasks at once.`}</h1>
-    <div class="kpis"><div><b>${dur(d.engagedMin)}</b>with agents</div><div><b>${d.order.length}</b>tasks touched</div><div><b>${d.hops}</b>hops</div><div><b>${Math.round(v.share * 100)}%</b>above ${DEF.limit} at once</div></div>
+    <div class="kpis">${kpiRow(d, v, DEF.limit)}</div>
     <section><h2><span>Time at each level</span></h2>
       <div class="levels">${lv.map((m, i) => m ? `<span style="flex:${m};background:${levelColor(i + 1, DEF.limit)};opacity:${i < DEF.limit ? levelOp[i] : 1}"></span>` : "").join("")}</div>
       <div class="lvkey">${lv.map((m, i) => `<span style="--c:${levelColor(i + 1, DEF.limit)}"><b>${dur(m)}</b>${levelLabel(i)}</span>`).join("")}</div>
@@ -297,7 +300,7 @@ function renderSummary() {
 const state = { win: store.get("win", DEF.win), limit: store.get("limit", DEF.limit), day: activeDays[activeDays.length - 1], all: false };
 
 function renderStrip() {
-  const svg = document.getElementById("strip"), W = 832, H = 96, slot = W / allDays.length, bw = Math.max(slot - 6, 2);
+  const svg = document.getElementById("strip"), W = 760, H = 96, slot = W / allDays.length, bw = Math.max(slot - 6, 2);
   svg.innerHTML = ""; svg.setAttribute("viewBox", `0 0 ${W} ${H + 20}`);
   document.getElementById("ndays").textContent = allDays.length;
   const days = allDays.map(k => byDay[k] ? getDay(k, state.win, state.limit) : null);
@@ -324,10 +327,7 @@ function renderDay() {
   document.getElementById("prev").disabled = i <= 0;
   document.getElementById("next").disabled = i >= activeDays.length - 1;
   document.getElementById("day-verdict").innerHTML = `<i style="background:${v.color}"></i>${v.text}`;
-  document.getElementById("day-kpis").innerHTML = [
-    [dur(d.engagedMin), "with agents"], [d.order.length, "tasks touched"], [d.peak, "most at once"],
-    [dur(d.overMin), `above ${state.limit} · ${Math.round(v.share * 100)}%`], [d.hops, "hops"],
-  ].map(([b, l]) => `<div><b>${b}</b>${l}</div>`).join("");
+  document.getElementById("day-kpis").innerHTML = kpiRow(d, v, state.limit);
 
   const max = Math.max(...d.levels, 1);
   document.getElementById("levels").innerHTML = d.levels.map((m, i) => `<div class="lvrow"><span>${levelLabel(i)}</span>
@@ -337,7 +337,7 @@ function renderDay() {
 }
 
 function renderChart(d) {
-  const svg = document.getElementById("chart"), LW = 200, W = 832, PW = W - LW;
+  const svg = document.getElementById("chart"), LW = 190, W = 760, PW = W - LW;
   svg.innerHTML = "";
   const m0 = Math.max(0, Math.floor((d.first - 10) / 60) * 60), m1 = Math.min(1440, Math.ceil((d.last + 10) / 60) * 60), span = Math.max(m1 - m0, 60);
   const x = m => LW + (m - m0) / span * PW;
@@ -425,7 +425,6 @@ function showTab(name) {
   document.getElementById("advanced").hidden = !adv;
   document.getElementById("tab-summary").setAttribute("aria-selected", !adv);
   document.getElementById("tab-advanced").setAttribute("aria-selected", adv);
-  document.body.classList.toggle("adv", adv);
   if (adv && !advancedDrawn && state.day) { renderAdvanced(); advancedDrawn = true; }
   store.set("tab", name);
 }
