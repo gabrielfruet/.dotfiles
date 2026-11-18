@@ -225,6 +225,13 @@ def cmd_unclassified(sessions: list[dict], threads: dict) -> None:
     print()
 
 
+def area_by_repo(repo: str, threads: dict) -> str:
+    """"work" when the repo matches a prefix in threads.json's workRepoPrefixes.
+    A thread's own "area" overrides this for work done outside those repos."""
+    prefixes = threads.get("workRepoPrefixes", [])
+    return "work" if any(repo.startswith(p) for p in prefixes) else "other"
+
+
 def resolve(sessions: list[dict], threads: dict) -> tuple[dict, list[dict]]:
     """Attach a thread to every session: Claude's label, or the fallback."""
     out_threads: dict[str, dict] = {}
@@ -238,7 +245,9 @@ def resolve(sessions: list[dict], threads: dict) -> tuple[dict, list[dict]]:
         else:
             tid, name = fallback_thread(s)
             kind, labelled = "", False
-        out_threads.setdefault(tid, {"id": tid, "name": name, "kind": kind, "repo": s["repo"], "labelled": labelled})
+        area = threads["threads"].get(tid, {}).get("area") or area_by_repo(s["repo"], threads)
+        out_threads.setdefault(tid, {"id": tid, "name": name, "kind": kind, "area": area,
+                                     "repo": s["repo"], "labelled": labelled})
         out_sessions.append({
             "id": s["id"],
             "thread": tid,
@@ -286,7 +295,7 @@ def by_day(out_sessions: list[dict]) -> dict[str, list[tuple[float, float, str]]
     return days
 
 
-def day_stats(evs: list, names: dict, win: int = WINDOW_MIN, limit: int = LIMIT) -> dict:
+def day_stats(evs: list, names: dict, areas: dict, win: int = WINDOW_MIN, limit: int = LIMIT) -> dict:
     """Mirror of computeDay() in template.html, plus what Claude needs to write."""
     n = 1440
     order: list[str] = []
@@ -336,19 +345,23 @@ def day_stats(evs: list, names: dict, win: int = WINDOW_MIN, limit: int = LIMIT)
                 returns.append((a - end, len({x[2] for x in evs[j + 1:i]})))
         last_end[t] = (i, b)
         prev = t
+    area_min: dict[str, float] = {"work": 0.0, "other": 0.0}
+    for t in order:
+        area_min[areas[t]] += minutes[t]
     share = over / len(eng) if eng else 0
     verdict = "Within your limit" if share < 0.15 else "Some extra juggling" if share < 0.35 else "Hopped too much"
     med = lambda xs: sorted(xs)[len(xs) // 2] if xs else None
     return {
         "engagedMin": len(eng), "tasks": len(order), "hops": hops, "peak": max(count) if eng else 0,
         "overMin": over, "overShare": round(share, 3), "verdict": verdict,
+        "areaMin": {k: round(v) for k, v in area_min.items()},
         "levelsMin": {f"{i + 1}{'+' if i == 4 else ''}": v for i, v in enumerate(levels)},
         "firstPrompt": f"{eng[0] // 60:02d}:{eng[0] % 60:02d}" if eng else None,
         "lastPrompt": f"{eng[-1] // 60:02d}:{eng[-1] % 60:02d}" if eng else None,
         "overRuns": runs,
         "returns": {"count": len(returns), "medianGapMin": med([round(g) for g, _ in returns]),
                     "medianOtherTasksBetween": med([k for _, k in returns])},
-        "perTask": sorted(({"name": names[t], "min": round(minutes[t]), "visits": visits[t],
+        "perTask": sorted(({"name": names[t], "area": areas[t], "min": round(minutes[t]), "visits": visits[t],
                             "from": f"{int(min(a for a, _, x in evs if x == t)) // 60:02d}:{int(min(a for a, _, x in evs if x == t)) % 60:02d}"}
                            for t in order), key=lambda r: -r["min"]),
     }
@@ -357,11 +370,12 @@ def day_stats(evs: list, names: dict, win: int = WINDOW_MIN, limit: int = LIMIT)
 def cmd_stats(sessions: list[dict], threads: dict, day: str | None) -> None:
     out_threads, out_sessions = resolve(sessions, threads)
     names = {t: v["name"] for t, v in out_threads.items()}
+    areas = {t: v["area"] for t, v in out_threads.items()}
     days = by_day(out_sessions)
     day = day or max(days)
     recent = sorted(k for k in days if k < day)[-6:]
-    out = {"day": day, "window": WINDOW_MIN, "limit": LIMIT, **day_stats(days.get(day, []), names),
-           "previousDays": [{"day": k, "overShare": (st := day_stats(days[k], names))["overShare"],
+    out = {"day": day, "window": WINDOW_MIN, "limit": LIMIT, **day_stats(days.get(day, []), names, areas),
+           "previousDays": [{"day": k, "overShare": (st := day_stats(days[k], names, areas))["overShare"],
                              "engagedMin": st["engagedMin"], "hops": st["hops"]} for k in recent]}
     json.dump(out, sys.stdout, indent=1, ensure_ascii=False)
     print()

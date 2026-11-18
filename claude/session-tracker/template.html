@@ -65,12 +65,18 @@ section { margin-top: 48px; }
 .take dt::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--c); }
 .take dd { margin: 0; }
 .tasks .row { display: grid; grid-template-columns: 1fr 160px 60px; align-items: center; gap: 16px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
-.tasks .row:first-of-type { border-top: 1px solid var(--line); }
+.tasks .grp + .row { border-top: 1px solid var(--line); }
 .tasks .row > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tasks .bar { height: 6px; border-radius: 3px; background: var(--c); }
 .num { font-variant-numeric: tabular-nums; }
 .t { text-align: right; color: var(--muted); font-size: 13px; }
 .sub { color: var(--faint); font-size: 12px; margin-left: 6px; }
+.areas { display: flex; flex-wrap: wrap; gap: 4px 24px; font-size: 13px; color: var(--muted); margin-top: 12px; }
+.areas b { color: var(--ink); font-weight: 500; font-variant-numeric: tabular-nums; }
+.grp { display: flex; justify-content: space-between; font-size: 12.5px; font-weight: 500; color: var(--ink); margin: 22px 0 6px; }
+.grp:first-of-type { margin-top: 0; }
+.grp span + span { color: var(--muted); font-weight: 400; font-variant-numeric: tabular-nums; }
+svg text.grp-label { fill: var(--muted); font-size: 11.5px; font-weight: 500; }
 .pending { color: var(--muted); font-size: 14px; background: var(--paper); border-radius: 10px; padding: 14px 18px; }
 footer { margin-top: 56px; font-size: 12px; color: var(--faint); }
 
@@ -126,10 +132,12 @@ details p { max-width: 620px; }
       <span class="arrows"><button id="prev">‹ Previous day</button><button id="next">Next day ›</button></span>
       <label>Window <select id="win"></select></label>
       <label>Limit <select id="limit"></select></label>
+      <label>Show <select id="scope"></select></label>
     </div>
     <div class="verdict" id="day-verdict" style="margin-top:20px"></div>
     <h1 id="day-h"></h1>
     <div class="kpis" id="day-kpis"></div>
+    <div class="areas" id="day-areas"></div>
     <section>
       <h2><span>Last <span id="ndays"></span> days</span><span style="font-weight:400">click a day</span></h2>
       <svg id="strip" role="img" aria-label="Engaged time per day, split by time within and above the limit"></svg>
@@ -161,8 +169,10 @@ const KIND_GROUP = { build: "build", review: "review", research: "research", inv
 const KIND_LABEL = { build: "Build", review: "Review", research: "Research", plan: "Plan & write", ops: "Ops & personal" };
 const kindOf = t => KIND_GROUP[t.kind] || "build";
 const kc = k => `var(--k-${k})`;
+const AREAS = { work: "Work", other: "Other" };
 const threads = Object.fromEntries(DATA.threads.map(t => [t.id, t]));
 const S = DATA.summary || null;
+const areaOf = t => threads[t].area === "work" ? "work" : "other";
 const DEF = { win: 30, limit: 3 };
 
 const store = {
@@ -191,8 +201,9 @@ const activeDays = allDays.filter(k => byDay[k]);
 // Minute grid for one day. count[m] = tasks touched in the trailing `win` minutes.
 // A minute shared by k tasks gives each 1/k, so per-task times add up to engaged time.
 // build.py day_stats() mirrors this; keep the two in step.
-function computeDay(key, win, limit) {
-  const evs = byDay[key] || [], t0 = dayStart(key), N = 1440, order = [], cov = {};
+// scope "all" counts every task toward "in flight"; "work"/"other" look at one side only.
+function computeDay(key, win, limit, scope = "all") {
+  const evs = (byDay[key] || []).filter(e => scope === "all" || areaOf(e.thread) === scope), t0 = dayStart(key), N = 1440, order = [], cov = {};
   for (const e of evs) {
     if (!cov[e.thread]) { cov[e.thread] = new Uint8Array(N); order.push(e.thread); }
     const m0 = Math.max(0, Math.floor((e.a - t0) / MIN)), m1 = Math.min(N, Math.ceil((e.b - t0) / MIN));
@@ -222,10 +233,15 @@ function computeDay(key, win, limit) {
     s.iv.push([(e.a - t0) / MIN, (e.b - t0) / MIN]);
     prev = e.thread;
   }
-  return { key, order, count, engaged, engagedMin, overMin, peak, first, last: lastM, hops, levels, stats, win, limit };
+  const areaMin = { work: 0, other: 0 };
+  for (const t of order) areaMin[areaOf(t)] += stats[t].min;
+  return { key, order, count, engaged, engagedMin, overMin, peak, first, last: lastM, hops, levels, stats, areaMin, win, limit, scope };
 }
 const cache = {};
-const getDay = (k, w, l) => cache[`${k}|${w}|${l}`] ||= computeDay(k, w, l);
+const getDay = (k, w, l, sc = "all") => cache[`${k}|${w}|${l}|${sc}`] ||= computeDay(k, w, l, sc);
+const areaLine = d => d.scope === "all"
+  ? Object.keys(AREAS).map(a => `<span><b>${dur(d.areaMin[a])}</b> ${AREAS[a].toLowerCase()}</span>`).join("")
+  : `<span>Showing ${AREAS[d.scope].toLowerCase()} tasks only</span>`;
 
 function verdictOf(d) {
   const share = d.engagedMin ? d.overMin / d.engagedMin : 0;
@@ -262,12 +278,17 @@ function renderSummary() {
   const d = getDay(key, DEF.win, DEF.limit), v = verdictOf(d);
   const fresh = S && S.day === key;
   const rows = Object.values(d.stats).sort((a, b) => b.min - a.min);
-  const top = rows.slice(0, 4), rest = rows.slice(4), restMin = rest.reduce((s, r) => s + r.min, 0), maxMin = Math.max(rows[0]?.min || 1, restMin);
+  const groups = Object.keys(AREAS).map(a => {
+    const rs = rows.filter(r => areaOf(r.thread) === a), rest = rs.slice(4);
+    return { a, top: rs.slice(0, 4), rest, restMin: rest.reduce((s, r) => s + r.min, 0) };
+  }).filter(g => g.top.length);
+  const maxMin = Math.max(rows[0]?.min || 1, ...groups.map(g => g.restMin));
   const lv = d.levels, levelOp = [0.55, 0.75, 1, 1, 1];
   let h = `<div class="eyebrow">${esc(fmtDay(key))}${fresh && S.checkin ? ` · ${esc(S.checkin)}` : ""}</div>
     <div class="verdict" style="margin-top:20px"><i style="background:${v.color}"></i>${v.text}</div>
     <h1>${fresh && S.headline ? esc(S.headline) : `${Math.round(v.share * 100)}% of your time with agents ran above ${DEF.limit} tasks at once.`}</h1>
     <div class="kpis">${kpiRow(d, v, DEF.limit)}</div>
+    <div class="areas">${areaLine(d)}</div>
     <section><h2><span>Time at each level</span></h2>
       <div class="levels">${lv.map((m, i) => m ? `<span style="flex:${m};background:${levelColor(i + 1, DEF.limit)};opacity:${i < DEF.limit ? levelOp[i] : 1}"></span>` : "").join("")}</div>
       <div class="lvkey">${lv.map((m, i) => `<span style="--c:${levelColor(i + 1, DEF.limit)}"><b>${dur(m)}</b>${levelLabel(i)}</span>`).join("")}</div>
@@ -286,24 +307,25 @@ function renderSummary() {
         ${S.read.slipped ? `<dt style="--c:var(--warn)">Slipped</dt><dd>${esc(S.read.slipped)}</dd>` : ""}
         ${S.read.next ? `<dt style="--c:var(--k-build)">${esc(S.read.nextLabel || "Tomorrow")}</dt><dd>${esc(S.read.next)}</dd>` : ""}</dl></section>`;
   }
-  h += `<section class="tasks"><h2><span>Where the time went</span></h2>` +
-    top.map(r => { const t = threads[r.thread], k = kindOf(t);
+  h += `<section class="tasks"><h2><span>Where the time went</span></h2>` + groups.map(g =>
+    `<div class="grp"><span>${AREAS[g.a]}</span><span>${dur(d.areaMin[g.a])}</span></div>` +
+    g.top.map(r => { const t = threads[r.thread], k = kindOf(t);
       return `<div class="row"><span title="${esc(t.name)}">${esc(t.name)}<span class="sub">${KIND_LABEL[k].toLowerCase()}</span></span><span class="bar" style="--c:${kc(k)};width:${(r.min / maxMin * 100).toFixed(1)}%"></span><span class="t num">${dur(r.min)}</span></div>`; }).join("") +
-    (rest.length ? `<div class="row"><span>${rest.length} smaller task${rest.length > 1 ? "s" : ""}</span><span class="bar" style="--c:var(--neutral);width:${(restMin / maxMin * 100).toFixed(1)}%"></span><span class="t num">${dur(restMin)}</span></div>` : "") +
-    `</section>`;
+    (g.rest.length ? `<div class="row"><span>${g.rest.length} smaller task${g.rest.length > 1 ? "s" : ""}</span><span class="bar" style="--c:var(--neutral);width:${(g.restMin / maxMin * 100).toFixed(1)}%"></span><span class="t num">${dur(g.restMin)}</span></div>` : "")
+  ).join("") + `</section>`;
   const gen = new Date(DATA.generatedAt);
   h += `<footer>Updated ${esc(fmtDay(dayKey(DATA.generatedAt), { month: "short", day: "numeric" }))} at ${pad(gen.getHours())}:${pad(gen.getMinutes())}${fresh && S.nextCheckin ? ` · next check-in ${esc(S.nextCheckin)}` : ""} · window ${DEF.win} min, limit ${DEF.limit}</footer>`;
   out.innerHTML = h;
 }
 
 // ---------- advanced ----------
-const state = { win: store.get("win", DEF.win), limit: store.get("limit", DEF.limit), day: activeDays[activeDays.length - 1], all: false };
+const state = { win: store.get("win", DEF.win), limit: store.get("limit", DEF.limit), scope: store.get("scope", "all"), day: activeDays[activeDays.length - 1], all: false };
 
 function renderStrip() {
   const svg = document.getElementById("strip"), W = 760, H = 96, slot = W / allDays.length, bw = Math.max(slot - 6, 2);
   svg.innerHTML = ""; svg.setAttribute("viewBox", `0 0 ${W} ${H + 20}`);
   document.getElementById("ndays").textContent = allDays.length;
-  const days = allDays.map(k => byDay[k] ? getDay(k, state.win, state.limit) : null);
+  const days = allDays.map(k => byDay[k] ? getDay(k, state.win, state.limit, state.scope) : null);
   const max = Math.max(60, ...days.map(d => d ? d.engagedMin : 0));
   allDays.forEach((k, i) => {
     const d = days[i], x = i * slot + 3, dt = new Date(dayStart(k));
@@ -322,12 +344,13 @@ function renderStrip() {
 }
 
 function renderDay() {
-  const d = getDay(state.day, state.win, state.limit), v = verdictOf(d), i = activeDays.indexOf(state.day);
+  const d = getDay(state.day, state.win, state.limit, state.scope), v = verdictOf(d), i = activeDays.indexOf(state.day);
   document.getElementById("day-h").textContent = fmtDay(state.day);
   document.getElementById("prev").disabled = i <= 0;
   document.getElementById("next").disabled = i >= activeDays.length - 1;
   document.getElementById("day-verdict").innerHTML = `<i style="background:${v.color}"></i>${v.text}`;
   document.getElementById("day-kpis").innerHTML = kpiRow(d, v, state.limit);
+  document.getElementById("day-areas").innerHTML = areaLine(d);
 
   const max = Math.max(...d.levels, 1);
   document.getElementById("levels").innerHTML = d.levels.map((m, i) => `<div class="lvrow"><span>${levelLabel(i)}</span>
@@ -342,7 +365,15 @@ function renderChart(d) {
   const m0 = Math.max(0, Math.floor((d.first - 10) / 60) * 60), m1 = Math.min(1440, Math.ceil((d.last + 10) / 60) * 60), span = Math.max(m1 - m0, 60);
   const x = m => LW + (m - m0) / span * PW;
   const AH = 76, top = 8, yMax = Math.max(5, d.peak), y = c => top + AH - c / yMax * AH;
-  const lanes = d.order, LH = 24, laneTop = top + AH + 24, H = laneTop + lanes.length * LH + 22;
+  const lanes = d.order, LH = 24, laneTop = top + AH + 24;
+  const laneRows = [];  // work lanes first, then other, each under a small label when both show
+  for (const a of Object.keys(AREAS)) {
+    const ls = lanes.filter(t => areaOf(t) === a);
+    if (!ls.length) continue;
+    if (d.scope === "all") laneRows.push({ head: AREAS[a] });
+    laneRows.push(...ls.map(t => ({ t })));
+  }
+  const H = laneTop + laneRows.length * LH + 22;
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
   for (let h = m0; h <= m1; h += 60) {
     el("line", { x1: x(h), x2: x(h), y1: top, y2: H - 20, stroke: "var(--line)" }, svg);
@@ -363,9 +394,12 @@ function renderChart(d) {
     const open = lanes.filter(t => d.stats[t].iv.some(([a, b]) => a <= m + 1 && b >= m - d.win + 1));
     return `<b>${hhmm(m)}</b> · ${d.count[m] || 0} in flight` + open.map(t => `<br><span class="sw" style="--c:${kc(kindOf(threads[t]))}"></span>${esc(threads[t].name)}`).join("");
   });
-  lanes.forEach((t, i) => {
-    const Y = laneTop + i * LH, th = threads[t], k = kindOf(th), s = d.stats[t];
-    if (i % 2 === 0) el("rect", { x: 0, y: Y, width: W, height: LH, fill: "var(--wash)", opacity: 0.6 }, svg);
+  let n = 0;
+  laneRows.forEach((row, i) => {
+    const Y = laneTop + i * LH;
+    if (row.head) { el("text", { x: 0, y: Y + 17, class: "grp-label" }, svg, row.head); return; }
+    const t = row.t, th = threads[t], k = kindOf(th), s = d.stats[t];
+    if (n++ % 2 === 0) el("rect", { x: 0, y: Y, width: W, height: LH, fill: "var(--wash)", opacity: 0.6 }, svg);
     const label = el("text", { x: 0, y: Y + 16, class: "lane" }, svg, th.name.length > 28 ? th.name.slice(0, 27) + "…" : th.name);
     el("title", {}, label, th.name);
     for (const [a, b] of s.iv) {
@@ -383,19 +417,20 @@ function renderTable() {
   document.getElementById("tbl-all").setAttribute("aria-pressed", state.all);
   const agg = {};
   for (const k of state.all ? activeDays : [state.day]) {
-    const d = getDay(k, state.win, state.limit);
+    const d = getDay(k, state.win, state.limit, state.scope);
     for (const s of Object.values(d.stats)) { const a = agg[s.thread] ||= { thread: s.thread, min: 0, visits: 0, days: 0 }; a.min += s.min; a.visits += s.visits; a.days++; }
   }
-  const rows = Object.values(agg).sort((a, b) => b.min - a.min);
-  document.getElementById("tbl").innerHTML = `<tr><th>Task</th><th>Kind</th><th class="t">Time</th><th class="t">Visits</th>${state.all ? `<th class="t">Days</th>` : ""}<th class="t">Size</th></tr>` +
+  const rows = Object.values(agg).sort((a, b) => (areaOf(a.thread) === "work" ? 0 : 1) - (areaOf(b.thread) === "work" ? 0 : 1) || b.min - a.min);
+  document.getElementById("tbl").innerHTML = `<tr><th>Task</th><th>Area</th><th>Kind</th><th class="t">Time</th><th class="t">Visits</th>${state.all ? `<th class="t">Days</th>` : ""}<th class="t">Size</th></tr>` +
     rows.map(r => { const t = threads[r.thread], k = kindOf(t);
-      return `<tr><td>${esc(t.name)}</td><td><span class="dot" style="background:${kc(k)}"></span>${KIND_LABEL[k]}</td><td class="t num">${dur(r.min)}</td><td class="t num">${r.visits}</td>${state.all ? `<td class="t num">${r.days}</td>` : ""}<td class="t">${sizeOf(r.min)}</td></tr>`; }).join("");
+      return `<tr><td>${esc(t.name)}</td><td>${AREAS[areaOf(r.thread)]}</td><td><span class="dot" style="background:${kc(k)}"></span>${KIND_LABEL[k]}</td><td class="t num">${dur(r.min)}</td><td class="t num">${r.visits}</td>${state.all ? `<td class="t num">${r.days}</td>` : ""}<td class="t">${sizeOf(r.min)}</td></tr>`; }).join("");
 }
 
 function renderMethod() {
   document.getElementById("method").innerHTML = `<p>Each prompt you send counts as engaged time, from the agent's last reply (at most ${DATA.readCapMin} minutes back) to the moment you send it. The first prompt of a session counts as the time to write it.</p>
     <p>A task is in flight if you touched it in the last ${state.win} minutes. Time above the limit is engaged time while more than ${state.limit} tasks were in flight. When two tasks share a minute, each gets half of it.</p>
     <p>A hop is two prompts in a row sent to different tasks. A visit is one unbroken run of prompts on the same task. Sizes: Quick is under 10 minutes, Focused is 10 to 45, Deep is over 45.</p>
+    <p>Work is anything in your work repos plus tasks you marked as work; everything else is other. The limit counts all tasks together, because switching from work to the thesis is still a switch. "Show" narrows the Advanced tab to one side.</p>
     <p>The Summary tab always uses a ${DEF.win}-minute window and a limit of ${DEF.limit}, so it matches what Claude wrote.</p>`;
 }
 
@@ -407,6 +442,10 @@ winSel.innerHTML = [10, 15, 20, 30, 45, 60, 90].map(v => `<option value="${v}">$
 limSel.innerHTML = [1, 2, 3, 4, 5].map(v => `<option value="${v}">${v} at once</option>`).join("");
 winSel.value = state.win; limSel.value = state.limit;
 winSel.onchange = () => { state.win = +winSel.value; store.set("win", state.win); renderAdvanced(); };
+const scopeSel = document.getElementById("scope");
+scopeSel.innerHTML = `<option value="all">all tasks</option><option value="work">work only</option><option value="other">other only</option>`;
+scopeSel.value = state.scope;
+scopeSel.onchange = () => { state.scope = scopeSel.value; store.set("scope", state.scope); renderAdvanced(); };
 limSel.onchange = () => { state.limit = +limSel.value; store.set("limit", state.limit); renderAdvanced(); };
 const step = dir => { const i = activeDays.indexOf(state.day) + dir; if (i >= 0 && i < activeDays.length) { state.day = activeDays[i]; renderAdvanced(); } };
 document.getElementById("prev").onclick = () => step(-1);
