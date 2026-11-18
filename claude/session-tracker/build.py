@@ -38,7 +38,7 @@ MIN_ENGAGE_MIN = 0.5  # every prompt costs at least 30 s of attention
 FIRST_PROMPT_CHARS_PER_MIN = 300  # writing the opening prompt of a session
 FIRST_PROMPT_MIN, FIRST_PROMPT_MAX = 1.0, 5.0
 
-TICKET_RE = re.compile(r"\b(STU|LIG)-(\d+)\b", re.I)
+TICKET_RE = re.compile(r"\b([A-Z]{2,6})-(\d+)\b")  # issue-tracker IDs like ABC-123
 
 
 def ts(s: str) -> float:
