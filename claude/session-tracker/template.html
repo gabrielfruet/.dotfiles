@@ -2,569 +2,436 @@
 <title>Session Juggling</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;1,8..60,400&display=swap">
 <style>
-/* Layout: one column, range strip on top, then the selected day as a shared time axis (load curve over swimlanes), then its task table. */
+/* Two tabs. Summary: Claude's read of the latest day, fixed 30-min window / limit 3.
+   Advanced: the same data, interactive (window, limit, any day in range). */
 :root {
-  --bg: #f6f7f8;
-  --surface: #fcfcfc;
-  --ink: #101418;
-  --ink-2: #4c545c;
-  --muted: #878e95;
-  --grid: #e2e5e8;
-  --axis: #c3c8cd;
-  --ring: rgba(16, 20, 24, 0.10);
-  --wash: rgba(16, 20, 24, 0.05);
-  --load: rgba(16, 20, 24, 0.14);
-  --k-build: #2a78d6;
-  --k-review: #eb6834;
-  --k-research: #1baf7a;
-  --k-plan: #eda100;
-  --k-ops: #e87ba4;
-  --good: #0ca30c;
-  --good-ink: #006300;
-  --warn: #fab219;
-  --bad: #d03b3b;
-  --bad-wash: rgba(208, 59, 59, 0.09);
-  --f-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --bg: #faf9f5; --ink: #141413; --muted: #6b6a65; --faint: #a3a199; --line: #e8e6dc;
+  --paper: #f3f1ea; --wash: #f1efe8; --neutral: #cfccc1; --clay: #d97757; --tip-bg: #141413; --tip-ink: #faf9f5;
+  --good: #0ca30c; --warn: #fab219; --bad: #d03b3b;
+  --k-build: #2a78d6; --k-review: #eb6834; --k-research: #1baf7a; --k-plan: #8a55c8; --k-ops: #e87ba4;
+  --f-serif: "Source Serif 4", Georgia, serif;
   --f-body: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0f1113; --surface: #181b1e; --ink: #eef0f2; --ink-2: #b9bfc5; --muted: #858c93;
-    --grid: #262a2e; --axis: #363b40; --ring: rgba(255,255,255,0.10); --wash: rgba(255,255,255,0.05);
-    --load: rgba(255,255,255,0.16);
-    --k-build: #3987e5; --k-review: #d95926; --k-research: #199e70; --k-plan: #c98500; --k-ops: #d55181;
-    --good-ink: #0ca30c; --bad-wash: rgba(208, 59, 59, 0.16);
+    --bg: #1f1e1d; --ink: #f0eee6; --muted: #a8a69e; --faint: #77756e; --line: #34332f;
+    --paper: #2a2927; --wash: #262523; --neutral: #55534d; --tip-bg: #f0eee6; --tip-ink: #1f1e1d;
+    --k-build: #3987e5; --k-review: #d95926; --k-research: #199e70; --k-plan: #9a6ad6; --k-ops: #d55181;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0f1113; --surface: #181b1e; --ink: #eef0f2; --ink-2: #b9bfc5; --muted: #858c93;
-  --grid: #262a2e; --axis: #363b40; --ring: rgba(255,255,255,0.10); --wash: rgba(255,255,255,0.05);
-  --load: rgba(255,255,255,0.16);
-  --k-build: #3987e5; --k-review: #d95926; --k-research: #199e70; --k-plan: #c98500; --k-ops: #d55181;
-  --good-ink: #0ca30c; --bad-wash: rgba(208, 59, 59, 0.16);
+  --bg: #1f1e1d; --ink: #f0eee6; --muted: #a8a69e; --faint: #77756e; --line: #34332f;
+  --paper: #2a2927; --wash: #262523; --neutral: #55534d; --tip-bg: #f0eee6; --tip-ink: #1f1e1d;
+  --k-build: #3987e5; --k-review: #d95926; --k-research: #199e70; --k-plan: #9a6ad6; --k-ops: #d55181;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
 body {
-  background: var(--bg); color: var(--ink); font: 14px/1.5 var(--f-body);
-  padding-left: max(16px, env(safe-area-inset-left, 0px));
-  padding-right: max(16px, env(safe-area-inset-right, 0px));
-  padding-block: 24px 48px;
+  margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.6 var(--f-body); -webkit-font-smoothing: antialiased;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
 }
-.wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 20px; }
-h1, h2 { font-family: var(--f-display); font-weight: 600; letter-spacing: -0.01em; margin: 0; text-wrap: balance; }
-h1 { font-size: 26px; }
-h2 { font-size: 17px; }
+.wrap { max-width: 680px; margin: 0 auto; padding: 40px 0 80px; }
+body.adv .wrap { max-width: 880px; }
+nav { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; color: var(--muted); margin-bottom: 52px; }
+nav button { font: inherit; color: var(--muted); background: none; border: 0; padding: 0 0 4px; margin-left: 20px; cursor: pointer; }
+nav button[aria-selected="true"] { color: var(--ink); border-bottom: 1.5px solid var(--clay); }
+.eyebrow { font-size: 13px; color: var(--muted); }
+.verdict { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.verdict i { width: 8px; height: 8px; border-radius: 50%; }
+h1 { font-family: var(--f-serif); font-weight: 400; font-size: 34px; line-height: 1.25; letter-spacing: -.01em; margin: 10px 0 36px; text-wrap: balance; }
+h2 { font-size: 13px; font-weight: 500; color: var(--muted); margin: 0 0 16px; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+section { margin-top: 48px; }
+.kpis { display: grid; grid-template-columns: repeat(var(--n, 4), 1fr); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.kpis div { padding: 18px 0; font-size: 12.5px; color: var(--muted); min-width: 0; }
+.kpis div + div { padding-left: 18px; border-left: 1px solid var(--line); }
+.kpis b { display: block; font-family: var(--f-serif); font-weight: 400; font-size: 26px; color: var(--ink); line-height: 1.2; margin-bottom: 2px; font-variant-numeric: tabular-nums; }
+.levels { display: flex; gap: 2px; height: 12px; }
+.levels span { border-radius: 2px; }
+.lvkey { display: grid; grid-template-columns: repeat(5, 1fr); font-size: 12px; color: var(--muted); margin-top: 10px; font-variant-numeric: tabular-nums; }
+.lvkey b { display: block; font-weight: 500; color: var(--ink); font-size: 13px; }
+.sw::before, .lvkey span::before, .legend span::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; background: var(--c); }
+.exp { background: var(--paper); border-radius: 10px; padding: 20px 22px; }
+.exp .label { font-size: 12px; color: var(--muted); }
+.exp .quote { font-family: var(--f-serif); font-style: italic; font-size: 17px; margin: 4px 0 14px; }
+.exp p, .research p { font-family: var(--f-serif); font-size: 17px; line-height: 1.55; margin: 0 0 12px; }
+.exp p:last-child { margin-bottom: 0; }
+.research { border-left: 2px solid var(--clay); padding-left: 18px; }
+.research .cite { font-size: 12px; color: var(--faint); }
+.take { display: grid; grid-template-columns: 110px 1fr; row-gap: 18px; margin: 0; font-family: var(--f-serif); font-size: 17px; line-height: 1.55; }
+.take dt { font: 500 12.5px/1.9 var(--f-body); color: var(--muted); display: flex; align-items: center; gap: 8px; }
+.take dt::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--c); }
+.take dd { margin: 0; }
+.tasks .row { display: grid; grid-template-columns: 1fr 160px 60px; align-items: center; gap: 16px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.tasks .row:first-of-type { border-top: 1px solid var(--line); }
+.tasks .row > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tasks .bar { height: 6px; border-radius: 3px; background: var(--c); }
 .num { font-variant-numeric: tabular-nums; }
-.muted { color: var(--muted); }
-.eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 600; }
+.t { text-align: right; color: var(--muted); font-size: 13px; }
+.sub { color: var(--faint); font-size: 12px; margin-left: 6px; }
+.pending { color: var(--muted); font-size: 14px; background: var(--paper); border-radius: 10px; padding: 14px 18px; }
+footer { margin-top: 56px; font-size: 12px; color: var(--faint); }
 
-header { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: end; justify-content: space-between; }
-header .sub { color: var(--ink-2); max-width: 62ch; }
-.controls { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
-.control { display: grid; gap: 2px; }
-.control label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 600; }
-.control .row { display: flex; gap: 8px; align-items: center; }
-input[type=range] { width: 140px; accent-color: var(--ink); }
-select, button { font: inherit; color: var(--ink); }
-select { background: var(--surface); border: 1px solid var(--axis); border-radius: 6px; padding: 3px 6px; }
-:focus-visible { outline: 2px solid var(--k-build); outline-offset: 2px; }
-
-.panel { background: var(--surface); border: 1px solid var(--ring); border-radius: 10px; padding: 16px; display: grid; gap: 14px; min-width: 0; }
-.panel-head { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: baseline; justify-content: space-between; }
-
-/* range strip */
-.strip { display: flex; gap: 3px; align-items: flex-end; height: 120px; overflow-x: auto; padding-bottom: 2px; }
-.day {
-  flex: 1 0 14px; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; gap: 2px;
-  border: 0; background: none; padding: 0; cursor: pointer; position: relative; border-radius: 4px;
-}
-.day:hover { background: var(--wash); }
-.day .seg { width: 100%; border-radius: 0; }
-.day .seg.ok { background: var(--load); border-radius: 0 0 3px 3px; }
-.day .seg.over { background: var(--bad); border-radius: 3px 3px 0 0; }
-.day .seg.only { border-radius: 3px; }
-.day.empty { cursor: default; }
-.day.empty:hover { background: none; }
-.day.sel { box-shadow: 0 0 0 2px var(--ink); }
-.strip-axis { display: flex; gap: 3px; font-size: 10px; color: var(--muted); }
-.strip-axis span { flex: 1 0 14px; text-align: center; }
-.range-line { color: var(--ink-2); }
-.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12px; color: var(--ink-2); align-items: center; }
-.sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
-
-/* day */
-.daynav { display: flex; gap: 8px; align-items: center; }
-.daynav button { background: var(--surface); border: 1px solid var(--axis); border-radius: 6px; width: 30px; height: 28px; cursor: pointer; }
-.daynav button:disabled { opacity: 0.35; cursor: default; }
-.verdict { display: inline-flex; gap: 6px; align-items: center; padding: 3px 10px 3px 8px; border-radius: 999px; font-weight: 600; font-size: 13px; border: 1px solid var(--ring); }
-.verdict .dot { width: 8px; height: 8px; border-radius: 50%; }
-.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
-.kpi { border: 1px solid var(--ring); border-radius: 8px; padding: 10px 12px; display: grid; gap: 2px; }
-.kpi .v { font-family: var(--f-display); font-size: 24px; font-weight: 600; font-variant-numeric: tabular-nums; }
-.kpi .v.bad { color: var(--bad); }
-.kpi .d { font-size: 12px; color: var(--muted); }
-.story { color: var(--ink-2); max-width: 75ch; margin: 0; }
-
-.chart-scroll { overflow-x: auto; }
-svg text { font-family: var(--f-body); font-size: 11px; fill: var(--muted); }
-svg .lane-label { fill: var(--ink-2); font-size: 12px; }
-svg .tick { stroke: var(--grid); stroke-width: 1; }
-svg .baseline { stroke: var(--axis); stroke-width: 1; }
-
-.tip {
-  position: fixed; z-index: 20; pointer-events: none; background: var(--surface); color: var(--ink);
-  border: 1px solid var(--ring); box-shadow: 0 6px 24px rgba(0,0,0,0.14); border-radius: 8px;
-  padding: 8px 10px; font-size: 12px; max-width: 320px; display: grid; gap: 4px;
-}
-.tip b { font-weight: 600; }
-.tip .row { display: flex; gap: 6px; align-items: center; }
-
-/* table */
+.controls { display: flex; flex-wrap: wrap; gap: 28px; font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+.controls select { font: 500 13px var(--f-body); color: var(--ink); background: transparent; border: 0; border-bottom: 1px dotted var(--faint); padding: 0 2px; cursor: pointer; }
+.dayhead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; margin: 44px 0 22px; }
+.dayhead h1 { margin: 0; font-size: 30px; }
+.arrows button { font: 20px var(--f-body); color: var(--faint); background: none; border: 0; padding: 0 4px; cursor: pointer; }
+.arrows button:disabled { opacity: .3; cursor: default; }
+.seg button { font: inherit; color: var(--muted); background: none; border: 0; padding: 0 0 3px; margin-left: 14px; cursor: pointer; }
+.seg button[aria-pressed="true"] { color: var(--ink); border-bottom: 1.5px solid var(--clay); }
+.lvrow { display: grid; grid-template-columns: 110px 1fr 120px; gap: 16px; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.lvrow .bar { height: 8px; border-radius: 3px; }
+svg { display: block; width: 100%; height: auto; overflow: visible; }
+svg text { font: 11.5px var(--f-body); fill: var(--faint); }
+svg text.lane { fill: var(--ink); font-size: 12.5px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 12px; color: var(--muted); margin-top: 14px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { text-align: left; font-weight: 500; font-size: 12px; color: var(--muted); padding: 0 0 10px; border-bottom: 1px solid var(--line); }
+td { padding: 9px 8px 9px 0; border-bottom: 1px solid var(--line); }
+td.t, th.t { text-align: right; padding-right: 0; padding-left: 12px; }
+.dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 8px; vertical-align: 1px; }
 .table-wrap { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600; padding: 6px 8px; border-bottom: 1px solid var(--axis); white-space: nowrap; }
-td { padding: 7px 8px; border-bottom: 1px solid var(--grid); vertical-align: top; }
-td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; }
-.chip { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; font-size: 12px; color: var(--ink-2); }
-.size { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; border: 1px solid var(--ring); white-space: nowrap; }
-.size.quick { color: var(--ink-2); }
-.size.focused { background: var(--wash); }
-.size.deep { background: var(--ink); color: var(--surface); border-color: var(--ink); }
-.seg-toggle { display: inline-flex; border: 1px solid var(--axis); border-radius: 6px; overflow: hidden; }
-.seg-toggle button { background: var(--surface); border: 0; padding: 3px 10px; cursor: pointer; font-size: 13px; }
-.seg-toggle button[aria-pressed=true] { background: var(--ink); color: var(--surface); }
-details { color: var(--ink-2); }
-details summary { cursor: pointer; font-weight: 600; color: var(--ink); }
-details ul { margin: 8px 0 0; padding-left: 18px; display: grid; gap: 4px; max-width: 80ch; }
-@media (prefers-reduced-motion: no-preference) { .day .seg { transition: height .2s ease; } }
+details { margin-top: 56px; font-size: 14px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; }
+summary { cursor: pointer; font-size: 13px; font-weight: 500; }
+details p { max-width: 620px; }
+#tip { position: fixed; pointer-events: none; background: var(--tip-bg); color: var(--tip-ink); font-size: 12px; line-height: 1.45; padding: 7px 10px; border-radius: 6px; max-width: 300px; z-index: 10; }
+[hidden] { display: none !important; }
+
+@media (max-width: 640px) {
+  h1 { font-size: 27px; }
+  .kpis { grid-template-columns: repeat(2, 1fr); }
+  .kpis div:nth-child(odd) { padding-left: 0; border-left: 0; }
+  .kpis div:nth-child(n+3) { border-top: 1px solid var(--line); }
+  .lvkey { grid-template-columns: repeat(3, 1fr); row-gap: 8px; }
+  .take { grid-template-columns: 1fr; row-gap: 4px; }
+  .take dd { margin-bottom: 14px; }
+  .tasks .row { grid-template-columns: 1fr 70px 56px; }
+  .lvrow { grid-template-columns: 80px 1fr 96px; }
+}
 </style>
 
 <div class="wrap">
-  <header>
-    <div style="display:grid;gap:4px;min-width:0">
-      <span class="eyebrow">Claude Code · last <span id="ndays"></span> days</span>
-      <h1>Session Juggling</h1>
-      <div class="sub">How many tasks you had in flight at once. A task counts as in flight while you read its replies or write its prompts. The goal is two or three at a time.</div>
-    </div>
+  <nav>
+    <span>Session juggling</span>
+    <span role="tablist"><button role="tab" id="tab-summary" aria-selected="true">Summary</button><button role="tab" id="tab-advanced" aria-selected="false">Advanced</button></span>
+  </nav>
+
+  <main id="summary"></main>
+
+  <main id="advanced" hidden>
     <div class="controls">
-      <div class="control">
-        <label for="win">Window</label>
-        <div class="row"><input id="win" type="range" min="10" max="90" step="5" value="30"><span id="winv" class="num"></span></div>
-      </div>
-      <div class="control">
-        <label for="target">Target</label>
-        <div class="row"><select id="target"><option value="2">2 at once</option><option value="3" selected>3 at once</option><option value="4">4 at once</option></select></div>
-      </div>
+      <label>Window <select id="win"></select></label>
+      <label>Limit <select id="limit"></select></label>
     </div>
-  </header>
-
-  <section class="panel" aria-labelledby="range-h">
-    <div class="panel-head">
-      <h2 id="range-h">Engaged time per day</h2>
-      <div class="legend">
-        <span><span class="sw" style="background:var(--load)"></span>Within target</span>
-        <span><span class="sw" style="background:var(--bad)"></span>Juggling above target</span>
-      </div>
+    <section style="margin-top:0">
+      <h2><span>Last <span id="ndays"></span> days</span><span style="font-weight:400">click a day</span></h2>
+      <svg id="strip" role="img" aria-label="Engaged time per day, split by time within and above the limit"></svg>
+      <div class="legend"><span style="--c:var(--neutral)">within limit</span><span style="--c:var(--bad)">above limit</span></div>
+    </section>
+    <div class="dayhead">
+      <span class="arrows"><button id="prev" aria-label="Previous day">‹</button><button id="next" aria-label="Next day">›</button></span>
+      <h1 id="day-h"></h1>
+      <span class="verdict" id="day-verdict"></span>
     </div>
-    <div class="strip" id="strip" role="list"></div>
-    <div class="strip-axis" id="strip-axis" aria-hidden="true"></div>
-    <p class="range-line" id="range-line" style="margin:0"></p>
-  </section>
-
-  <section class="panel" aria-labelledby="day-h">
-    <div class="panel-head">
-      <div class="daynav">
-        <button id="prev" aria-label="Previous day">‹</button>
-        <h2 id="day-h"></h2>
-        <button id="next" aria-label="Next day">›</button>
-      </div>
-      <span id="verdict" class="verdict"></span>
-    </div>
-    <div class="kpis" id="kpis"></div>
-    <p class="story" id="story"></p>
-    <div class="legend" id="kind-legend"></div>
-    <div class="chart-scroll" id="chart"></div>
-  </section>
-
-  <section class="panel" aria-labelledby="tasks-h">
-    <div class="panel-head">
-      <h2 id="tasks-h">Time per task</h2>
-      <div class="seg-toggle" role="group" aria-label="Table range">
-        <button id="t-day" aria-pressed="true">Selected day</button>
-        <button id="t-all" aria-pressed="false">All days</button>
-      </div>
-    </div>
-    <div class="legend">
-      <span><span class="size quick">Quick</span> under 10 min</span>
-      <span><span class="size focused">Focused</span> 10 to 45 min</span>
-      <span><span class="size deep">Deep</span> over 45 min</span>
-      <span>Visits: separate stretches you came back to it</span>
-    </div>
-    <div class="table-wrap"><table id="tasks"></table></div>
-  </section>
-
-  <details class="panel">
-    <summary>How this is measured</summary>
-    <ul id="method"></ul>
-  </details>
+    <div class="kpis" id="day-kpis" style="--n:5"></div>
+    <section>
+      <h2><span>Time spent with N tasks in flight</span><span style="font-weight:400">share of engaged time</span></h2>
+      <div id="levels"></div>
+    </section>
+    <section>
+      <h2><span>Tasks in flight, and when you touched each one</span></h2>
+      <svg id="chart"></svg>
+      <div class="legend" id="kinds"></div>
+    </section>
+    <section>
+      <h2><span>Time per task</span><span class="seg"><button id="tbl-day" aria-pressed="true">This day</button><button id="tbl-all" aria-pressed="false">All days</button></span></h2>
+      <div class="table-wrap"><table id="tbl"></table></div>
+    </section>
+    <details><summary>How this is measured</summary><div id="method"></div></details>
+  </main>
 </div>
-<div class="tip" id="tip" hidden></div>
+<div id="tip" hidden></div>
 
 <script>
 const DATA = /*__DATA__*/null;
-const MIN = 60000;
+const MIN = 60000, NS = "http://www.w3.org/2000/svg";
 const KIND_GROUP = { build: "build", review: "review", research: "research", investigate: "research",
   planning: "plan", comms: "plan", writing: "plan", ops: "ops", personal: "ops" };
 const KIND_LABEL = { build: "Build", review: "Review", research: "Research", plan: "Plan & write", ops: "Ops & personal" };
 const kindOf = t => KIND_GROUP[t.kind] || "build";
-const kcolor = k => `var(--k-${k})`;
-
+const kc = k => `var(--k-${k})`;
 const threads = Object.fromEntries(DATA.threads.map(t => [t.id, t]));
+const S = DATA.summary || null;
+const DEF = { win: 30, limit: 3 };
+
 const store = {
   get(k, d) { try { const v = localStorage.getItem("sj:" + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
   set(k, v) { try { localStorage.setItem("sj:" + k, JSON.stringify(v)); } catch {} },
 };
-
 const pad = n => String(n).padStart(2, "0");
 const dayKey = ms => { const d = new Date(ms); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
 const dayStart = key => { const [y, m, d] = key.split("-").map(Number); return new Date(y, m - 1, d).getTime(); };
-const hm = ms => { const d = new Date(ms); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+const hhmm = m => `${pad(Math.floor(m / 60) % 24)}:${pad(Math.floor(m % 60))}`;
 const dur = min => { min = Math.round(min); if (min < 60) return `${min}m`; const h = Math.floor(min / 60), m = min % 60; return m ? `${h}h ${pad(m)}m` : `${h}h`; };
-const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-const fmtDay = key => new Date(dayStart(key)).toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" });
-const sizeOf = min => min < 10 ? "quick" : min <= 45 ? "focused" : "deep";
-const SIZE_LABEL = { quick: "Quick", focused: "Focused", deep: "Deep" };
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const fmtDay = (key, o = { weekday: "long", month: "long", day: "numeric" }) => new Date(dayStart(key)).toLocaleDateString("en", o);
+const sizeOf = m => m < 10 ? "Quick" : m <= 45 ? "Focused" : "Deep";
+const el = (tag, attrs, parent, text) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; parent && parent.appendChild(e); return e; };
 
-// Every human prompt is one engagement interval; group by the day the prompt was sent.
+// Every human prompt is one engagement interval, filed under the day it was sent.
 const byDay = {};
-for (const s of DATA.sessions) for (const [a, b, text] of s.engage) {
-  (byDay[dayKey(b)] ||= []).push({ a, b, text, thread: s.thread, session: s.id });
-}
+for (const s of DATA.sessions) for (const [a, b] of s.engage) (byDay[dayKey(b)] ||= []).push({ a, b, thread: s.thread });
 for (const k in byDay) byDay[k].sort((x, y) => x.b - y.b);
-
 const today = dayKey(DATA.generatedAt);
 const allDays = [];
-for (let i = DATA.days - 1; i >= 0; i--) {
-  const d = new Date(dayStart(today)); d.setDate(d.getDate() - i); allDays.push(dayKey(d.getTime()));
-}
+for (let i = DATA.days - 1; i >= 0; i--) { const d = new Date(dayStart(today)); d.setDate(d.getDate() - i); allDays.push(dayKey(d.getTime())); }
 const activeDays = allDays.filter(k => byDay[k]);
 
-const state = {
-  win: store.get("win", 30),
-  target: store.get("target", 3),
-  day: activeDays[activeDays.length - 1],
-  tableAll: false,
-};
-
-function computeDay(key, W, target) {
-  const evs = byDay[key] || [];
-  const t0 = dayStart(key), N = 1440;
-  const order = [], cov = {};
+// Minute grid for one day. count[m] = tasks touched in the trailing `win` minutes.
+// A minute shared by k tasks gives each 1/k, so per-task times add up to engaged time.
+// build.py day_stats() mirrors this; keep the two in step.
+function computeDay(key, win, limit) {
+  const evs = byDay[key] || [], t0 = dayStart(key), N = 1440, order = [], cov = {};
   for (const e of evs) {
     if (!cov[e.thread]) { cov[e.thread] = new Uint8Array(N); order.push(e.thread); }
     const m0 = Math.max(0, Math.floor((e.a - t0) / MIN)), m1 = Math.min(N, Math.ceil((e.b - t0) / MIN));
     for (let m = m0; m < Math.max(m1, m0 + 1); m++) cov[e.thread][m] = 1;
   }
-  const prefix = {};
-  for (const t of order) { const p = new Uint16Array(N + 1); for (let m = 0; m < N; m++) p[m + 1] = p[m] + cov[t][m]; prefix[t] = p; }
-  const count = new Uint8Array(N), engaged = new Uint8Array(N);
+  const count = new Uint8Array(N), engaged = new Uint8Array(N), last = {};
+  const stats = Object.fromEntries(order.map(t => [t, { thread: t, min: 0, visits: 0, iv: [] }]));
   for (let m = 0; m < N; m++) {
-    let c = 0, e = 0;
-    for (const t of order) { const p = prefix[t]; if (p[m + 1] - p[Math.max(0, m - W + 1)] > 0) c++; if (cov[t][m]) e = 1; }
-    count[m] = c; engaged[m] = e;
+    let c = 0, here = 0;
+    for (const t of order) { if (cov[t][m]) { last[t] = m; here++; } if (last[t] != null && m - last[t] < win) c++; }
+    count[m] = c; engaged[m] = here ? 1 : 0;
+    if (here) for (const t of order) if (cov[t][m]) stats[t].min += 1 / here;
   }
-  let engagedMin = 0, overMin = 0, peak = 0, peakAt = 0, first = -1, last = -1;
+  let engagedMin = 0, overMin = 0, peak = 0, first = -1, lastM = -1;
+  const levels = [0, 0, 0, 0, 0];
   for (let m = 0; m < N; m++) {
     if (!engaged[m]) continue;
-    engagedMin++; if (first < 0) first = m; last = m;
-    if (count[m] > target) overMin++;
-    if (count[m] > peak) { peak = count[m]; peakAt = m; }
+    engagedMin++; if (first < 0) first = m; lastM = m;
+    if (count[m] > limit) overMin++;
+    peak = Math.max(peak, count[m]);
+    levels[Math.min(Math.max(count[m], 1), 5) - 1]++;
   }
-  const stats = {};
-  for (const t of order) stats[t] = { thread: t, min: prefix[t][N], visits: 0, prompts: 0, sessions: new Set(), first: Infinity, last: 0 };
   let hops = 0, prev = null;
   for (const e of evs) {
     const s = stats[e.thread];
     if (e.thread !== prev) { s.visits++; if (prev) hops++; }
-    s.prompts++; s.sessions.add(e.session); s.first = Math.min(s.first, e.a); s.last = Math.max(s.last, e.b);
+    s.iv.push([(e.a - t0) / MIN, (e.b - t0) / MIN]);
     prev = e.thread;
   }
-  return { key, t0, evs, order, cov, prefix, count, engaged, engagedMin, overMin, peak, peakAt, first, last, hops, stats, W, target };
+  return { key, order, count, engaged, engagedMin, overMin, peak, first, last: lastM, hops, levels, stats, win, limit };
 }
+const cache = {};
+const getDay = (k, w, l) => cache[`${k}|${w}|${l}`] ||= computeDay(k, w, l);
 
 function verdictOf(d) {
   const share = d.engagedMin ? d.overMin / d.engagedMin : 0;
-  if (share < 0.15) return { cls: "good", text: "Within target", color: "var(--good)", share };
-  if (share < 0.35) return { cls: "warn", text: "Some extra juggling", color: "var(--warn)", share };
-  return { cls: "bad", text: "Hopped too much", color: "var(--bad)", share };
+  if (share < 0.15) return { text: "Within your limit", color: "var(--good)", share };
+  if (share < 0.35) return { text: "Some extra juggling", color: "var(--warn)", share };
+  return { text: "Hopped too much", color: "var(--bad)", share };
 }
+const levelColor = (n, limit) => n <= limit ? "var(--good)" : n === limit + 1 ? "var(--warn)" : "var(--bad)";
+const levelLabel = i => `${i + 1}${i === 4 ? "+" : ""} at once`;
 
 // ---------- tooltip ----------
 const tip = document.getElementById("tip");
 function showTip(html, ev) {
   tip.innerHTML = html; tip.hidden = false;
-  const r = tip.getBoundingClientRect(), pad = 14;
-  let x = ev.clientX + pad, y = ev.clientY + pad;
-  if (x + r.width > innerWidth - 8) x = ev.clientX - r.width - pad;
-  if (y + r.height > innerHeight - 8) y = ev.clientY - r.height - pad;
+  const r = tip.getBoundingClientRect();
+  let x = ev.clientX + 12, y = ev.clientY + 12;
+  if (x + r.width > innerWidth - 8) x = ev.clientX - r.width - 12;
+  if (y + r.height > innerHeight - 8) y = ev.clientY - r.height - 12;
   tip.style.left = Math.max(8, x) + "px"; tip.style.top = Math.max(8, y) + "px";
 }
 const hideTip = () => { tip.hidden = true; };
+const hover = (node, html) => { node.addEventListener("mousemove", e => showTip(typeof html === "function" ? html(e) : html, e)); node.addEventListener("mouseleave", hideTip); };
 
-// ---------- range strip ----------
-let dayCache = {};
-function getDay(key) {
-  const id = `${key}|${state.win}|${state.target}`;
-  return dayCache[id] ||= computeDay(key, state.win, state.target);
+// ---------- summary ----------
+function renderSummary() {
+  const out = document.getElementById("summary");
+  const key = S && byDay[S.day] ? S.day : activeDays[activeDays.length - 1];
+  if (!key) { out.innerHTML = `<p class="pending">No sessions in the last ${DATA.days} days.</p>`; return; }
+  const d = getDay(key, DEF.win, DEF.limit), v = verdictOf(d);
+  const fresh = S && S.day === key;
+  const rows = Object.values(d.stats).sort((a, b) => b.min - a.min);
+  const top = rows.slice(0, 4), rest = rows.slice(4), restMin = rest.reduce((s, r) => s + r.min, 0), maxMin = Math.max(rows[0]?.min || 1, restMin);
+  const lv = d.levels, levelOp = [0.55, 0.75, 1, 1, 1];
+  let h = `<div class="eyebrow">${esc(fmtDay(key))}${fresh && S.checkin ? ` · ${esc(S.checkin)}` : ""}</div>
+    <div class="verdict" style="margin-top:20px"><i style="background:${v.color}"></i>${v.text}</div>
+    <h1>${fresh && S.headline ? esc(S.headline) : `${Math.round(v.share * 100)}% of your time with agents ran above ${DEF.limit} tasks at once.`}</h1>
+    <div class="kpis"><div><b>${dur(d.engagedMin)}</b>with agents</div><div><b>${d.order.length}</b>tasks touched</div><div><b>${d.hops}</b>hops</div><div><b>${Math.round(v.share * 100)}%</b>above ${DEF.limit} at once</div></div>
+    <section><h2><span>Time at each level</span></h2>
+      <div class="levels">${lv.map((m, i) => m ? `<span style="flex:${m};background:${levelColor(i + 1, DEF.limit)};opacity:${i < DEF.limit ? levelOp[i] : 1}"></span>` : "").join("")}</div>
+      <div class="lvkey">${lv.map((m, i) => `<span style="--c:${levelColor(i + 1, DEF.limit)}"><b>${dur(m)}</b>${levelLabel(i)}</span>`).join("")}</div>
+    </section>`;
+  if (!fresh) {
+    h += `<section><p class="pending">Claude hasn't written its read of this day yet. It will at the next check-in.</p></section>`;
+  } else {
+    if (S.experiment) h += `<section><h2><span>Your experiment</span></h2><div class="exp">
+        ${S.experiment.quote ? `<div class="label">${esc(S.experiment.source || "From your daily note")}</div><div class="quote">“${esc(S.experiment.quote)}”</div>` : ""}
+        ${S.experiment.assessment ? `<p>${esc(S.experiment.assessment)}</p>` : ""}
+        ${S.experiment.question ? `<p>${esc(S.experiment.question)}</p>` : ""}</div></section>`;
+    if (S.research) h += `<section><h2><span>What the research says</span></h2><div class="research">
+        <p>${esc(S.research.finding)}</p>${S.research.tie ? `<p>${esc(S.research.tie)}</p>` : ""}<div class="cite">${esc(S.research.cite)}</div></div></section>`;
+    if (S.read) h += `<section><h2><span>Claude's read</span></h2><dl class="take">
+        ${S.read.wentWell ? `<dt style="--c:var(--good)">Went well</dt><dd>${esc(S.read.wentWell)}</dd>` : ""}
+        ${S.read.slipped ? `<dt style="--c:var(--warn)">Slipped</dt><dd>${esc(S.read.slipped)}</dd>` : ""}
+        ${S.read.next ? `<dt style="--c:var(--k-build)">${esc(S.read.nextLabel || "Tomorrow")}</dt><dd>${esc(S.read.next)}</dd>` : ""}</dl></section>`;
+  }
+  h += `<section class="tasks"><h2><span>Where the time went</span></h2>` +
+    top.map(r => { const t = threads[r.thread], k = kindOf(t);
+      return `<div class="row"><span title="${esc(t.name)}">${esc(t.name)}<span class="sub">${KIND_LABEL[k].toLowerCase()}</span></span><span class="bar" style="--c:${kc(k)};width:${(r.min / maxMin * 100).toFixed(1)}%"></span><span class="t num">${dur(r.min)}</span></div>`; }).join("") +
+    (rest.length ? `<div class="row"><span>${rest.length} smaller task${rest.length > 1 ? "s" : ""}</span><span class="bar" style="--c:var(--neutral);width:${(restMin / maxMin * 100).toFixed(1)}%"></span><span class="t num">${dur(restMin)}</span></div>` : "") +
+    `</section>`;
+  const gen = new Date(DATA.generatedAt);
+  h += `<footer>Updated ${esc(fmtDay(dayKey(DATA.generatedAt), { month: "short", day: "numeric" }))} at ${pad(gen.getHours())}:${pad(gen.getMinutes())}${fresh && S.nextCheckin ? ` · next check-in ${esc(S.nextCheckin)}` : ""} · window ${DEF.win} min, limit ${DEF.limit}</footer>`;
+  out.innerHTML = h;
 }
+
+// ---------- advanced ----------
+const state = { win: store.get("win", DEF.win), limit: store.get("limit", DEF.limit), day: activeDays[activeDays.length - 1], all: false };
 
 function renderStrip() {
-  const strip = document.getElementById("strip"), axis = document.getElementById("strip-axis");
-  const days = allDays.map(k => byDay[k] ? getDay(k) : null);
-  const maxMin = Math.max(60, ...days.map(d => d ? d.engagedMin : 0));
-  strip.innerHTML = ""; axis.innerHTML = "";
+  const svg = document.getElementById("strip"), W = 832, H = 96, slot = W / allDays.length, bw = Math.max(slot - 6, 2);
+  svg.innerHTML = ""; svg.setAttribute("viewBox", `0 0 ${W} ${H + 20}`);
+  document.getElementById("ndays").textContent = allDays.length;
+  const days = allDays.map(k => byDay[k] ? getDay(k, state.win, state.limit) : null);
+  const max = Math.max(60, ...days.map(d => d ? d.engagedMin : 0));
   allDays.forEach((k, i) => {
-    const d = days[i];
-    const b = document.createElement("button");
-    b.className = "day" + (d ? "" : " empty") + (k === state.day ? " sel" : "");
-    b.setAttribute("role", "listitem");
-    const dt = new Date(dayStart(k));
+    const d = days[i], x = i * slot + 3, dt = new Date(dayStart(k));
     if (d) {
-      const okH = (d.engagedMin - d.overMin) / maxMin * 100, overH = d.overMin / maxMin * 100;
-      const only = !overH || !okH ? " only" : "";
-      b.innerHTML = (overH ? `<div class="seg over${only}" style="height:${overH}%"></div>` : "") +
-        (okH ? `<div class="seg ok${only}" style="height:${okH}%"></div>` : "");
-      b.setAttribute("aria-label", `${fmtDay(k)}: ${dur(d.engagedMin)} engaged, ${dur(d.overMin)} above target`);
-      b.onclick = () => { state.day = k; render(); };
-      b.onmousemove = ev => {
-        const v = verdictOf(d);
-        showTip(`<b>${fmtDay(k)}</b><span class="num">${dur(d.engagedMin)} engaged · ${d.order.length} tasks</span>` +
-          `<span class="num">${dur(d.overMin)} above ${state.target} at once (${Math.round(v.share * 100)}%)</span>` +
-          `<span class="row"><span class="sw" style="background:${v.color}"></span>${v.text}</span>`, ev);
-      };
-      b.onmouseleave = hideTip;
-    } else {
-      b.setAttribute("aria-label", `${fmtDay(k)}: no sessions`); b.disabled = true;
-    }
-    strip.appendChild(b);
-    const s = document.createElement("span");
-    const dow = dt.getDay();
-    s.textContent = dow === 1 || i === 0 ? `${dt.getDate()}/${dt.getMonth() + 1}` : "";
-    axis.appendChild(s);
+      const hT = d.engagedMin / max * H, hO = d.overMin / max * H, g = el("g", { style: "cursor:pointer" }, svg);
+      el("rect", { x, y: 0, width: bw, height: H, fill: "transparent" }, g);
+      if (hT - hO > 0.5) el("rect", { x, y: H - hT, width: bw, height: Math.max(hT - hO - (hO ? 2 : 0), 0.5), rx: 2, fill: "var(--neutral)" }, g);
+      if (hO > 0) el("rect", { x, y: H - hO, width: bw, height: hO, rx: 2, fill: "var(--bad)" }, g);
+      if (k === state.day) el("rect", { x: x - 2.5, y: H - hT - 3, width: bw + 5, height: hT + 6, rx: 4, fill: "none", stroke: "var(--clay)", "stroke-width": 1.5 }, g);
+      const v = verdictOf(d);
+      hover(g, `<b>${esc(fmtDay(k, { weekday: "short", month: "short", day: "numeric" }))}</b><br>${dur(d.engagedMin)} engaged · ${d.order.length} tasks<br>${dur(d.overMin)} above ${state.limit} (${Math.round(v.share * 100)}%) · ${v.text}`);
+      g.addEventListener("click", () => { state.day = k; renderAdvanced(); });
+    } else el("rect", { x, y: H - 2, width: bw, height: 2, rx: 1, fill: "var(--line)" }, svg);
+    if (dt.getDay() === 1) el("text", { x: x + bw / 2, y: H + 16, "text-anchor": "middle" }, svg, fmtDay(k, { month: "short", day: "numeric" }));
   });
-
-  const ds = days.filter(Boolean);
-  const tot = ds.reduce((s, d) => s + d.engagedMin, 0), over = ds.reduce((s, d) => s + d.overMin, 0);
-  const good = ds.filter(d => verdictOf(d).cls === "good").length;
-  const worst = ds.slice().sort((a, b) => b.overMin / b.engagedMin - a.overMin / a.engagedMin)[0];
-  document.getElementById("range-line").innerHTML =
-    `<b class="num">${dur(tot)}</b> engaged over ${ds.length} active days. ` +
-    `<b class="num">${Math.round(over / Math.max(1, tot) * 100)}%</b> of it with more than ${state.target} tasks in flight. ` +
-    `<b class="num">${good} of ${ds.length}</b> days stayed within target.` +
-    (worst ? ` Heaviest juggling: ${fmtDay(worst.key)}.` : "");
 }
 
-// ---------- day view ----------
 function renderDay() {
-  const d = getDay(state.day);
-  const i = activeDays.indexOf(state.day);
+  const d = getDay(state.day, state.win, state.limit), v = verdictOf(d), i = activeDays.indexOf(state.day);
   document.getElementById("day-h").textContent = fmtDay(state.day);
   document.getElementById("prev").disabled = i <= 0;
   document.getElementById("next").disabled = i >= activeDays.length - 1;
-  const v = verdictOf(d);
-  const vEl = document.getElementById("verdict");
-  vEl.innerHTML = `<span class="dot" style="background:${v.color}"></span>${v.text}`;
-  const hours = d.engagedMin / 60;
-  const kpis = [
-    ["Engaged", dur(d.engagedMin), `${hm(d.t0 + d.first * MIN)} to ${hm(d.t0 + (d.last + 1) * MIN)}`],
-    ["Tasks touched", d.order.length, `${d.evs.length} prompts`],
-    ["Peak at once", d.peak, `at ${hm(d.t0 + d.peakAt * MIN)}`, d.peak > state.target],
-    [`Above ${state.target} at once`, dur(d.overMin), `${Math.round(v.share * 100)}% of engaged time`, v.cls === "bad"],
-    ["Hops", d.hops, `${(d.hops / Math.max(hours, 0.1)).toFixed(1)} per engaged hour`],
-  ];
-  document.getElementById("kpis").innerHTML = kpis.map(([l, val, sub, bad]) =>
-    `<div class="kpi"><span class="eyebrow">${l}</span><span class="v${bad ? " bad" : ""}">${val}</span><span class="d">${sub}</span></div>`).join("");
+  document.getElementById("day-verdict").innerHTML = `<i style="background:${v.color}"></i>${v.text}`;
+  document.getElementById("day-kpis").innerHTML = [
+    [dur(d.engagedMin), "with agents"], [d.order.length, "tasks touched"], [d.peak, "most at once"],
+    [dur(d.overMin), `above ${state.limit} · ${Math.round(v.share * 100)}%`], [d.hops, "hops"],
+  ].map(([b, l]) => `<div><b>${b}</b>${l}</div>`).join("");
 
-  const top = Object.values(d.stats).sort((a, b) => b.min - a.min);
-  const longest = top[0];
-  const quick = top.filter(s => sizeOf(s.min) === "quick").length;
-  document.getElementById("story").innerHTML =
-    `Your longest task was <b>${esc(threads[longest.thread].name)}</b> at ${dur(longest.min)}, in ${longest.visits} visit${longest.visits > 1 ? "s" : ""}. ` +
-    `${quick} of ${top.length} tasks got under 10 minutes. ` +
-    `You switched tasks ${d.hops} times, about once every ${Math.round(d.engagedMin / Math.max(1, d.hops))} engaged minutes.`;
-
-  const kinds = [...new Set(d.order.map(t => kindOf(threads[t])))];
-  document.getElementById("kind-legend").innerHTML =
-    Object.keys(KIND_LABEL).filter(k => kinds.includes(k)).map(k => `<span><span class="sw" style="background:${kcolor(k)}"></span>${KIND_LABEL[k]}</span>`).join("") +
-    `<span><span class="sw" style="background:var(--bad-wash);outline:1px solid var(--bad)"></span>More than ${state.target} in the last ${state.win} min</span>`;
+  const max = Math.max(...d.levels, 1);
+  document.getElementById("levels").innerHTML = d.levels.map((m, i) => `<div class="lvrow"><span>${levelLabel(i)}</span>
+    <span class="bar" style="width:${(m / max * 100).toFixed(1)}%;background:${levelColor(i + 1, state.limit)};opacity:${m ? 1 : 0}"></span>
+    <span class="t num">${dur(m)} · ${Math.round(100 * m / Math.max(d.engagedMin, 1))}%</span></div>`).join("");
   renderChart(d);
 }
 
 function renderChart(d) {
-  const host = document.getElementById("chart");
-  const L = Math.min(230, Math.max(150, host.clientWidth * 0.26));
-  const width = Math.max(680, host.clientWidth);
-  const PW = width - L - 12;
-  const h0 = Math.floor(d.first / 60), h1 = Math.ceil((d.last + 1) / 60);
-  const m0 = h0 * 60, m1 = Math.max(h1 * 60, m0 + 60);
-  const x = m => L + (m - m0) / (m1 - m0) * PW;
-  const xt = ms => x((ms - d.t0) / MIN);
-
-  const CH = 120, CT = 16;
-  const ymax = Math.max(d.peak, state.target + 2);
-  const y = c => CT + CH - c / ymax * CH;
-  const laneTop = CT + CH + 34, LH = 20;
-  const lanes = d.order;
-  const height = laneTop + lanes.length * LH + 8;
-
-  let s = `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="Tasks in flight over the day and a timeline per task">`;
-  s += `<defs><clipPath id="above"><rect x="0" y="0" width="${width}" height="${y(state.target)}"/></clipPath>` +
-       `<clipPath id="below"><rect x="0" y="${y(state.target)}" width="${width}" height="${height}"/></clipPath></defs>`;
-
-  // over-target bands behind everything
-  let run = -1;
-  for (let m = m0; m <= m1; m++) {
-    const on = m < m1 && d.count[m] > state.target;
-    if (on && run < 0) run = m;
-    if (!on && run >= 0) { s += `<rect x="${x(run)}" y="${CT}" width="${Math.max(1, x(m) - x(run))}" height="${height - CT - 4}" fill="var(--bad-wash)"/>`; run = -1; }
+  const svg = document.getElementById("chart"), LW = 200, W = 832, PW = W - LW;
+  svg.innerHTML = "";
+  const m0 = Math.max(0, Math.floor((d.first - 10) / 60) * 60), m1 = Math.min(1440, Math.ceil((d.last + 10) / 60) * 60), span = Math.max(m1 - m0, 60);
+  const x = m => LW + (m - m0) / span * PW;
+  const AH = 76, top = 8, yMax = Math.max(5, d.peak), y = c => top + AH - c / yMax * AH;
+  const lanes = d.order, LH = 24, laneTop = top + AH + 24, H = laneTop + lanes.length * LH + 22;
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  for (let h = m0; h <= m1; h += 60) {
+    el("line", { x1: x(h), x2: x(h), y1: top, y2: H - 20, stroke: "var(--line)" }, svg);
+    el("text", { x: x(h), y: H - 4, "text-anchor": "middle" }, svg, hhmm(h));
   }
-  // hour grid
-  for (let h = h0; h <= h1; h++) {
-    const X = x(h * 60);
-    s += `<line class="tick" x1="${X}" x2="${X}" y1="${CT}" y2="${height - 4}"/>`;
-    s += `<text x="${X}" y="${CT + CH + 16}" text-anchor="middle" class="num">${pad(h % 24)}:00</text>`;
+  el("text", { x: LW - 12, y: top + 10, "text-anchor": "end" }, svg, "in flight");
+  for (let m = m0; m < m1; m++) {
+    const c = d.count[m]; if (!c) continue;
+    let e = m; while (e + 1 < m1 && d.count[e + 1] === c) e++;
+    el("rect", { x: x(m), y: y(c), width: x(e + 1) - x(m) + 0.3, height: top + AH - y(c), fill: c > d.limit ? "var(--bad)" : "var(--neutral)", opacity: c > d.limit ? 0.85 : 0.7 }, svg);
+    m = e;
   }
-  // load curve
-  let path = `M${x(m0)},${y(0)}`;
-  for (let m = m0; m < m1; m++) path += `L${x(m)},${y(d.count[m])}L${x(m + 1)},${y(d.count[m])}`;
-  path += `L${x(m1)},${y(0)}Z`;
-  s += `<path d="${path}" fill="var(--load)" clip-path="url(#below)"/>`;
-  s += `<path d="${path}" fill="var(--bad)" clip-path="url(#above)"/>`;
-  s += `<line class="baseline" x1="${L}" x2="${L + PW}" y1="${y(0)}" y2="${y(0)}"/>`;
-  s += `<line x1="${L}" x2="${L + PW}" y1="${y(state.target)}" y2="${y(state.target)}" stroke="var(--ink-2)" stroke-dasharray="4 3" stroke-width="1"/>`;
-  s += `<text x="${L - 8}" y="${y(state.target) + 4}" text-anchor="end">target ${state.target}</text>`;
-  s += `<text x="${L - 8}" y="${y(d.peak) + 4}" text-anchor="end" class="num">${d.peak > state.target ? "peak " : ""}${d.peak}</text>`;
-  s += `<text x="${L - 8}" y="${y(0)}" text-anchor="end">0</text>`;
-  s += `<text x="0" y="${CT - 4}" class="lane-label" style="font-weight:600">Tasks in flight</text>`;
-  s += `<text x="0" y="${laneTop - 8}" class="lane-label" style="font-weight:600">Schedule</text>`;
-
-  // lanes
+  el("line", { x1: LW, x2: W, y1: y(d.limit), y2: y(d.limit), stroke: "var(--ink)", "stroke-dasharray": "3 4", opacity: 0.45 }, svg);
+  el("text", { x: W, y: y(d.limit) - 5, "text-anchor": "end" }, svg, `limit ${d.limit}`);
+  const hit = el("rect", { x: LW, y: top, width: PW, height: AH, fill: "transparent" }, svg);
+  hover(hit, e => {
+    const r = svg.getBoundingClientRect(), m = Math.floor(m0 + ((e.clientX - r.left) / r.width * W - LW) / PW * span);
+    const open = lanes.filter(t => d.stats[t].iv.some(([a, b]) => a <= m + 1 && b >= m - d.win + 1));
+    return `<b>${hhmm(m)}</b> · ${d.count[m] || 0} in flight` + open.map(t => `<br><span class="sw" style="--c:${kc(kindOf(threads[t]))}"></span>${esc(threads[t].name)}`).join("");
+  });
   lanes.forEach((t, i) => {
-    const th = threads[t], Y = laneTop + i * LH, k = kindOf(th);
-    const name = th.name.length > 34 ? th.name.slice(0, 33) + "…" : th.name;
-    s += `<text x="0" y="${Y + 14}" class="lane-label"><title>${esc(th.name)}</title>${esc(name)}</text>`;
-    s += `<line class="tick" x1="${L}" x2="${L + PW}" y1="${Y + LH - 0.5}" y2="${Y + LH - 0.5}" opacity="0.5"/>`;
-    const evs = d.evs.filter(e => e.thread === t);
-    // merge intervals separated by less than a minute
-    const blocks = [];
-    for (const e of evs) {
-      const lastB = blocks[blocks.length - 1];
-      if (lastB && e.a - lastB.b < MIN) { lastB.b = Math.max(lastB.b, e.b); lastB.evs.push(e); }
-      else blocks.push({ a: e.a, b: e.b, evs: [e] });
-    }
-    for (const bl of blocks) {
-      const X0 = xt(bl.a), W = Math.max(3, xt(bl.b) - X0);
-      s += `<rect class="blk" data-t="${t}" data-a="${bl.a}" data-b="${bl.b}" x="${X0}" y="${Y + 4}" width="${W}" height="${LH - 8}" rx="2" fill="${kcolor(k)}" stroke="var(--surface)" stroke-width="1"/>`;
+    const Y = laneTop + i * LH, th = threads[t], k = kindOf(th), s = d.stats[t];
+    if (i % 2 === 0) el("rect", { x: 0, y: Y, width: W, height: LH, fill: "var(--wash)", opacity: 0.6 }, svg);
+    const label = el("text", { x: 0, y: Y + 16, class: "lane" }, svg, th.name.length > 28 ? th.name.slice(0, 27) + "…" : th.name);
+    el("title", {}, label, th.name);
+    for (const [a, b] of s.iv) {
+      const r = el("rect", { x: x(a), y: Y + 7, width: Math.max(x(b) - x(a), 2.5), height: 10, rx: 2, fill: kc(k) }, svg);
+      hover(r, `<b>${esc(th.name)}</b><br>${hhmm(a)}–${hhmm(b)} · ${KIND_LABEL[k]} · ${dur(s.min)} this day`);
     }
   });
-  // crosshair layer for the load curve
-  s += `<line id="xh" x1="0" x2="0" y1="${CT}" y2="${height - 4}" stroke="var(--ink-2)" stroke-width="1" visibility="hidden"/>`;
-  s += `<rect id="hit" x="${L}" y="${CT}" width="${PW}" height="${CH}" fill="transparent"/>`;
-  s += `</svg>`;
-  host.innerHTML = s;
-
-  const svg = host.querySelector("svg"), xh = svg.querySelector("#xh");
-  svg.querySelector("#hit").addEventListener("mousemove", ev => {
-    const r = svg.getBoundingClientRect();
-    const m = Math.min(m1 - 1, Math.max(m0, Math.floor(m0 + (ev.clientX - r.left - L) / PW * (m1 - m0))));
-    xh.setAttribute("x1", x(m)); xh.setAttribute("x2", x(m)); xh.setAttribute("visibility", "visible");
-    const active = d.order.filter(t => d.prefix[t][m + 1] - d.prefix[t][Math.max(0, m - state.win + 1)] > 0);
-    showTip(`<b class="num">${hm(d.t0 + m * MIN)} · ${active.length} in the last ${state.win} min</b>` +
-      active.map(t => `<span class="row"><span class="sw" style="background:${kcolor(kindOf(threads[t]))}"></span>${esc(threads[t].name)}</span>`).join(""), ev);
-  });
-  svg.querySelector("#hit").addEventListener("mouseleave", () => { xh.setAttribute("visibility", "hidden"); hideTip(); });
-  svg.querySelectorAll(".blk").forEach(el => {
-    el.addEventListener("mousemove", ev => {
-      const t = el.dataset.t, a = +el.dataset.a, b = +el.dataset.b;
-      const evs = d.evs.filter(e => e.thread === t && e.a >= a - 1 && e.b <= b + 1);
-      const th = threads[t];
-      showTip(`<b>${esc(th.name)}</b><span class="muted num">${hm(a)}–${hm(b)} · ${KIND_LABEL[kindOf(th)]} · ${dur(d.stats[t].min)} today</span>` +
-        evs.slice(-3).map(e => `<span>“${esc(e.text.slice(0, 120))}${e.text.length > 120 ? "…" : ""}”</span>`).join(""), ev);
-    });
-    el.addEventListener("mouseleave", hideTip);
-  });
+  const kinds = [...new Set(lanes.map(t => kindOf(threads[t])))];
+  document.getElementById("kinds").innerHTML = Object.keys(KIND_LABEL).filter(k => kinds.includes(k)).map(k => `<span style="--c:${kc(k)}">${KIND_LABEL[k]}</span>`).join("") +
+    `<span style="--c:var(--bad)">above limit</span>`;
 }
 
-// ---------- table ----------
 function renderTable() {
-  let rows;
-  if (state.tableAll) {
-    const agg = {};
-    for (const k of activeDays) {
-      const d = getDay(k);
-      for (const s of Object.values(d.stats)) {
-        const a = agg[s.thread] ||= { thread: s.thread, min: 0, visits: 0, prompts: 0, sessions: new Set(), first: Infinity, last: 0, days: 0 };
-        a.min += s.min; a.visits += s.visits; a.prompts += s.prompts; a.days++;
-        s.sessions.forEach(x => a.sessions.add(x)); a.first = Math.min(a.first, s.first); a.last = Math.max(a.last, s.last);
-      }
-    }
-    rows = Object.values(agg);
-  } else {
-    rows = Object.values(getDay(state.day).stats);
+  document.getElementById("tbl-day").setAttribute("aria-pressed", !state.all);
+  document.getElementById("tbl-all").setAttribute("aria-pressed", state.all);
+  const agg = {};
+  for (const k of state.all ? activeDays : [state.day]) {
+    const d = getDay(k, state.win, state.limit);
+    for (const s of Object.values(d.stats)) { const a = agg[s.thread] ||= { thread: s.thread, min: 0, visits: 0, days: 0 }; a.min += s.min; a.visits += s.visits; a.days++; }
   }
-  rows.sort((a, b) => b.min - a.min);
-  const when = r => state.tableAll
-    ? `${new Date(r.first).toLocaleDateString(undefined, { month: "short", day: "numeric" })} – ${new Date(r.last).toLocaleDateString(undefined, { month: "short", day: "numeric" })} · ${r.days}d`
-    : `${hm(r.first)}–${hm(r.last)}`;
-  document.getElementById("tasks").innerHTML =
-    `<thead><tr><th>Task</th><th>Type</th><th class="r">Time</th><th>Size</th><th class="r">Visits</th><th class="r">Prompts</th><th class="r">Sessions</th><th>When</th></tr></thead><tbody>` +
-    rows.map(r => {
-      const th = threads[r.thread], k = kindOf(th), sz = sizeOf(r.min);
-      return `<tr><td>${esc(th.name)}</td>` +
-        `<td><span class="chip"><span class="sw" style="background:${kcolor(k)};margin:0"></span>${KIND_LABEL[k]}</span></td>` +
-        `<td class="r">${dur(r.min)}</td><td><span class="size ${sz}">${SIZE_LABEL[sz]}</span></td>` +
-        `<td class="r">${r.visits}</td><td class="r">${r.prompts}</td><td class="r">${r.sessions.size}</td>` +
-        `<td class="num muted" style="white-space:nowrap">${when(r)}</td></tr>`;
-    }).join("") + `</tbody>`;
+  const rows = Object.values(agg).sort((a, b) => b.min - a.min);
+  document.getElementById("tbl").innerHTML = `<tr><th>Task</th><th>Kind</th><th class="t">Time</th><th class="t">Visits</th>${state.all ? `<th class="t">Days</th>` : ""}<th class="t">Size</th></tr>` +
+    rows.map(r => { const t = threads[r.thread], k = kindOf(t);
+      return `<tr><td>${esc(t.name)}</td><td><span class="dot" style="background:${kc(k)}"></span>${KIND_LABEL[k]}</td><td class="t num">${dur(r.min)}</td><td class="t num">${r.visits}</td>${state.all ? `<td class="t num">${r.days}</td>` : ""}<td class="t">${sizeOf(r.min)}</td></tr>`; }).join("");
 }
 
 function renderMethod() {
-  document.getElementById("method").innerHTML = [
-    `Source: your Claude Code transcripts from the last ${DATA.days} days, desktop app and CLI. Only prompts you typed count. Subagents, scheduled runs and automatic continuations are left out.`,
-    `Each prompt counts as attention from the moment Claude's previous reply landed until you sent it, capped at ${DATA.readCapMin} minutes. A longer gap counts as time away, and only its last ${DATA.readCapMin} minutes count as reading.`,
-    `The opening prompt of a session counts as 1 to 5 minutes of writing, depending on its length. Reading a final reply you never answered is not counted, so totals run a little low.`,
-    `A task is one thread of work. Usually that's one session. Forks, /btw side chats and follow-up sessions on the same PR or thread are grouped together, and the grouping is Claude's call. Forked sessions repeat their parent's prompts, so each prompt is counted once.`,
-    `Tasks in flight at a minute = distinct tasks you touched in the trailing ${state.win}-minute window. Above target = engaged minutes where that number is above ${state.target}.`,
-    `Day verdict: Within target when under 15% of engaged time is above target, Some extra juggling up to 35%, Hopped too much beyond that. A hop is a prompt sent to a different task than your previous prompt.`,
-    `Updated ${new Date(DATA.generatedAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}.`,
-  ].map(x => `<li>${x}</li>`).join("");
+  document.getElementById("method").innerHTML = `<p>Each prompt you send counts as engaged time, from the agent's last reply (at most ${DATA.readCapMin} minutes back) to the moment you send it. The first prompt of a session counts as the time to write it.</p>
+    <p>A task is in flight if you touched it in the last ${state.win} minutes. Time above the limit is engaged time while more than ${state.limit} tasks were in flight. When two tasks share a minute, each gets half of it.</p>
+    <p>A hop is two prompts in a row sent to different tasks. A visit is one unbroken run of prompts on the same task. Sizes: Quick is under 10 minutes, Focused is 10 to 45, Deep is over 45.</p>
+    <p>The Summary tab always uses a ${DEF.win}-minute window and a limit of ${DEF.limit}, so it matches what Claude wrote.</p>`;
 }
 
-function render() {
-  document.getElementById("winv").textContent = `${state.win} min`;
-  renderStrip(); renderDay(); renderTable(); renderMethod();
-}
+function renderAdvanced() { renderStrip(); renderDay(); renderTable(); renderMethod(); }
 
 // ---------- controls ----------
-document.getElementById("ndays").textContent = DATA.days;
-const win = document.getElementById("win"), tgt = document.getElementById("target");
-win.value = state.win; tgt.value = String(state.target);
-win.addEventListener("input", () => { state.win = +win.value; store.set("win", state.win); render(); });
-tgt.addEventListener("change", () => { state.target = +tgt.value; store.set("target", state.target); render(); });
-document.getElementById("prev").onclick = () => { const i = activeDays.indexOf(state.day); if (i > 0) { state.day = activeDays[i - 1]; render(); } };
-document.getElementById("next").onclick = () => { const i = activeDays.indexOf(state.day); if (i < activeDays.length - 1) { state.day = activeDays[i + 1]; render(); } };
-const tDay = document.getElementById("t-day"), tAll = document.getElementById("t-all");
-tDay.onclick = () => { state.tableAll = false; tDay.setAttribute("aria-pressed", "true"); tAll.setAttribute("aria-pressed", "false"); renderTable(); };
-tAll.onclick = () => { state.tableAll = true; tAll.setAttribute("aria-pressed", "true"); tDay.setAttribute("aria-pressed", "false"); renderTable(); };
+const winSel = document.getElementById("win"), limSel = document.getElementById("limit");
+winSel.innerHTML = [10, 15, 20, 30, 45, 60, 90].map(v => `<option value="${v}">${v} min</option>`).join("");
+limSel.innerHTML = [1, 2, 3, 4, 5].map(v => `<option value="${v}">${v} at once</option>`).join("");
+winSel.value = state.win; limSel.value = state.limit;
+winSel.onchange = () => { state.win = +winSel.value; store.set("win", state.win); renderAdvanced(); };
+limSel.onchange = () => { state.limit = +limSel.value; store.set("limit", state.limit); renderAdvanced(); };
+const step = dir => { const i = activeDays.indexOf(state.day) + dir; if (i >= 0 && i < activeDays.length) { state.day = activeDays[i]; renderAdvanced(); } };
+document.getElementById("prev").onclick = () => step(-1);
+document.getElementById("next").onclick = () => step(1);
+document.getElementById("tbl-day").onclick = () => { state.all = false; renderTable(); };
+document.getElementById("tbl-all").onclick = () => { state.all = true; renderTable(); };
 document.addEventListener("keydown", e => {
-  if (e.target.matches("input, select")) return;
-  if (e.key === "ArrowLeft") document.getElementById("prev").click();
-  if (e.key === "ArrowRight") document.getElementById("next").click();
+  if (document.getElementById("advanced").hidden || e.target.tagName === "SELECT") return;
+  if (e.key === "ArrowLeft") step(-1); if (e.key === "ArrowRight") step(1);
 });
-let rz; addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => renderDay(), 150); });
-render();
+
+let advancedDrawn = false;
+function showTab(name) {
+  const adv = name === "advanced";
+  document.getElementById("summary").hidden = adv;
+  document.getElementById("advanced").hidden = !adv;
+  document.getElementById("tab-summary").setAttribute("aria-selected", !adv);
+  document.getElementById("tab-advanced").setAttribute("aria-selected", adv);
+  document.body.classList.toggle("adv", adv);
+  if (adv && !advancedDrawn && state.day) { renderAdvanced(); advancedDrawn = true; }
+  store.set("tab", name);
+}
+document.getElementById("tab-summary").onclick = () => showTab("summary");
+document.getElementById("tab-advanced").onclick = () => showTab("advanced");
+
+renderSummary();
+showTab(store.get("tab", "summary"));
 </script>

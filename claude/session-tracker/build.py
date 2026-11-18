@@ -6,12 +6,18 @@ an "engagement" interval (reading the last reply + writing the prompt), and
 writes a self-contained HTML page next to the data.
 
 Usage:
-  build.py                 build the HTML page
-  build.py --unclassified  print sessions with no thread yet, as JSON
-  build.py --threads       print the current thread list, as JSON
+  build.py                   build the HTML page (embeds DATA_DIR/summary.json)
+  build.py --unclassified    print sessions with no thread yet, as JSON
+  build.py --threads         print the current thread list, as JSON
+  build.py --stats [DAY]     print one day's numbers for Claude to judge, as JSON
+  build.py --notes [DAY]     print the Scratchpad and Tomorrow sections of that
+                             day's daily note and the one before it
+  build.py --checkin TEXT    add Claude's check-in question to today's daily note
 
-Personal data (thread labels, the built page) lives in DATA_DIR, never in the
-dotfiles repo, which is public.
+DAY is YYYY-MM-DD and defaults to the latest day with sessions.
+
+Personal data (thread labels, the summary, the built page) lives in DATA_DIR,
+never in the dotfiles repo, which is public.
 """
 
 from __future__ import annotations
@@ -31,12 +37,19 @@ PROJECTS = Path.home() / ".claude" / "projects"
 DATA_DIR = Path(os.environ.get("SESSION_TRACKER_DIR", Path.home() / ".local/share/session-tracker"))
 THREADS_FILE = DATA_DIR / "threads.json"
 OUT_FILE = DATA_DIR / "session-tracker.html"
+SUMMARY_FILE = DATA_DIR / "summary.json"  # written by Claude at each check-in
+VAULT = Path(os.environ.get("SESSION_TRACKER_VAULT", Path.home() / "docs/zettelkasten"))
+DAILY_NOTE = "60 - Planning/{day}.md"
+NOTE_SECTIONS = ("Scratchpad", "Tomorrow")
+CHECKIN_MARK = "🤖 Check-in:"
 
 DAYS = 40
 READ_CAP_MIN = 10  # a gap longer than this between reply and prompt counts as "away"
 MIN_ENGAGE_MIN = 0.5  # every prompt costs at least 30 s of attention
 FIRST_PROMPT_CHARS_PER_MIN = 300  # writing the opening prompt of a session
 FIRST_PROMPT_MIN, FIRST_PROMPT_MAX = 1.0, 5.0
+
+WINDOW_MIN, LIMIT = 30, 3  # what the Summary tab and --stats use
 
 TICKET_RE = re.compile(r"\b([A-Z]{2,6})-(\d+)\b")  # issue-tracker IDs like ABC-123
 
@@ -212,7 +225,8 @@ def cmd_unclassified(sessions: list[dict], threads: dict) -> None:
     print()
 
 
-def build(sessions: list[dict], threads: dict) -> None:
+def resolve(sessions: list[dict], threads: dict) -> tuple[dict, list[dict]]:
+    """Attach a thread to every session: Claude's label, or the fallback."""
     out_threads: dict[str, dict] = {}
     out_sessions = []
     for s in sessions:
@@ -234,12 +248,19 @@ def build(sessions: list[dict], threads: dict) -> None:
             "prs": s["prs"],
             "engage": engagements(s),
         })
+    return out_threads, out_sessions
+
+
+def build(sessions: list[dict], threads: dict) -> None:
+    out_threads, out_sessions = resolve(sessions, threads)
+    summary = json.loads(SUMMARY_FILE.read_text()) if SUMMARY_FILE.exists() else None
     data = {
         "generatedAt": int(time.time() * 1000),
         "days": DAYS,
         "readCapMin": READ_CAP_MIN,
         "threads": list(out_threads.values()),
         "sessions": out_sessions,
+        "summary": summary,
     }
     template = (HERE / "template.html").read_text()
     blob = json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
@@ -252,11 +273,175 @@ def build(sessions: list[dict], threads: dict) -> None:
           f"({unl} unlabelled), {n_prompts} prompts")
 
 
+def by_day(out_sessions: list[dict]) -> dict[str, list[tuple[float, float, str]]]:
+    """Engagements as (start_min, end_min, thread) per local day, in prompt order."""
+    days: dict[str, list] = {}
+    for s in out_sessions:
+        for a, b, _ in s["engage"]:
+            end = datetime.fromtimestamp(b / 1000)
+            t0 = end.replace(hour=0, minute=0, second=0, microsecond=0).timestamp() * 1000
+            days.setdefault(end.strftime("%Y-%m-%d"), []).append(((a - t0) / 60000, (b - t0) / 60000, s["thread"]))
+    for evs in days.values():
+        evs.sort(key=lambda e: e[1])
+    return days
+
+
+def day_stats(evs: list, names: dict, win: int = WINDOW_MIN, limit: int = LIMIT) -> dict:
+    """Mirror of computeDay() in template.html, plus what Claude needs to write."""
+    n = 1440
+    order: list[str] = []
+    cov: dict[str, bytearray] = {}
+    for a, b, t in evs:
+        if t not in cov:
+            cov[t] = bytearray(n)
+            order.append(t)
+        m0, m1 = max(0, int(a // 1)), min(n, -int(-b // 1))
+        for m in range(m0, max(m1, m0 + 1)):
+            cov[t][m] = 1
+    count, engaged, last = [0] * n, [0] * n, {}
+    minutes = dict.fromkeys(order, 0.0)
+    for m in range(n):
+        here = [t for t in order if cov[t][m]]
+        for t in here:
+            last[t] = m
+        count[m] = sum(1 for t in order if t in last and m - last[t] < win)
+        engaged[m] = 1 if here else 0
+        for t in here:
+            minutes[t] += 1 / len(here)
+    eng = [m for m in range(n) if engaged[m]]
+    levels = [0] * 5
+    for m in eng:
+        levels[min(max(count[m], 1), 5) - 1] += 1
+    over = sum(1 for m in eng if count[m] > limit)
+    runs, start = [], None  # stretches of engaged-day time above the limit
+    for m in range((eng[0] if eng else 0), (eng[-1] + 2 if eng else 0)):
+        above = count[m] > limit if m < n else False
+        if above and start is None:
+            start = m
+        elif not above and start is not None:
+            if m - start >= 5:
+                runs.append({"from": f"{start // 60:02d}:{start % 60:02d}", "to": f"{m // 60:02d}:{m % 60:02d}",
+                             "peak": max(count[start:m]),
+                             "tasks": sorted({names[t] for a, b, t in evs if b >= start - win and a <= m})})
+            start = None
+    visits = dict.fromkeys(order, 0)
+    hops, prev, last_end, returns = 0, None, {}, []
+    for i, (a, b, t) in enumerate(evs):
+        if t != prev:
+            visits[t] += 1
+            if prev is not None:
+                hops += 1
+            if t in last_end:
+                j, end = last_end[t]
+                returns.append((a - end, len({x[2] for x in evs[j + 1:i]})))
+        last_end[t] = (i, b)
+        prev = t
+    share = over / len(eng) if eng else 0
+    verdict = "Within your limit" if share < 0.15 else "Some extra juggling" if share < 0.35 else "Hopped too much"
+    med = lambda xs: sorted(xs)[len(xs) // 2] if xs else None
+    return {
+        "engagedMin": len(eng), "tasks": len(order), "hops": hops, "peak": max(count) if eng else 0,
+        "overMin": over, "overShare": round(share, 3), "verdict": verdict,
+        "levelsMin": {f"{i + 1}{'+' if i == 4 else ''}": v for i, v in enumerate(levels)},
+        "firstPrompt": f"{eng[0] // 60:02d}:{eng[0] % 60:02d}" if eng else None,
+        "lastPrompt": f"{eng[-1] // 60:02d}:{eng[-1] % 60:02d}" if eng else None,
+        "overRuns": runs,
+        "returns": {"count": len(returns), "medianGapMin": med([round(g) for g, _ in returns]),
+                    "medianOtherTasksBetween": med([k for _, k in returns])},
+        "perTask": sorted(({"name": names[t], "min": round(minutes[t]), "visits": visits[t],
+                            "from": f"{int(min(a for a, _, x in evs if x == t)) // 60:02d}:{int(min(a for a, _, x in evs if x == t)) % 60:02d}"}
+                           for t in order), key=lambda r: -r["min"]),
+    }
+
+
+def cmd_stats(sessions: list[dict], threads: dict, day: str | None) -> None:
+    out_threads, out_sessions = resolve(sessions, threads)
+    names = {t: v["name"] for t, v in out_threads.items()}
+    days = by_day(out_sessions)
+    day = day or max(days)
+    recent = sorted(k for k in days if k < day)[-6:]
+    out = {"day": day, "window": WINDOW_MIN, "limit": LIMIT, **day_stats(days.get(day, []), names),
+           "previousDays": [{"day": k, "overShare": (st := day_stats(days[k], names))["overShare"],
+                             "engagedMin": st["engagedMin"], "hops": st["hops"]} for k in recent]}
+    json.dump(out, sys.stdout, indent=1, ensure_ascii=False)
+    print()
+
+
+def note_path(day: str) -> Path:
+    return VAULT / DAILY_NOTE.format(day=day)
+
+
+def note_sections(text: str) -> dict[str, str]:
+    """The level-2 sections named in NOTE_SECTIONS, keyed by that name."""
+    out, cur = {}, None
+    for line in text.splitlines():
+        if line.startswith("## "):
+            cur = next((s for s in NOTE_SECTIONS if s.lower() in line.lower()), None)
+            if cur:
+                out[cur] = ""
+            continue
+        if cur:
+            out[cur] += line + "\n"
+    return {k: v.strip() for k, v in out.items()}
+
+
+def cmd_notes(day: str | None) -> None:
+    day = day or datetime.now().strftime("%Y-%m-%d")
+    notes = sorted(p.stem for p in note_path("x").parent.glob("*.md") if p.stem <= day)[-2:]
+    out = {n: note_sections(note_path(n).read_text()) for n in notes}
+    json.dump(out, sys.stdout, indent=1, ensure_ascii=False)
+    print()
+
+
+def insert_checkin(note: str, line: str) -> str:
+    """Return the note with Claude's check-in line placed in it.
+
+    `line` already starts with CHECKIN_MARK. It goes under "## Tomorrow", which
+    is what the user reads when planning the next morning. A second run
+    replaces the earlier check-in instead of stacking another one.
+    """
+    bullet = f"- {line}"
+    lines = note.splitlines()
+    trail = "\n" if note.endswith("\n") else ""
+    for i, ln in enumerate(lines):
+        if CHECKIN_MARK in ln:
+            lines[i] = bullet
+            return "\n".join(lines) + trail
+    head = next((i for i, ln in enumerate(lines) if ln.startswith("## ") and "tomorrow" in ln.lower()), None)
+    if head is None:
+        return note.rstrip("\n") + f"\n\n## Tomorrow\n\n{bullet}\n"
+    end = next((i for i in range(head + 1, len(lines)) if lines[i].startswith("## ")), len(lines))
+    empty = next((i for i in range(head + 1, end) if lines[i].strip() == "-"), None)
+    if empty is not None:  # the template's placeholder bullet
+        lines[empty] = bullet
+    else:
+        last = max((i for i in range(head + 1, end) if lines[i].strip()), default=head)
+        lines.insert(last + 1, bullet)
+    return "\n".join(lines) + trail
+
+
+def cmd_checkin(text: str) -> None:
+    path = note_path(datetime.now().strftime("%Y-%m-%d"))
+    if not path.exists():
+        sys.exit(f"no daily note at {path}; skipping check-in")
+    path.write_text(insert_checkin(path.read_text(), f"{CHECKIN_MARK} {text.strip()}"))
+    print(f"check-in written to {path}")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--unclassified", action="store_true")
     ap.add_argument("--threads", action="store_true")
+    ap.add_argument("--stats", nargs="?", const="", metavar="DAY")
+    ap.add_argument("--notes", nargs="?", const="", metavar="DAY")
+    ap.add_argument("--checkin", metavar="TEXT")
     args = ap.parse_args()
+    if args.notes is not None:
+        cmd_notes(args.notes or None)
+        return
+    if args.checkin:
+        cmd_checkin(args.checkin)
+        return
     threads = load_threads()
     if args.threads:
         json.dump(threads["threads"], sys.stdout, indent=1, ensure_ascii=False)
@@ -265,6 +450,8 @@ def main() -> None:
     sessions = load_sessions()
     if args.unclassified:
         cmd_unclassified(sessions, threads)
+    elif args.stats is not None:
+        cmd_stats(sessions, threads, args.stats or None)
     else:
         build(sessions, threads)
 
