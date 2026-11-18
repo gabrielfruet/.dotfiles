@@ -1,0 +1,570 @@
+<meta charset="utf-8">
+<title>Session Juggling</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap">
+<style>
+/* Layout: one column, range strip on top, then the selected day as a shared time axis (load curve over swimlanes), then its task table. */
+:root {
+  --bg: #f6f7f8;
+  --surface: #fcfcfc;
+  --ink: #101418;
+  --ink-2: #4c545c;
+  --muted: #878e95;
+  --grid: #e2e5e8;
+  --axis: #c3c8cd;
+  --ring: rgba(16, 20, 24, 0.10);
+  --wash: rgba(16, 20, 24, 0.05);
+  --load: rgba(16, 20, 24, 0.14);
+  --k-build: #2a78d6;
+  --k-review: #eb6834;
+  --k-research: #1baf7a;
+  --k-plan: #eda100;
+  --k-ops: #e87ba4;
+  --good: #0ca30c;
+  --good-ink: #006300;
+  --warn: #fab219;
+  --bad: #d03b3b;
+  --bad-wash: rgba(208, 59, 59, 0.09);
+  --f-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --f-body: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1113; --surface: #181b1e; --ink: #eef0f2; --ink-2: #b9bfc5; --muted: #858c93;
+    --grid: #262a2e; --axis: #363b40; --ring: rgba(255,255,255,0.10); --wash: rgba(255,255,255,0.05);
+    --load: rgba(255,255,255,0.16);
+    --k-build: #3987e5; --k-review: #d95926; --k-research: #199e70; --k-plan: #c98500; --k-ops: #d55181;
+    --good-ink: #0ca30c; --bad-wash: rgba(208, 59, 59, 0.16);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1113; --surface: #181b1e; --ink: #eef0f2; --ink-2: #b9bfc5; --muted: #858c93;
+  --grid: #262a2e; --axis: #363b40; --ring: rgba(255,255,255,0.10); --wash: rgba(255,255,255,0.05);
+  --load: rgba(255,255,255,0.16);
+  --k-build: #3987e5; --k-review: #d95926; --k-research: #199e70; --k-plan: #c98500; --k-ops: #d55181;
+  --good-ink: #0ca30c; --bad-wash: rgba(208, 59, 59, 0.16);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font: 14px/1.5 var(--f-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 24px 48px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 20px; }
+h1, h2 { font-family: var(--f-display); font-weight: 600; letter-spacing: -0.01em; margin: 0; text-wrap: balance; }
+h1 { font-size: 26px; }
+h2 { font-size: 17px; }
+.num { font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+.eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 600; }
+
+header { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: end; justify-content: space-between; }
+header .sub { color: var(--ink-2); max-width: 62ch; }
+.controls { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
+.control { display: grid; gap: 2px; }
+.control label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 600; }
+.control .row { display: flex; gap: 8px; align-items: center; }
+input[type=range] { width: 140px; accent-color: var(--ink); }
+select, button { font: inherit; color: var(--ink); }
+select { background: var(--surface); border: 1px solid var(--axis); border-radius: 6px; padding: 3px 6px; }
+:focus-visible { outline: 2px solid var(--k-build); outline-offset: 2px; }
+
+.panel { background: var(--surface); border: 1px solid var(--ring); border-radius: 10px; padding: 16px; display: grid; gap: 14px; min-width: 0; }
+.panel-head { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: baseline; justify-content: space-between; }
+
+/* range strip */
+.strip { display: flex; gap: 3px; align-items: flex-end; height: 120px; overflow-x: auto; padding-bottom: 2px; }
+.day {
+  flex: 1 0 14px; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; gap: 2px;
+  border: 0; background: none; padding: 0; cursor: pointer; position: relative; border-radius: 4px;
+}
+.day:hover { background: var(--wash); }
+.day .seg { width: 100%; border-radius: 0; }
+.day .seg.ok { background: var(--load); border-radius: 0 0 3px 3px; }
+.day .seg.over { background: var(--bad); border-radius: 3px 3px 0 0; }
+.day .seg.only { border-radius: 3px; }
+.day.empty { cursor: default; }
+.day.empty:hover { background: none; }
+.day.sel { box-shadow: 0 0 0 2px var(--ink); }
+.strip-axis { display: flex; gap: 3px; font-size: 10px; color: var(--muted); }
+.strip-axis span { flex: 1 0 14px; text-align: center; }
+.range-line { color: var(--ink-2); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12px; color: var(--ink-2); align-items: center; }
+.sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+
+/* day */
+.daynav { display: flex; gap: 8px; align-items: center; }
+.daynav button { background: var(--surface); border: 1px solid var(--axis); border-radius: 6px; width: 30px; height: 28px; cursor: pointer; }
+.daynav button:disabled { opacity: 0.35; cursor: default; }
+.verdict { display: inline-flex; gap: 6px; align-items: center; padding: 3px 10px 3px 8px; border-radius: 999px; font-weight: 600; font-size: 13px; border: 1px solid var(--ring); }
+.verdict .dot { width: 8px; height: 8px; border-radius: 50%; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.kpi { border: 1px solid var(--ring); border-radius: 8px; padding: 10px 12px; display: grid; gap: 2px; }
+.kpi .v { font-family: var(--f-display); font-size: 24px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.kpi .v.bad { color: var(--bad); }
+.kpi .d { font-size: 12px; color: var(--muted); }
+.story { color: var(--ink-2); max-width: 75ch; margin: 0; }
+
+.chart-scroll { overflow-x: auto; }
+svg text { font-family: var(--f-body); font-size: 11px; fill: var(--muted); }
+svg .lane-label { fill: var(--ink-2); font-size: 12px; }
+svg .tick { stroke: var(--grid); stroke-width: 1; }
+svg .baseline { stroke: var(--axis); stroke-width: 1; }
+
+.tip {
+  position: fixed; z-index: 20; pointer-events: none; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--ring); box-shadow: 0 6px 24px rgba(0,0,0,0.14); border-radius: 8px;
+  padding: 8px 10px; font-size: 12px; max-width: 320px; display: grid; gap: 4px;
+}
+.tip b { font-weight: 600; }
+.tip .row { display: flex; gap: 6px; align-items: center; }
+
+/* table */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600; padding: 6px 8px; border-bottom: 1px solid var(--axis); white-space: nowrap; }
+td { padding: 7px 8px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; }
+.chip { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; font-size: 12px; color: var(--ink-2); }
+.size { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; border: 1px solid var(--ring); white-space: nowrap; }
+.size.quick { color: var(--ink-2); }
+.size.focused { background: var(--wash); }
+.size.deep { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.seg-toggle { display: inline-flex; border: 1px solid var(--axis); border-radius: 6px; overflow: hidden; }
+.seg-toggle button { background: var(--surface); border: 0; padding: 3px 10px; cursor: pointer; font-size: 13px; }
+.seg-toggle button[aria-pressed=true] { background: var(--ink); color: var(--surface); }
+details { color: var(--ink-2); }
+details summary { cursor: pointer; font-weight: 600; color: var(--ink); }
+details ul { margin: 8px 0 0; padding-left: 18px; display: grid; gap: 4px; max-width: 80ch; }
+@media (prefers-reduced-motion: no-preference) { .day .seg { transition: height .2s ease; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div style="display:grid;gap:4px;min-width:0">
+      <span class="eyebrow">Claude Code · last <span id="ndays"></span> days</span>
+      <h1>Session Juggling</h1>
+      <div class="sub">How many tasks you had in flight at once. A task counts as in flight while you read its replies or write its prompts. The goal is two or three at a time.</div>
+    </div>
+    <div class="controls">
+      <div class="control">
+        <label for="win">Window</label>
+        <div class="row"><input id="win" type="range" min="10" max="90" step="5" value="30"><span id="winv" class="num"></span></div>
+      </div>
+      <div class="control">
+        <label for="target">Target</label>
+        <div class="row"><select id="target"><option value="2">2 at once</option><option value="3" selected>3 at once</option><option value="4">4 at once</option></select></div>
+      </div>
+    </div>
+  </header>
+
+  <section class="panel" aria-labelledby="range-h">
+    <div class="panel-head">
+      <h2 id="range-h">Engaged time per day</h2>
+      <div class="legend">
+        <span><span class="sw" style="background:var(--load)"></span>Within target</span>
+        <span><span class="sw" style="background:var(--bad)"></span>Juggling above target</span>
+      </div>
+    </div>
+    <div class="strip" id="strip" role="list"></div>
+    <div class="strip-axis" id="strip-axis" aria-hidden="true"></div>
+    <p class="range-line" id="range-line" style="margin:0"></p>
+  </section>
+
+  <section class="panel" aria-labelledby="day-h">
+    <div class="panel-head">
+      <div class="daynav">
+        <button id="prev" aria-label="Previous day">‹</button>
+        <h2 id="day-h"></h2>
+        <button id="next" aria-label="Next day">›</button>
+      </div>
+      <span id="verdict" class="verdict"></span>
+    </div>
+    <div class="kpis" id="kpis"></div>
+    <p class="story" id="story"></p>
+    <div class="legend" id="kind-legend"></div>
+    <div class="chart-scroll" id="chart"></div>
+  </section>
+
+  <section class="panel" aria-labelledby="tasks-h">
+    <div class="panel-head">
+      <h2 id="tasks-h">Time per task</h2>
+      <div class="seg-toggle" role="group" aria-label="Table range">
+        <button id="t-day" aria-pressed="true">Selected day</button>
+        <button id="t-all" aria-pressed="false">All days</button>
+      </div>
+    </div>
+    <div class="legend">
+      <span><span class="size quick">Quick</span> under 10 min</span>
+      <span><span class="size focused">Focused</span> 10 to 45 min</span>
+      <span><span class="size deep">Deep</span> over 45 min</span>
+      <span>Visits: separate stretches you came back to it</span>
+    </div>
+    <div class="table-wrap"><table id="tasks"></table></div>
+  </section>
+
+  <details class="panel">
+    <summary>How this is measured</summary>
+    <ul id="method"></ul>
+  </details>
+</div>
+<div class="tip" id="tip" hidden></div>
+
+<script>
+const DATA = /*__DATA__*/null;
+const MIN = 60000;
+const KIND_GROUP = { build: "build", review: "review", research: "research", investigate: "research",
+  planning: "plan", comms: "plan", writing: "plan", ops: "ops", personal: "ops" };
+const KIND_LABEL = { build: "Build", review: "Review", research: "Research", plan: "Plan & write", ops: "Ops & personal" };
+const kindOf = t => KIND_GROUP[t.kind] || "build";
+const kcolor = k => `var(--k-${k})`;
+
+const threads = Object.fromEntries(DATA.threads.map(t => [t.id, t]));
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("sj:" + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem("sj:" + k, JSON.stringify(v)); } catch {} },
+};
+
+const pad = n => String(n).padStart(2, "0");
+const dayKey = ms => { const d = new Date(ms); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
+const dayStart = key => { const [y, m, d] = key.split("-").map(Number); return new Date(y, m - 1, d).getTime(); };
+const hm = ms => { const d = new Date(ms); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+const dur = min => { min = Math.round(min); if (min < 60) return `${min}m`; const h = Math.floor(min / 60), m = min % 60; return m ? `${h}h ${pad(m)}m` : `${h}h`; };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const fmtDay = key => new Date(dayStart(key)).toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" });
+const sizeOf = min => min < 10 ? "quick" : min <= 45 ? "focused" : "deep";
+const SIZE_LABEL = { quick: "Quick", focused: "Focused", deep: "Deep" };
+
+// Every human prompt is one engagement interval; group by the day the prompt was sent.
+const byDay = {};
+for (const s of DATA.sessions) for (const [a, b, text] of s.engage) {
+  (byDay[dayKey(b)] ||= []).push({ a, b, text, thread: s.thread, session: s.id });
+}
+for (const k in byDay) byDay[k].sort((x, y) => x.b - y.b);
+
+const today = dayKey(DATA.generatedAt);
+const allDays = [];
+for (let i = DATA.days - 1; i >= 0; i--) {
+  const d = new Date(dayStart(today)); d.setDate(d.getDate() - i); allDays.push(dayKey(d.getTime()));
+}
+const activeDays = allDays.filter(k => byDay[k]);
+
+const state = {
+  win: store.get("win", 30),
+  target: store.get("target", 3),
+  day: activeDays[activeDays.length - 1],
+  tableAll: false,
+};
+
+function computeDay(key, W, target) {
+  const evs = byDay[key] || [];
+  const t0 = dayStart(key), N = 1440;
+  const order = [], cov = {};
+  for (const e of evs) {
+    if (!cov[e.thread]) { cov[e.thread] = new Uint8Array(N); order.push(e.thread); }
+    const m0 = Math.max(0, Math.floor((e.a - t0) / MIN)), m1 = Math.min(N, Math.ceil((e.b - t0) / MIN));
+    for (let m = m0; m < Math.max(m1, m0 + 1); m++) cov[e.thread][m] = 1;
+  }
+  const prefix = {};
+  for (const t of order) { const p = new Uint16Array(N + 1); for (let m = 0; m < N; m++) p[m + 1] = p[m] + cov[t][m]; prefix[t] = p; }
+  const count = new Uint8Array(N), engaged = new Uint8Array(N);
+  for (let m = 0; m < N; m++) {
+    let c = 0, e = 0;
+    for (const t of order) { const p = prefix[t]; if (p[m + 1] - p[Math.max(0, m - W + 1)] > 0) c++; if (cov[t][m]) e = 1; }
+    count[m] = c; engaged[m] = e;
+  }
+  let engagedMin = 0, overMin = 0, peak = 0, peakAt = 0, first = -1, last = -1;
+  for (let m = 0; m < N; m++) {
+    if (!engaged[m]) continue;
+    engagedMin++; if (first < 0) first = m; last = m;
+    if (count[m] > target) overMin++;
+    if (count[m] > peak) { peak = count[m]; peakAt = m; }
+  }
+  const stats = {};
+  for (const t of order) stats[t] = { thread: t, min: prefix[t][N], visits: 0, prompts: 0, sessions: new Set(), first: Infinity, last: 0 };
+  let hops = 0, prev = null;
+  for (const e of evs) {
+    const s = stats[e.thread];
+    if (e.thread !== prev) { s.visits++; if (prev) hops++; }
+    s.prompts++; s.sessions.add(e.session); s.first = Math.min(s.first, e.a); s.last = Math.max(s.last, e.b);
+    prev = e.thread;
+  }
+  return { key, t0, evs, order, cov, prefix, count, engaged, engagedMin, overMin, peak, peakAt, first, last, hops, stats, W, target };
+}
+
+function verdictOf(d) {
+  const share = d.engagedMin ? d.overMin / d.engagedMin : 0;
+  if (share < 0.15) return { cls: "good", text: "Within target", color: "var(--good)", share };
+  if (share < 0.35) return { cls: "warn", text: "Some extra juggling", color: "var(--warn)", share };
+  return { cls: "bad", text: "Hopped too much", color: "var(--bad)", share };
+}
+
+// ---------- tooltip ----------
+const tip = document.getElementById("tip");
+function showTip(html, ev) {
+  tip.innerHTML = html; tip.hidden = false;
+  const r = tip.getBoundingClientRect(), pad = 14;
+  let x = ev.clientX + pad, y = ev.clientY + pad;
+  if (x + r.width > innerWidth - 8) x = ev.clientX - r.width - pad;
+  if (y + r.height > innerHeight - 8) y = ev.clientY - r.height - pad;
+  tip.style.left = Math.max(8, x) + "px"; tip.style.top = Math.max(8, y) + "px";
+}
+const hideTip = () => { tip.hidden = true; };
+
+// ---------- range strip ----------
+let dayCache = {};
+function getDay(key) {
+  const id = `${key}|${state.win}|${state.target}`;
+  return dayCache[id] ||= computeDay(key, state.win, state.target);
+}
+
+function renderStrip() {
+  const strip = document.getElementById("strip"), axis = document.getElementById("strip-axis");
+  const days = allDays.map(k => byDay[k] ? getDay(k) : null);
+  const maxMin = Math.max(60, ...days.map(d => d ? d.engagedMin : 0));
+  strip.innerHTML = ""; axis.innerHTML = "";
+  allDays.forEach((k, i) => {
+    const d = days[i];
+    const b = document.createElement("button");
+    b.className = "day" + (d ? "" : " empty") + (k === state.day ? " sel" : "");
+    b.setAttribute("role", "listitem");
+    const dt = new Date(dayStart(k));
+    if (d) {
+      const okH = (d.engagedMin - d.overMin) / maxMin * 100, overH = d.overMin / maxMin * 100;
+      const only = !overH || !okH ? " only" : "";
+      b.innerHTML = (overH ? `<div class="seg over${only}" style="height:${overH}%"></div>` : "") +
+        (okH ? `<div class="seg ok${only}" style="height:${okH}%"></div>` : "");
+      b.setAttribute("aria-label", `${fmtDay(k)}: ${dur(d.engagedMin)} engaged, ${dur(d.overMin)} above target`);
+      b.onclick = () => { state.day = k; render(); };
+      b.onmousemove = ev => {
+        const v = verdictOf(d);
+        showTip(`<b>${fmtDay(k)}</b><span class="num">${dur(d.engagedMin)} engaged · ${d.order.length} tasks</span>` +
+          `<span class="num">${dur(d.overMin)} above ${state.target} at once (${Math.round(v.share * 100)}%)</span>` +
+          `<span class="row"><span class="sw" style="background:${v.color}"></span>${v.text}</span>`, ev);
+      };
+      b.onmouseleave = hideTip;
+    } else {
+      b.setAttribute("aria-label", `${fmtDay(k)}: no sessions`); b.disabled = true;
+    }
+    strip.appendChild(b);
+    const s = document.createElement("span");
+    const dow = dt.getDay();
+    s.textContent = dow === 1 || i === 0 ? `${dt.getDate()}/${dt.getMonth() + 1}` : "";
+    axis.appendChild(s);
+  });
+
+  const ds = days.filter(Boolean);
+  const tot = ds.reduce((s, d) => s + d.engagedMin, 0), over = ds.reduce((s, d) => s + d.overMin, 0);
+  const good = ds.filter(d => verdictOf(d).cls === "good").length;
+  const worst = ds.slice().sort((a, b) => b.overMin / b.engagedMin - a.overMin / a.engagedMin)[0];
+  document.getElementById("range-line").innerHTML =
+    `<b class="num">${dur(tot)}</b> engaged over ${ds.length} active days. ` +
+    `<b class="num">${Math.round(over / Math.max(1, tot) * 100)}%</b> of it with more than ${state.target} tasks in flight. ` +
+    `<b class="num">${good} of ${ds.length}</b> days stayed within target.` +
+    (worst ? ` Heaviest juggling: ${fmtDay(worst.key)}.` : "");
+}
+
+// ---------- day view ----------
+function renderDay() {
+  const d = getDay(state.day);
+  const i = activeDays.indexOf(state.day);
+  document.getElementById("day-h").textContent = fmtDay(state.day);
+  document.getElementById("prev").disabled = i <= 0;
+  document.getElementById("next").disabled = i >= activeDays.length - 1;
+  const v = verdictOf(d);
+  const vEl = document.getElementById("verdict");
+  vEl.innerHTML = `<span class="dot" style="background:${v.color}"></span>${v.text}`;
+  const hours = d.engagedMin / 60;
+  const kpis = [
+    ["Engaged", dur(d.engagedMin), `${hm(d.t0 + d.first * MIN)} to ${hm(d.t0 + (d.last + 1) * MIN)}`],
+    ["Tasks touched", d.order.length, `${d.evs.length} prompts`],
+    ["Peak at once", d.peak, `at ${hm(d.t0 + d.peakAt * MIN)}`, d.peak > state.target],
+    [`Above ${state.target} at once`, dur(d.overMin), `${Math.round(v.share * 100)}% of engaged time`, v.cls === "bad"],
+    ["Hops", d.hops, `${(d.hops / Math.max(hours, 0.1)).toFixed(1)} per engaged hour`],
+  ];
+  document.getElementById("kpis").innerHTML = kpis.map(([l, val, sub, bad]) =>
+    `<div class="kpi"><span class="eyebrow">${l}</span><span class="v${bad ? " bad" : ""}">${val}</span><span class="d">${sub}</span></div>`).join("");
+
+  const top = Object.values(d.stats).sort((a, b) => b.min - a.min);
+  const longest = top[0];
+  const quick = top.filter(s => sizeOf(s.min) === "quick").length;
+  document.getElementById("story").innerHTML =
+    `Your longest task was <b>${esc(threads[longest.thread].name)}</b> at ${dur(longest.min)}, in ${longest.visits} visit${longest.visits > 1 ? "s" : ""}. ` +
+    `${quick} of ${top.length} tasks got under 10 minutes. ` +
+    `You switched tasks ${d.hops} times, about once every ${Math.round(d.engagedMin / Math.max(1, d.hops))} engaged minutes.`;
+
+  const kinds = [...new Set(d.order.map(t => kindOf(threads[t])))];
+  document.getElementById("kind-legend").innerHTML =
+    Object.keys(KIND_LABEL).filter(k => kinds.includes(k)).map(k => `<span><span class="sw" style="background:${kcolor(k)}"></span>${KIND_LABEL[k]}</span>`).join("") +
+    `<span><span class="sw" style="background:var(--bad-wash);outline:1px solid var(--bad)"></span>More than ${state.target} in the last ${state.win} min</span>`;
+  renderChart(d);
+}
+
+function renderChart(d) {
+  const host = document.getElementById("chart");
+  const L = Math.min(230, Math.max(150, host.clientWidth * 0.26));
+  const width = Math.max(680, host.clientWidth);
+  const PW = width - L - 12;
+  const h0 = Math.floor(d.first / 60), h1 = Math.ceil((d.last + 1) / 60);
+  const m0 = h0 * 60, m1 = Math.max(h1 * 60, m0 + 60);
+  const x = m => L + (m - m0) / (m1 - m0) * PW;
+  const xt = ms => x((ms - d.t0) / MIN);
+
+  const CH = 120, CT = 16;
+  const ymax = Math.max(d.peak, state.target + 2);
+  const y = c => CT + CH - c / ymax * CH;
+  const laneTop = CT + CH + 34, LH = 20;
+  const lanes = d.order;
+  const height = laneTop + lanes.length * LH + 8;
+
+  let s = `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="Tasks in flight over the day and a timeline per task">`;
+  s += `<defs><clipPath id="above"><rect x="0" y="0" width="${width}" height="${y(state.target)}"/></clipPath>` +
+       `<clipPath id="below"><rect x="0" y="${y(state.target)}" width="${width}" height="${height}"/></clipPath></defs>`;
+
+  // over-target bands behind everything
+  let run = -1;
+  for (let m = m0; m <= m1; m++) {
+    const on = m < m1 && d.count[m] > state.target;
+    if (on && run < 0) run = m;
+    if (!on && run >= 0) { s += `<rect x="${x(run)}" y="${CT}" width="${Math.max(1, x(m) - x(run))}" height="${height - CT - 4}" fill="var(--bad-wash)"/>`; run = -1; }
+  }
+  // hour grid
+  for (let h = h0; h <= h1; h++) {
+    const X = x(h * 60);
+    s += `<line class="tick" x1="${X}" x2="${X}" y1="${CT}" y2="${height - 4}"/>`;
+    s += `<text x="${X}" y="${CT + CH + 16}" text-anchor="middle" class="num">${pad(h % 24)}:00</text>`;
+  }
+  // load curve
+  let path = `M${x(m0)},${y(0)}`;
+  for (let m = m0; m < m1; m++) path += `L${x(m)},${y(d.count[m])}L${x(m + 1)},${y(d.count[m])}`;
+  path += `L${x(m1)},${y(0)}Z`;
+  s += `<path d="${path}" fill="var(--load)" clip-path="url(#below)"/>`;
+  s += `<path d="${path}" fill="var(--bad)" clip-path="url(#above)"/>`;
+  s += `<line class="baseline" x1="${L}" x2="${L + PW}" y1="${y(0)}" y2="${y(0)}"/>`;
+  s += `<line x1="${L}" x2="${L + PW}" y1="${y(state.target)}" y2="${y(state.target)}" stroke="var(--ink-2)" stroke-dasharray="4 3" stroke-width="1"/>`;
+  s += `<text x="${L - 8}" y="${y(state.target) + 4}" text-anchor="end">target ${state.target}</text>`;
+  s += `<text x="${L - 8}" y="${y(d.peak) + 4}" text-anchor="end" class="num">${d.peak > state.target ? "peak " : ""}${d.peak}</text>`;
+  s += `<text x="${L - 8}" y="${y(0)}" text-anchor="end">0</text>`;
+  s += `<text x="0" y="${CT - 4}" class="lane-label" style="font-weight:600">Tasks in flight</text>`;
+  s += `<text x="0" y="${laneTop - 8}" class="lane-label" style="font-weight:600">Schedule</text>`;
+
+  // lanes
+  lanes.forEach((t, i) => {
+    const th = threads[t], Y = laneTop + i * LH, k = kindOf(th);
+    const name = th.name.length > 34 ? th.name.slice(0, 33) + "…" : th.name;
+    s += `<text x="0" y="${Y + 14}" class="lane-label"><title>${esc(th.name)}</title>${esc(name)}</text>`;
+    s += `<line class="tick" x1="${L}" x2="${L + PW}" y1="${Y + LH - 0.5}" y2="${Y + LH - 0.5}" opacity="0.5"/>`;
+    const evs = d.evs.filter(e => e.thread === t);
+    // merge intervals separated by less than a minute
+    const blocks = [];
+    for (const e of evs) {
+      const lastB = blocks[blocks.length - 1];
+      if (lastB && e.a - lastB.b < MIN) { lastB.b = Math.max(lastB.b, e.b); lastB.evs.push(e); }
+      else blocks.push({ a: e.a, b: e.b, evs: [e] });
+    }
+    for (const bl of blocks) {
+      const X0 = xt(bl.a), W = Math.max(3, xt(bl.b) - X0);
+      s += `<rect class="blk" data-t="${t}" data-a="${bl.a}" data-b="${bl.b}" x="${X0}" y="${Y + 4}" width="${W}" height="${LH - 8}" rx="2" fill="${kcolor(k)}" stroke="var(--surface)" stroke-width="1"/>`;
+    }
+  });
+  // crosshair layer for the load curve
+  s += `<line id="xh" x1="0" x2="0" y1="${CT}" y2="${height - 4}" stroke="var(--ink-2)" stroke-width="1" visibility="hidden"/>`;
+  s += `<rect id="hit" x="${L}" y="${CT}" width="${PW}" height="${CH}" fill="transparent"/>`;
+  s += `</svg>`;
+  host.innerHTML = s;
+
+  const svg = host.querySelector("svg"), xh = svg.querySelector("#xh");
+  svg.querySelector("#hit").addEventListener("mousemove", ev => {
+    const r = svg.getBoundingClientRect();
+    const m = Math.min(m1 - 1, Math.max(m0, Math.floor(m0 + (ev.clientX - r.left - L) / PW * (m1 - m0))));
+    xh.setAttribute("x1", x(m)); xh.setAttribute("x2", x(m)); xh.setAttribute("visibility", "visible");
+    const active = d.order.filter(t => d.prefix[t][m + 1] - d.prefix[t][Math.max(0, m - state.win + 1)] > 0);
+    showTip(`<b class="num">${hm(d.t0 + m * MIN)} · ${active.length} in the last ${state.win} min</b>` +
+      active.map(t => `<span class="row"><span class="sw" style="background:${kcolor(kindOf(threads[t]))}"></span>${esc(threads[t].name)}</span>`).join(""), ev);
+  });
+  svg.querySelector("#hit").addEventListener("mouseleave", () => { xh.setAttribute("visibility", "hidden"); hideTip(); });
+  svg.querySelectorAll(".blk").forEach(el => {
+    el.addEventListener("mousemove", ev => {
+      const t = el.dataset.t, a = +el.dataset.a, b = +el.dataset.b;
+      const evs = d.evs.filter(e => e.thread === t && e.a >= a - 1 && e.b <= b + 1);
+      const th = threads[t];
+      showTip(`<b>${esc(th.name)}</b><span class="muted num">${hm(a)}–${hm(b)} · ${KIND_LABEL[kindOf(th)]} · ${dur(d.stats[t].min)} today</span>` +
+        evs.slice(-3).map(e => `<span>“${esc(e.text.slice(0, 120))}${e.text.length > 120 ? "…" : ""}”</span>`).join(""), ev);
+    });
+    el.addEventListener("mouseleave", hideTip);
+  });
+}
+
+// ---------- table ----------
+function renderTable() {
+  let rows;
+  if (state.tableAll) {
+    const agg = {};
+    for (const k of activeDays) {
+      const d = getDay(k);
+      for (const s of Object.values(d.stats)) {
+        const a = agg[s.thread] ||= { thread: s.thread, min: 0, visits: 0, prompts: 0, sessions: new Set(), first: Infinity, last: 0, days: 0 };
+        a.min += s.min; a.visits += s.visits; a.prompts += s.prompts; a.days++;
+        s.sessions.forEach(x => a.sessions.add(x)); a.first = Math.min(a.first, s.first); a.last = Math.max(a.last, s.last);
+      }
+    }
+    rows = Object.values(agg);
+  } else {
+    rows = Object.values(getDay(state.day).stats);
+  }
+  rows.sort((a, b) => b.min - a.min);
+  const when = r => state.tableAll
+    ? `${new Date(r.first).toLocaleDateString(undefined, { month: "short", day: "numeric" })} – ${new Date(r.last).toLocaleDateString(undefined, { month: "short", day: "numeric" })} · ${r.days}d`
+    : `${hm(r.first)}–${hm(r.last)}`;
+  document.getElementById("tasks").innerHTML =
+    `<thead><tr><th>Task</th><th>Type</th><th class="r">Time</th><th>Size</th><th class="r">Visits</th><th class="r">Prompts</th><th class="r">Sessions</th><th>When</th></tr></thead><tbody>` +
+    rows.map(r => {
+      const th = threads[r.thread], k = kindOf(th), sz = sizeOf(r.min);
+      return `<tr><td>${esc(th.name)}</td>` +
+        `<td><span class="chip"><span class="sw" style="background:${kcolor(k)};margin:0"></span>${KIND_LABEL[k]}</span></td>` +
+        `<td class="r">${dur(r.min)}</td><td><span class="size ${sz}">${SIZE_LABEL[sz]}</span></td>` +
+        `<td class="r">${r.visits}</td><td class="r">${r.prompts}</td><td class="r">${r.sessions.size}</td>` +
+        `<td class="num muted" style="white-space:nowrap">${when(r)}</td></tr>`;
+    }).join("") + `</tbody>`;
+}
+
+function renderMethod() {
+  document.getElementById("method").innerHTML = [
+    `Source: your Claude Code transcripts from the last ${DATA.days} days, desktop app and CLI. Only prompts you typed count. Subagents, scheduled runs and automatic continuations are left out.`,
+    `Each prompt counts as attention from the moment Claude's previous reply landed until you sent it, capped at ${DATA.readCapMin} minutes. A longer gap counts as time away, and only its last ${DATA.readCapMin} minutes count as reading.`,
+    `The opening prompt of a session counts as 1 to 5 minutes of writing, depending on its length. Reading a final reply you never answered is not counted, so totals run a little low.`,
+    `A task is one thread of work. Usually that's one session. Forks, /btw side chats and follow-up sessions on the same PR or thread are grouped together, and the grouping is Claude's call. Forked sessions repeat their parent's prompts, so each prompt is counted once.`,
+    `Tasks in flight at a minute = distinct tasks you touched in the trailing ${state.win}-minute window. Above target = engaged minutes where that number is above ${state.target}.`,
+    `Day verdict: Within target when under 15% of engaged time is above target, Some extra juggling up to 35%, Hopped too much beyond that. A hop is a prompt sent to a different task than your previous prompt.`,
+    `Updated ${new Date(DATA.generatedAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}.`,
+  ].map(x => `<li>${x}</li>`).join("");
+}
+
+function render() {
+  document.getElementById("winv").textContent = `${state.win} min`;
+  renderStrip(); renderDay(); renderTable(); renderMethod();
+}
+
+// ---------- controls ----------
+document.getElementById("ndays").textContent = DATA.days;
+const win = document.getElementById("win"), tgt = document.getElementById("target");
+win.value = state.win; tgt.value = String(state.target);
+win.addEventListener("input", () => { state.win = +win.value; store.set("win", state.win); render(); });
+tgt.addEventListener("change", () => { state.target = +tgt.value; store.set("target", state.target); render(); });
+document.getElementById("prev").onclick = () => { const i = activeDays.indexOf(state.day); if (i > 0) { state.day = activeDays[i - 1]; render(); } };
+document.getElementById("next").onclick = () => { const i = activeDays.indexOf(state.day); if (i < activeDays.length - 1) { state.day = activeDays[i + 1]; render(); } };
+const tDay = document.getElementById("t-day"), tAll = document.getElementById("t-all");
+tDay.onclick = () => { state.tableAll = false; tDay.setAttribute("aria-pressed", "true"); tAll.setAttribute("aria-pressed", "false"); renderTable(); };
+tAll.onclick = () => { state.tableAll = true; tAll.setAttribute("aria-pressed", "true"); tDay.setAttribute("aria-pressed", "false"); renderTable(); };
+document.addEventListener("keydown", e => {
+  if (e.target.matches("input, select")) return;
+  if (e.key === "ArrowLeft") document.getElementById("prev").click();
+  if (e.key === "ArrowRight") document.getElementById("next").click();
+});
+let rz; addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => renderDay(), 150); });
+render();
+</script>
