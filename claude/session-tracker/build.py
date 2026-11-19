@@ -9,6 +9,9 @@ Usage:
   build.py                   build the HTML page (embeds DATA_DIR/summary.json)
   build.py --unclassified    print sessions with no thread yet, as JSON
   build.py --threads         print the current thread list, as JSON
+  build.py --content [IDS]   print what each thread was about (titles, branch,
+                             sample prompts) so a small agent can name it;
+                             IDS is a comma-separated list of thread ids
   build.py --stats [DAY]     print one day's numbers for Claude to judge, as JSON
   build.py --notes [DAY]     print the Scratchpad and Tomorrow sections of that
                              day's daily note and the one before it
@@ -225,6 +228,30 @@ def cmd_unclassified(sessions: list[dict], threads: dict) -> None:
     print()
 
 
+def cmd_content(sessions: list[dict], threads: dict, only: set[str] | None) -> None:
+    """What each thread was about, for a small agent to name it: titles, branch
+    and up to 8 prompts spread across the thread."""
+    by_thread: dict[str, dict] = {}
+    for s in sessions:
+        tid = threads["sessions"].get(s["id"]) or fallback_thread(s)[0]
+        if only and tid not in only:
+            continue
+        r = by_thread.setdefault(tid, {"id": tid, "current": threads["threads"].get(tid, {}).get("name"),
+                                       "repo": s["repo"], "branches": set(), "titles": set(), "prompts": []})
+        r["branches"].add(s["branch"])
+        if s["title"]:
+            r["titles"].add(s["title"])
+        r["prompts"] += s["prompts"]
+    out = []
+    for r in by_thread.values():
+        ps = [t for _, t in sorted(r["prompts"])]
+        pick = ps if len(ps) <= 8 else [ps[round(i * (len(ps) - 1) / 7)] for i in range(8)]
+        out.append({**r, "branches": sorted(r["branches"]), "titles": sorted(r["titles"]),
+                    "prompts": [p[:200] for p in pick]})
+    json.dump(out, sys.stdout, indent=1, ensure_ascii=False)
+    print()
+
+
 def area_by_repo(repo: str, threads: dict) -> str:
     """"work" when the repo matches a prefix in threads.json's workRepoPrefixes.
     A thread's own "area" overrides this for work done outside those repos."""
@@ -247,7 +274,8 @@ def resolve(sessions: list[dict], threads: dict) -> tuple[dict, list[dict]]:
             kind, labelled = "", False
         area = threads["threads"].get(tid, {}).get("area") or area_by_repo(s["repo"], threads)
         out_threads.setdefault(tid, {"id": tid, "name": name, "kind": kind, "area": area,
-                                     "repo": s["repo"], "labelled": labelled})
+                                     "repo": s["repo"], "labelled": labelled,
+                                     "detail": threads["threads"].get(tid, {}).get("detail", "")})
         out_sessions.append({
             "id": s["id"],
             "thread": tid,
@@ -449,6 +477,7 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--unclassified", action="store_true")
     ap.add_argument("--threads", action="store_true")
+    ap.add_argument("--content", nargs="?", const="", metavar="IDS")
     ap.add_argument("--stats", nargs="?", const="", metavar="DAY")
     ap.add_argument("--notes", nargs="?", const="", metavar="DAY")
     ap.add_argument("--checkin", metavar="TEXT")
@@ -467,6 +496,8 @@ def main() -> None:
     sessions = load_sessions()
     if args.unclassified:
         cmd_unclassified(sessions, threads)
+    elif args.content is not None:
+        cmd_content(sessions, threads, set(args.content.split(",")) if args.content else None)
     elif args.stats is not None:
         cmd_stats(sessions, threads, args.stats or None)
     else:

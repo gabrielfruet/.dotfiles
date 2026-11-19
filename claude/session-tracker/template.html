@@ -182,6 +182,7 @@ const kc = k => `var(--k-${k})`;
 const AREAS = { work: "Work", other: "Other" };
 const threads = Object.fromEntries(DATA.threads.map(t => [t.id, t]));
 const S = DATA.summary || null;
+const hint = th => th.detail ? `${th.name} · ${th.detail}` : th.name;  // hover text: name plus ticket/PR detail
 const areaOf = t => threads[t].area === "work" ? "work" : "other";
 const DEF = { win: 30, limit: 3 };
 
@@ -324,7 +325,7 @@ function renderSummary() {
   h += `<section class="tasks"><h2><span>Where the time went</span></h2>` + groups.map(g =>
     `<div class="grp"><span>${AREAS[g.a]}</span><span>${dur(d.areaMin[g.a])}</span></div>` +
     g.top.map(r => { const t = threads[r.thread], k = kindOf(t);
-      return `<div class="row"><span title="${esc(t.name)}">${esc(t.name)}<span class="sub">${KIND_LABEL[k].toLowerCase()}</span></span><span class="bar" style="--c:${kc(k)};width:${(r.min / maxMin * 100).toFixed(1)}%"></span><span class="t num">${dur(r.min)}</span></div>`; }).join("") +
+      return `<div class="row"><span title="${esc(hint(t))}">${esc(t.name)}<span class="sub">${KIND_LABEL[k].toLowerCase()}</span></span><span class="bar" style="--c:${kc(k)};width:${(r.min / maxMin * 100).toFixed(1)}%"></span><span class="t num">${dur(r.min)}</span></div>`; }).join("") +
     (g.rest.length ? `<div class="row"><span>${g.rest.length} smaller task${g.rest.length > 1 ? "s" : ""}</span><span class="bar" style="--c:var(--neutral);width:${(g.restMin / maxMin * 100).toFixed(1)}%"></span><span class="t num">${dur(g.restMin)}</span></div>` : "")
   ).join("") + `</section>`;
   const gen = new Date(DATA.generatedAt);
@@ -363,7 +364,7 @@ function drawTerrain(d) {
   for (const t of d.order) {
     const s = d.stats[t], a = s.iv[0][0], th = threads[t], cx = x(a), cy = y(level(Math.round(a)));
     const c = el("circle", { cx, cy, r: (3.5 + 4.5 * Math.sqrt(s.min / maxMin)).toFixed(1), fill: areaOf(t) === "work" ? "var(--ink)" : "var(--faint)", stroke: "var(--bg)", "stroke-width": 1.5 }, svg);
-    hover(c, `<b>${esc(th.name)}</b><br>first touched ${hhmm(a)} · ${dur(s.min)} this day`);
+    hover(c, `<b>${esc(th.name)}</b>${th.detail ? `<br>${esc(th.detail)}` : ""}<br>first touched ${hhmm(a)} · ${dur(s.min)} this day`);
   }
 }
 
@@ -468,7 +469,7 @@ function renderChart(d) {
     const t = row.t, th = threads[t], k = kindOf(th), s = d.stats[t];
     if (n++ % 2 === 0) el("rect", { x: 0, y: Y, width: W, height: LH, fill: "var(--wash)", opacity: 0.6 }, svg);
     const label = el("text", { x: 0, y: Y + 16, class: "lane" }, svg, th.name.length > 28 ? th.name.slice(0, 27) + "…" : th.name);
-    el("title", {}, label, th.name);
+    el("title", {}, label, hint(th));
     for (const [a, b] of s.iv) {
       const r = el("rect", { x: x(a), y: Y + 7, width: Math.max(x(b) - x(a), 2.5), height: 10, rx: 2, fill: kc(k) }, svg);
       hover(r, `<b>${esc(th.name)}</b><br>${hhmm(a)}–${hhmm(b)} · ${KIND_LABEL[k]} · ${dur(s.min)} this day`);
@@ -490,7 +491,7 @@ function renderTable() {
   const rows = Object.values(agg).sort((a, b) => (areaOf(a.thread) === "work" ? 0 : 1) - (areaOf(b.thread) === "work" ? 0 : 1) || b.min - a.min);
   document.getElementById("tbl").innerHTML = `<tr><th>Task</th><th>Area</th><th>Kind</th><th class="t">Time</th><th class="t">Visits</th>${state.all ? `<th class="t">Days</th>` : ""}<th class="t">Size</th></tr>` +
     rows.map(r => { const t = threads[r.thread], k = kindOf(t);
-      return `<tr><td>${esc(t.name)}</td><td>${AREAS[areaOf(r.thread)]}</td><td><span class="dot" style="background:${kc(k)}"></span>${KIND_LABEL[k]}</td><td class="t num">${dur(r.min)}</td><td class="t num">${r.visits}</td>${state.all ? `<td class="t num">${r.days}</td>` : ""}<td class="t">${sizeOf(r.min)}</td></tr>`; }).join("");
+      return `<tr><td title="${esc(hint(t))}">${esc(t.name)}</td><td>${AREAS[areaOf(r.thread)]}</td><td><span class="dot" style="background:${kc(k)}"></span>${KIND_LABEL[k]}</td><td class="t num">${dur(r.min)}</td><td class="t num">${r.visits}</td>${state.all ? `<td class="t num">${r.days}</td>` : ""}<td class="t">${sizeOf(r.min)}</td></tr>`; }).join("");
 }
 
 function renderMethod() {
