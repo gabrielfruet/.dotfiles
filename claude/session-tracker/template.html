@@ -212,18 +212,20 @@ const activeDays = allDays.filter(k => byDay[k]);
 // A minute shared by k tasks gives each 1/k, so per-task times add up to engaged time.
 // build.py day_stats() mirrors this; keep the two in step.
 // scope "all" counts every task toward "in flight"; "work"/"other" look at one side only.
+// A task leaves flight at its last prompt of the day: once you are done with it, no window tail.
 function computeDay(key, win, limit, scope = "all") {
-  const evs = (byDay[key] || []).filter(e => scope === "all" || areaOf(e.thread) === scope), t0 = dayStart(key), N = 1440, order = [], cov = {};
+  const evs = (byDay[key] || []).filter(e => scope === "all" || areaOf(e.thread) === scope), t0 = dayStart(key), N = 1440, order = [], cov = {}, endM = {};
   for (const e of evs) {
     if (!cov[e.thread]) { cov[e.thread] = new Uint8Array(N); order.push(e.thread); }
-    const m0 = Math.max(0, Math.floor((e.a - t0) / MIN)), m1 = Math.min(N, Math.ceil((e.b - t0) / MIN));
-    for (let m = m0; m < Math.max(m1, m0 + 1); m++) cov[e.thread][m] = 1;
+    const m0 = Math.max(0, Math.floor((e.a - t0) / MIN)), m1 = Math.min(N, Math.ceil((e.b - t0) / MIN)), mEnd = Math.max(m1, m0 + 1);
+    for (let m = m0; m < mEnd; m++) cov[e.thread][m] = 1;
+    endM[e.thread] = Math.max(endM[e.thread] ?? 0, mEnd - 1);
   }
   const count = new Uint8Array(N), engaged = new Uint8Array(N), last = {};
-  const stats = Object.fromEntries(order.map(t => [t, { thread: t, min: 0, visits: 0, iv: [] }]));
+  const stats = Object.fromEntries(order.map(t => [t, { thread: t, min: 0, visits: 0, iv: [], end: endM[t] }]));
   for (let m = 0; m < N; m++) {
     let c = 0, here = 0;
-    for (const t of order) { if (cov[t][m]) { last[t] = m; here++; } if (last[t] != null && m - last[t] < win) c++; }
+    for (const t of order) { if (cov[t][m]) { last[t] = m; here++; } if (last[t] != null && m - last[t] < win && m <= endM[t]) c++; }
     count[m] = c; engaged[m] = here ? 1 : 0;
     if (here) for (const t of order) if (cov[t][m]) stats[t].min += 1 / here;
   }
@@ -456,7 +458,7 @@ function renderChart(d) {
   const hit = el("rect", { x: LW, y: top, width: PW, height: AH, fill: "transparent" }, svg);
   hover(hit, e => {
     const r = svg.getBoundingClientRect(), m = Math.floor(m0 + ((e.clientX - r.left) / r.width * W - LW) / PW * span);
-    const open = lanes.filter(t => d.stats[t].iv.some(([a, b]) => a <= m + 1 && b >= m - d.win + 1));
+    const open = lanes.filter(t => m <= d.stats[t].end && d.stats[t].iv.some(([a, b]) => a <= m + 1 && b >= m - d.win + 1));
     return `<b>${hhmm(m)}</b> · ${d.count[m] || 0} in flight` + open.map(t => `<br><span class="sw" style="--c:${kc(kindOf(threads[t]))}"></span>${esc(threads[t].name)}`).join("");
   });
   let n = 0;
@@ -493,7 +495,7 @@ function renderTable() {
 
 function renderMethod() {
   document.getElementById("method").innerHTML = `<p>Each prompt you send counts as engaged time, from the agent's last reply (at most ${DATA.readCapMin} minutes back) to the moment you send it. The first prompt of a session counts as the time to write it.</p>
-    <p>A task is in flight if you touched it in the last ${state.win} minutes. Time above the limit is engaged time while more than ${state.limit} tasks were in flight. When two tasks share a minute, each gets half of it.</p>
+    <p>A task is in flight if you touched it in the last ${state.win} minutes, until your last prompt to it that day; after that it counts as done. On the current day this means the tasks you touched last show as done until you prompt them again. Time above the limit is engaged time while more than ${state.limit} tasks were in flight. When two tasks share a minute, each gets half of it.</p>
     <p>A hop is two prompts in a row sent to different tasks. A visit is one unbroken run of prompts on the same task. Sizes: Quick is under 10 minutes, Focused is 10 to 45, Deep is over 45.</p>
     <p>Work is anything in your work repos plus tasks you marked as work; everything else is other. The limit counts all tasks together, because switching from work to the thesis is still a switch. "Show" narrows the Advanced tab to one side.</p>
     <p>The Summary tab always uses a ${DEF.win}-minute window and a limit of ${DEF.limit}, so it matches what Claude wrote.</p>`;

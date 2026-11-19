@@ -300,20 +300,23 @@ def day_stats(evs: list, names: dict, areas: dict, win: int = WINDOW_MIN, limit:
     n = 1440
     order: list[str] = []
     cov: dict[str, bytearray] = {}
+    end: dict[str, int] = {}  # last minute of the task's last prompt that day: no window tail after it
     for a, b, t in evs:
         if t not in cov:
             cov[t] = bytearray(n)
             order.append(t)
         m0, m1 = max(0, int(a // 1)), min(n, -int(-b // 1))
-        for m in range(m0, max(m1, m0 + 1)):
+        m_end = max(m1, m0 + 1)
+        for m in range(m0, m_end):
             cov[t][m] = 1
+        end[t] = max(end.get(t, 0), m_end - 1)
     count, engaged, last = [0] * n, [0] * n, {}
     minutes = dict.fromkeys(order, 0.0)
     for m in range(n):
         here = [t for t in order if cov[t][m]]
         for t in here:
             last[t] = m
-        count[m] = sum(1 for t in order if t in last and m - last[t] < win)
+        count[m] = sum(1 for t in order if t in last and m - last[t] < win and m <= end[t])
         engaged[m] = 1 if here else 0
         for t in here:
             minutes[t] += 1 / len(here)
@@ -331,7 +334,7 @@ def day_stats(evs: list, names: dict, areas: dict, win: int = WINDOW_MIN, limit:
             if m - start >= 5:
                 runs.append({"from": f"{start // 60:02d}:{start % 60:02d}", "to": f"{m // 60:02d}:{m % 60:02d}",
                              "peak": max(count[start:m]),
-                             "tasks": sorted({names[t] for a, b, t in evs if b >= start - win and a <= m})})
+                             "tasks": sorted({names[t] for a, b, t in evs if b >= start - win and a <= m and end[t] >= start})})
             start = None
     visits = dict.fromkeys(order, 0)
     hops, prev, last_end, returns = 0, None, {}, []
