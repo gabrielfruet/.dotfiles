@@ -77,6 +77,13 @@ section { margin-top: 48px; }
 .grp:first-of-type { margin-top: 0; }
 .grp span + span { color: var(--muted); font-weight: 400; font-variant-numeric: tabular-nums; }
 svg text.grp-label { fill: var(--muted); font-size: 11.5px; font-weight: 500; }
+.terrain { margin: 4px 0 0; }
+.terrain svg text { fill: var(--faint); font-size: 11px; }
+.acts { display: grid; grid-template-columns: repeat(var(--n, 3), 1fr); margin: 18px 0 44px; }
+.acts div { padding: 0 18px; font-size: 13.5px; line-height: 1.5; color: var(--muted); min-width: 0; }
+.acts div:first-child { padding-left: 0; }
+.acts div + div { border-left: 1px solid var(--line); }
+.acts b { display: block; color: var(--ink); font-weight: 600; font-size: 13px; margin-bottom: 4px; font-variant-numeric: tabular-nums; }
 .pending { color: var(--muted); font-size: 14px; background: var(--paper); border-radius: 10px; padding: 14px 18px; }
 footer { margin-top: 56px; font-size: 12px; color: var(--faint); }
 
@@ -116,6 +123,9 @@ details p { max-width: 620px; }
   .take dd { margin-bottom: 14px; }
   .tasks .row { grid-template-columns: 1fr 70px 56px; }
   .lvrow { grid-template-columns: 80px 1fr 96px; }
+  .acts { grid-template-columns: 1fr; row-gap: 14px; }
+  .acts div { padding: 0; }
+  .acts div + div { border-left: 0; border-top: 1px solid var(--line); padding-top: 14px; }
 }
 </style>
 
@@ -287,6 +297,8 @@ function renderSummary() {
   let h = `<div class="eyebrow">${esc(fmtDay(key))}${fresh && S.checkin ? ` · ${esc(S.checkin)}` : ""}</div>
     <div class="verdict" style="margin-top:20px"><i style="background:${v.color}"></i>${v.text}</div>
     <h1>${fresh && S.headline ? esc(S.headline) : `${Math.round(v.share * 100)}% of your time with agents ran above ${DEF.limit} tasks at once.`}</h1>
+    <figure class="terrain"><svg id="terrain" role="img" aria-label="Tasks in flight across the day"></svg></figure>
+    ${actsHtml(d)}
     <div class="kpis">${kpiRow(d, v, DEF.limit)}</div>
     <div class="areas">${areaLine(d)}</div>
     <section><h2><span>Time at each level</span></h2>
@@ -316,6 +328,59 @@ function renderSummary() {
   const gen = new Date(DATA.generatedAt);
   h += `<footer>Updated ${esc(fmtDay(dayKey(DATA.generatedAt), { month: "short", day: "numeric" }))} at ${pad(gen.getHours())}:${pad(gen.getMinutes())}${fresh && S.nextCheckin ? ` · next check-in ${esc(S.nextCheckin)}` : ""} · window ${DEF.win} min, limit ${DEF.limit}</footer>`;
   out.innerHTML = h;
+  drawTerrain(d);
+}
+
+// The day as one line, like the /morning brief: height = tasks in flight,
+// clay where it runs above the limit, a dot where each task first came in
+// (bigger = more time on it that day, grey = other).
+function drawTerrain(d) {
+  const svg = document.getElementById("terrain"), W = 760, top = 14, base = 118, H = 146;
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.innerHTML = "";
+  const m0 = Math.floor(d.first / 60) * 60, m1 = Math.max(Math.ceil((d.last + 1) / 60) * 60, m0 + 120), span = m1 - m0;
+  const x = m => (m - m0) / span * W, yMax = Math.max(5, d.peak), y = c => base - c / yMax * (base - top);
+  const level = m => { let s = 0, n = 0; for (let k = m - 4; k <= m + 4; k++) if (k >= 0 && k < 1440) { s += d.count[k]; n++; } return s / n; };
+  const pts = []; for (let m = m0; m <= m1; m += 3) pts.push([x(m), y(level(m))]);
+  let path = `M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
+  for (let i = 0; i < pts.length - 1; i++) {  // Catmull-Rom through the samples, as cubic Béziers
+    const [p0, p1, p2, p3] = [pts[Math.max(i - 1, 0)], pts[i], pts[i + 1], pts[Math.min(i + 2, pts.length - 1)]];
+    path += `C${(p1[0] + (p2[0] - p0[0]) / 6).toFixed(1)},${(p1[1] + (p2[1] - p0[1]) / 6).toFixed(1)} ${(p2[0] - (p3[0] - p1[0]) / 6).toFixed(1)},${(p2[1] - (p3[1] - p1[1]) / 6).toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`;
+  }
+  const yl = y(d.limit + 0.3);
+  el("line", { x1: 0, x2: W, y1: y(d.limit), y2: y(d.limit), stroke: "var(--faint)", "stroke-dasharray": "2 5", opacity: 0.7 }, svg);
+  el("text", { x: W, y: y(d.limit) - 6, "text-anchor": "end" }, svg, `limit ${d.limit}`);
+  const clip = el("clipPath", { id: "above" }, el("defs", {}, svg));
+  el("rect", { x: 0, y: 0, width: W, height: yl }, clip);
+  el("path", { d: path, fill: "none", stroke: "var(--ink)", "stroke-width": 1.6, "stroke-linejoin": "round", "stroke-linecap": "round" }, svg);
+  el("path", { d: path, fill: "none", stroke: "var(--clay)", "stroke-width": 2.4, "stroke-linecap": "round", "clip-path": "url(#above)" }, svg);
+  for (let h = m0; h <= m1; h += 60) {
+    if (span > 600 && (h / 60) % 2) continue;
+    el("text", { x: Math.min(Math.max(x(h), 14), W - 14), y: H - 4, "text-anchor": "middle" }, svg, hhmm(h));
+  }
+  const maxMin = Math.max(...Object.values(d.stats).map(s => s.min), 1);
+  for (const t of d.order) {
+    const s = d.stats[t], a = s.iv[0][0], th = threads[t], cx = x(a), cy = y(level(Math.round(a)));
+    const c = el("circle", { cx, cy, r: (3.5 + 4.5 * Math.sqrt(s.min / maxMin)).toFixed(1), fill: areaOf(t) === "work" ? "var(--ink)" : "var(--faint)", stroke: "var(--bg)", "stroke-width": 1.5 }, svg);
+    hover(c, `<b>${esc(th.name)}</b><br>first touched ${hhmm(a)} · ${dur(s.min)} this day`);
+  }
+}
+
+// Up to three acts, cut at the day's two longest breaks (30 min or more).
+function actsHtml(d) {
+  const eng = []; for (let m = d.first; m <= d.last; m++) if (d.engaged[m]) eng.push(m);
+  const gaps = eng.slice(1).map((m, i) => [m - eng[i], i + 1]).filter(([g]) => g >= 30).sort((a, b) => b[0] - a[0]).slice(0, 2).map(g => g[1]).sort((a, b) => a - b);
+  const cuts = [0, ...gaps, eng.length];
+  const acts = cuts.slice(0, -1).map((c, i) => {
+    const ms = eng.slice(c, cuts[i + 1]), a = ms[0], b = ms[ms.length - 1] + 1;
+    const over = ms.filter(m => d.count[m] > d.limit).length, peak = Math.max(...ms.map(m => d.count[m]));
+    const per = {};
+    for (const t of d.order) for (const [p, q] of d.stats[t].iv) { const o = Math.min(q, b) - Math.max(p, a); if (o > 0) per[t] = (per[t] || 0) + o; }
+    const ts = Object.keys(per).sort((p, q) => per[q] - per[p]), lead = ts[0] ? threads[ts[0]].name : "";
+    const what = ts.length === 1 ? `, all of it on ${esc(lead)}.` : ` across ${ts.length} tasks, most of it on ${esc(lead)}.`;
+    const load = over ? `${dur(over)} ran above ${d.limit} at once, peaking at ${peak}.` : `Stayed at ${peak} or fewer at once.`;
+    return `<div><b>${hhmm(a)} – ${hhmm(b)}</b>${dur(ms.length)} with agents${what} ${load}</div>`;
+  });
+  return `<div class="acts" style="--n:${acts.length}">${acts.join("")}</div>`;
 }
 
 // ---------- advanced ----------
